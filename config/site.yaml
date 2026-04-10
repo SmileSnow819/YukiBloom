@@ -15,7 +15,7 @@ site:
   alternate: YukiBloom # 网站英文名称 用于页脚、Logo、@ handle 等
   subtitle: 生活或许有不如意，但温柔与善意能治愈一切。<br/>愿你被世界温柔以待，也能做温暖别人的小太阳。<br/>——《生如冬花的你》
   name: smile丶snow # 作者名称 - 请修改为你的名字
-  description: 前端开发者/百合汉化组成员 /百合/偶尔也会做些动态壁纸 # 网站描述
+  description: 大三/前端开发/百合汉化组成员/百合/偶尔也会做些动态壁纸 # 网站描述
   avatar: /img/avatar.webp # 网站头像
   showLogo: true # 是否显示 Logo
   author: Author # 作者名称 - 请修改为你的名字
@@ -64,7 +64,7 @@ categoryMap:
   随笔: life
   笔记: note
   工具: tools
-  周刊: weekly
+  # 周刊: weekly
   # Secondary categories (for nested paths)
   前端: front-end
   # Add more as needed:
@@ -185,10 +185,10 @@ social:
   #   url: https://www.zhihu.com/people/your-id
   #   icon: ri:zhihu-fill
   #   color: '#1e88e5'
-  # music:
-  #   url: https://music.163.com/#/user/home?id=your-id
-  #   icon: ri:netease-cloud-music-line
-  #   color: '#e60026'
+  music:
+    url: https://music.163.com/#/user/home?id=1573754661
+    icon: ri:netease-cloud-music-line
+    color: "#e60026"
 
 # =============================================================================
 # Friends Links
@@ -616,10 +616,10 @@ christmas:
 #   label: 导航显示名称（可选，默认：追番）
 #   icon: 导航图标，Iconify 格式（可选，默认：ri:bilibili-fill）
 # -----------------------------------------------------------------------------
-bangumi:
-  userId: cosine
-  # label: 追番
-  # icon: ri:bilibili-fill
+# bangumi:
+#   userId: cosine
+#   # label: 追番
+#   # icon: ri:bilibili-fill
 
 # =============================================================================
 # Development Tools (Dev Only)
