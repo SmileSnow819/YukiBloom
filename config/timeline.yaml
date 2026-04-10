@@ -1,0 +1,18 @@
+# Timeline Configuration
+# 实习经历配置文件
+# 按时间倒序排列（最新的在最上面）
+
+timeline:
+  - startDate: "2026.03"
+    endDate: ""
+    isPresent: true
+    company: "快手"
+    position: "前端开发实习生"
+    description: ""
+
+  - startDate: "2025.12"
+    endDate: "2026.03"
+    isPresent: false
+    company: "北京蓝色光标数字传媒有限科技公司"
+    position: "前端开发实习生"
+    description: ""

@@ -11,11 +11,11 @@
 # Site Basic Information
 # =============================================================================
 site:
-  title: 余弦の博客 # 网站名称
-  alternate: cosine # 网站英文名称 用于页脚、Logo、@ handle 等
-  subtitle: WA 的一声就哭了 # 网站副标题
-  name: cos # 作者名称 - 请修改为你的名字
-  description: 一个基于 Astro 的现代化博客主题 # 网站描述
+  title: Yukiの小窝 # 网站名称
+  alternate: YukiBloom # 网站英文名称 用于页脚、Logo、@ handle 等
+  subtitle: 生活或许有不如意，但温柔与善意能治愈一切。<br/>愿你被世界温柔以待，也能做温暖别人的小太阳。<br/>——《生如冬花的你》
+  name: smile丶snow # 作者名称 - 请修改为你的名字
+  description: 前端开发者/百合汉化组成员 /百合/偶尔也会做些动态壁纸 # 网站描述
   avatar: /img/avatar.webp # 网站头像
   showLogo: true # 是否显示 Logo
   author: Author # 作者名称 - 请修改为你的名字
@@ -159,17 +159,17 @@ featuredSeries:
 # -----------------------------------------------------------------------------
 social:
   github:
-    url: https://github.com/your-username # 替换为你的 GitHub 链接
+    url: https://github.com/SmileSnow819 # 替换为你的 GitHub 链接
     icon: ri:github-fill # Remix Icon 的 GitHub 图标
-    color: '#191717' # (可选) 图标颜色
+    color: "#191717" # (可选) 图标颜色
   email:
-    url: mailto:your@email.com # 替换为你的邮箱，需加 mailto: 前缀
+    url: mailto:2465225759@qq.com # 替换为你的邮箱，需加 mailto: 前缀
     icon: ri:mail-line
-    color: '#55acd5'
-  rss:
-    url: /rss.xml # 站内 RSS 订阅地址
-    icon: ri:rss-line
-    color: '#ff6600'
+    color: "#55acd5"
+  # rss:
+  #   url: /rss.xml # 站内 RSS 订阅地址
+  #   icon: ri:rss-line
+  #   color: "#ff6600"
   # -------------------------------------------------------------------------
   # 以下是更多可选的社交平台配置示例，取消注释并修改即可启用：
   # -------------------------------------------------------------------------
@@ -177,10 +177,10 @@ social:
   #   url: https://x.com/your-handle
   #   icon: ri:twitter-fill
   #   color: '#4b9ae4'
-  # bilibili:
-  #   url: https://space.bilibili.com/your-id
-  #   icon: ri:bilibili-fill
-  #   color: '#da708a'
+  bilibili:
+    url: https://space.bilibili.com/85462541
+    icon: ri:bilibili-fill
+    color: "#da708a"
   # zhihu:
   #   url: https://www.zhihu.com/people/your-id
   #   icon: ri:zhihu-fill
@@ -208,44 +208,44 @@ social:
 #   - image: 头像图片 URL
 #   - color: (可选) 卡片背景色，十六进制格式
 # -----------------------------------------------------------------------------
-friends:
-  intro:
-    title: 友情链接 # 页面标题
-    subtitle: 欢迎交换友链！ # 页面副标题
-    applyTitle: 申请友链 # 申请区块标题
-    applyDesc: 请在本页留言，格式如下 # 申请说明
-    exampleYaml: | # 申请格式示例，会显示在页面上
-      - site: 你的博客名称 # 站点名称
-        url: https://your-blog.com/ # 站点网址
-        owner: 你的昵称 # 昵称
-        desc: 站点简介 # 站点简介
-        image: https://your-blog.com/avatar.jpg # 头像链接
-        color: "#ffc0cb" # 主题色（可选）
-  data: # 友链列表
-    - site: 余弦の博客
-      url: https://blog.cosine.ren
-      owner: cos
-      desc: FE / ACG / 手工 / 深色模式强迫症 / INFP / 兴趣广泛养两只猫的老宅女 / remote
-      image: https://blog.cosine.ren/img/avatar.webp
-      color: '#ed788b'
-    - site: 示例博客 A
-      url: https://example-a.com
-      owner: Alice
-      desc: 一个热爱技术的开发者
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Alice
-      color: '#BEDCFF'
-    - site: 示例博客 B
-      url: https://example-b.com
-      owner: Bob
-      desc: 分享生活与技术的小站
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Bob
-      color: '#FBC1CC'
-    - site: 示例博客 C
-      url: https://example-c.com
-      owner: Carol
-      desc: 记录学习与成长的地方
-      image: https://api.dicebear.com/7.x/avataaars/svg?seed=Carol
-      color: '#ABDCFF'
+# friends:
+#   intro:
+#     title: 友情链接 # 页面标题
+#     subtitle: 欢迎交换友链！ # 页面副标题
+#     applyTitle: 申请友链 # 申请区块标题
+#     applyDesc: 请在本页留言，格式如下 # 申请说明
+#     exampleYaml: | # 申请格式示例，会显示在页面上
+#       - site: 你的博客名称 # 站点名称
+#         url: https://your-blog.com/ # 站点网址
+#         owner: 你的昵称 # 昵称
+#         desc: 站点简介 # 站点简介
+#         image: https://your-blog.com/avatar.jpg # 头像链接
+#         color: "#ffc0cb" # 主题色（可选）
+#   data: # 友链列表
+#     - site: 余弦の博客
+#       url: https://blog.cosine.ren
+#       owner: cos
+#       desc: FE / ACG / 手工 / 深色模式强迫症 / INFP / 兴趣广泛养两只猫的老宅女 / remote
+#       image: https://blog.cosine.ren/img/avatar.webp
+#       color: "#ed788b"
+#     - site: 示例博客 A
+#       url: https://example-a.com
+#       owner: Alice
+#       desc: 一个热爱技术的开发者
+#       image: https://api.dicebear.com/7.x/avataaars/svg?seed=Alice
+#       color: "#BEDCFF"
+#     - site: 示例博客 B
+#       url: https://example-b.com
+#       owner: Bob
+#       desc: 分享生活与技术的小站
+#       image: https://api.dicebear.com/7.x/avataaars/svg?seed=Bob
+#       color: "#FBC1CC"
+#     - site: 示例博客 C
+#       url: https://example-c.com
+#       owner: Carol
+#       desc: 记录学习与成长的地方
+#       image: https://api.dicebear.com/7.x/avataaars/svg?seed=Carol
+#       color: "#ABDCFF"
 
 # =============================================================================
 # Announcements
@@ -296,7 +296,6 @@ announcements:
   #   color: '#6366F1'
   #   publishDate: '2025-12-25'
 
-
 # =============================================================================
 # Default Cover List
 # 默认封面列表 - 文章没有指定封面时将随机从列表中选择一张作为封面
@@ -305,7 +304,6 @@ announcements:
 # defaultCoverList:
 #   - /img/cover/1.webp
 #   - https://example.com/custom-cover.webp
-
 
 # =============================================================================
 # Content Processing Options
@@ -339,16 +337,16 @@ content:
   lazyLoadEmbeds: true # 延迟加载嵌入
   postCardImagePosition: alternating # 文章卡片封面图位置在首页的显示控制 alternating 默认交替显示 left 封面图始终在左侧 right 封面图始终在右侧
   # Shoka 兼容功能（默认全部启用，设为 false 可关闭）
-  enableShokaContainers: true   # :::提醒块 ;;;标签卡 +++折叠块
-  enableShokaAttrs: true        # [text]{.class} 属性语法
-  enableShokaEffects: true      # ++下划线++ ==高亮== ~下标~ ^上标^
-  enableShokaSpoiler: true      # !!隐藏文字!!
-  enableShokaRuby: true         # {文字^注音} 注音标注
-  enableShokaHexoTags: true     # {% links %} {% media %} Hexo标签
-  enableMath: true              # $数学公式$ KaTeX渲染
-  enableCodeMeta: true          # 代码块增强 (title, mark, command)
-  enableQuiz: true              # 练习题交互功能
-  enableEncryptedBlock: true    # :::encrypted{password="..."} 加密内容块
+  enableShokaContainers: true # :::提醒块 ;;;标签卡 +++折叠块
+  enableShokaAttrs: true # [text]{.class} 属性语法
+  enableShokaEffects: true # ++下划线++ ==高亮== ~下标~ ^上标^
+  enableShokaSpoiler: true # !!隐藏文字!!
+  enableShokaRuby: true # {文字^注音} 注音标注
+  enableShokaHexoTags: true # {% links %} {% media %} Hexo标签
+  enableMath: true # $数学公式$ KaTeX渲染
+  enableCodeMeta: true # 代码块增强 (title, mark, command)
+  enableQuiz: true # 练习题交互功能
+  enableEncryptedBlock: true # :::encrypted{password="..."} 加密内容块
 
 # =============================================================================
 # Navigation Routes
@@ -371,10 +369,10 @@ navigation:
     icon: ri:home-heart-fill # 图标
   # - name: 书摘
   #   path: /reading
-  - name: 周刊
-    nameKey: nav.weekly
-    path: /weekly
-    icon: ri:newspaper-line
+  # - name: 周刊
+  #   nameKey: nav.weekly
+  #   path: /weekly
+  #   icon: ri:newspaper-line
   - name: 文章 # 有子菜单时，path 可省略
     nameKey: nav.posts
     icon: ri:quill-pen-ai-fill
@@ -391,10 +389,10 @@ navigation:
         nameKey: nav.archives
         path: /archives
         icon: ri:archive-2-fill
-  - name: 友链
-    nameKey: nav.friends
-    path: /friends
-    icon: ri:links-line
+  # - name: 友链
+  #   nameKey: nav.friends
+  #   path: /friends
+  #   icon: ri:links-line
   - name: 关于
     nameKey: nav.about
     path: /about
@@ -423,7 +421,6 @@ navigation:
 #   maxIterations: 最大迭代次数，影响雪花数量
 #   mobileMaxLayers: 移动端最大层数
 #   mobileMaxIterations: 移动端最大迭代次数
-
 
 # =============================================================================
 # Comment System
@@ -482,13 +479,13 @@ navigation:
 #     recaptchaV3Key: reCAPTCHA v3 Key (可选)
 #     turnstileKey: Cloudflare Turnstile Key (可选)
 #     locale: 自定义语言显示 (可选)
-  # twikoo:
-    # envId: # Twikoo 环境 ID (腾讯云) 或 Vercel 环境地址 (必填)
-    # region: # 环境地域，默认为 ap-shanghai
-    # path: # 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
-    # lang: # 语言 (默认: 'zh-CN')
+# twikoo:
+# envId: # Twikoo 环境 ID (腾讯云) 或 Vercel 环境地址 (必填)
+# region: # 环境地域，默认为 ap-shanghai
+# path: # 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
+# lang: # 语言 (默认: 'zh-CN')
 comment:
-  provider: none  # 'remark42' | 'giscus' | 'waline' | 'twikoo' | 'none'
+  provider: none # 'remark42' | 'giscus' | 'waline' | 'twikoo' | 'none'
   # remark42:
   #   host: https://comment.example.com/
   #   siteId: your-site-id
@@ -541,7 +538,7 @@ comment:
   #   # locale:                        # 自定义语言显示 (可选)
   #   #   placeholder: '请留言...'      # 自定义输入框占位文本
   twikoo:
-    envId: https://your-twikoo.vercel.app  # Twikoo 环境 ID (腾讯云) 或 Vercel 环境地址 (必填)
+    envId: https://your-twikoo.vercel.app # Twikoo 环境 ID (腾讯云) 或 Vercel 环境地址 (必填)
     # region: ap-shanghai              # 环境地域，默认为 ap-shanghai
     # path: location.pathname          # 用于区分不同文章的自定义 js 路径
     # lang: zh-CN                     # 语言 (默认: 'zh-CN')
@@ -583,7 +580,7 @@ seo:
 # Christmas/Seasonal Features
 # =============================================================================
 bgm:
-  enabled: true  # (有 audio 时自动启用，显式 false 可禁用)
+  enabled: true # (有 audio 时自动启用，显式 false 可禁用)
   # metingApi: https://163.hyc.moe/  # Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
   audio:
     - title: 最爱山山
@@ -639,18 +636,18 @@ bangumi:
 #     - urlTemplate: URL 模板，支持占位符 {path}（文件绝对路径）
 # -----------------------------------------------------------------------------
 dev:
-  localProjectPath: '/Users/yourname/path/to/astro-koharu' # 请修改为你的项目绝对路径
-  contentRelativePath: 'src/content/blog'
+  localProjectPath: "/Users/yourname/path/to/astro-koharu" # 请修改为你的项目绝对路径
+  contentRelativePath: "src/content/blog"
   editors:
     - id: vscode
       name: VS Code
       icon: devicon-plain:vscode
-      urlTemplate: 'vscode://file/{path}'
+      urlTemplate: "vscode://file/{path}"
     - id: cursor
       name: Cursor
       icon: simple-icons:cursor
-      urlTemplate: 'cursor://file/{path}'
+      urlTemplate: "cursor://file/{path}"
     - id: zed
       name: Zed
       icon: simple-icons:zedindustries
-      urlTemplate: 'zed://file/{path}'
+      urlTemplate: "zed://file/{path}"

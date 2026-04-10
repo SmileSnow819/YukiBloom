@@ -60,3 +60,40 @@
 @utility scroll-gutter-stable {
   scrollbar-gutter: stable;
 }
+
+/* 简化侧边栏 - 只保留个人信息区域（头像、简介、社交、统计） */
+/* 隐藏导航按钮区域 */
+[data-home-info-container] > div:last-child {
+  display: none !important;
+}
+
+/* 隐藏分段切换按钮 */
+.page-home-sider #inner-home-sider {
+  display: none !important;
+}
+
+/* 隐藏目录 slot */
+.page-home-sider .sider-slot[data-slot-type="directory"] {
+  display: none !important;
+}
+
+/* 隐藏系列文章列表 slot */
+.page-home-sider .sider-slot[data-slot-type="series"] {
+  display: none !important;
+}
+
+/* 隐藏滚动进度条 */
+.page-home-sider .scroll-progress {
+  display: none !important;
+}
+
+/* 隐藏上一篇/下一篇导航 (SeriesNavigation) */
+.page-home-sider > div[class*="border-t"] {
+  display: none !important;
+}
+
+/* 强制始终显示个人信息 slot */
+.page-home-sider .sider-slot[data-slot-type="info"] {
+  display: block !important;
+  position: relative !important;
+}

@@ -6,6 +6,8 @@ date: 2025-01-03 01:01:33
 description: "关于我？"
 ---
 
+import TimelineWrapper from '../components/timeline/TimelineWrapper.astro';
+
 ## 你好，这里是余弦
 
 [![github badge](https://img.shields.io/badge/dynamic/json?color=blue&label=Github&query=%24.data.totalSubs&url=https%3A%2F%2Fapi.spencerwoo.com%2Fsubstats%2F%3Fsource%3Dgithub%26queryKey%3Dyusixian)](https://github.com/yusixian)
@@ -18,6 +20,10 @@ cosine = 余弦 = cos
 > 做你自己最喜欢的事 \
 > 像花一样 肆意绽放 \
 > 不去管 有没有人欣赏
+
+### 实习经历
+
+<TimelineWrapper />
 
 ### 找到我
 

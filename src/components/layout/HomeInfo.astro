@@ -1,6 +1,7 @@
 ---
 import ChristmasHat from '@components/christmas/ChristmasHat.astro';
 import ButtonLink from '@components/control/ButtonLink.astro';
+import TimelineWrapper from '@components/timeline/TimelineWrapper.astro';
 import type { HomeSiderType } from '@constants/enum';
 import { RESERVED_ROUTES } from '@constants/router';
 import { christmasConfig, configuredSeriesSlugs, enabledSeriesSlugs, routers, siteConfig } from '@constants/site-config';
@@ -72,6 +73,7 @@ const strippedPath = stripLocaleFromPath(Astro.url.pathname);
       {t(locale, 'homeInfo.tags')}
     </a>
   </div>
+  <TimelineWrapper />
   <div class="mt-6 flex w-full flex-col items-center gap-2.5">
     {
       filteredRouters.map((item, index) => {
