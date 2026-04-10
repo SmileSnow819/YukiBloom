@@ -28,7 +28,7 @@ export default function Timeline({ items }: TimelineProps) {
             <div className="timeline-period">
               {formatDate(item.startDate)} - {item.isPresent ? '至今' : formatDate(item.endDate || '')}
             </div>
-            <h3 className="timeline-company">{item.company}</h3>
+            <div className="timeline-company">{item.company}</div>
             <div className="timeline-position">{item.position}</div>
             {item.description && <p className="timeline-description">{item.description}</p>}
           </div>
