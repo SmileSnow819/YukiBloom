@@ -54,9 +54,9 @@
 .timeline-line {
   position: absolute;
   left: 0.4375rem; /* 居中对齐圆点 */
-  top: 50%; /* 从圆点中心开始 */
+  top: 50%; /* 从当前圆点中心开始 */
   width: 1px;
-  height: calc(100% - 50%); /* 延伸到下一个 item */
+  height: 100%; /* 延伸到容器底部（连接下一个圆点）*/
   background: linear-gradient(
     180deg,
     var(--color-pink) 0%,
