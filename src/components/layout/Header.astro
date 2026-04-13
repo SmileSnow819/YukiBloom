@@ -1,6 +1,5 @@
 ---
-import LogoSvg from '@assets/svg/logo.svg?react';
-import logoSrc from '@assets/svg/logo.svg?url';
+import logoSrc from '@assets/logo/logo.png';
 import ChristmasLights from '@components/christmas/ChristmasLights.astro';
 import { ChristmasOrnamentToggle } from '@components/christmas/ChristmasOrnamentToggle';
 import { MobilePostHeader } from '@components/layout/MobilePostHeader';
@@ -35,7 +34,7 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
       title={alternate || title}
       aria-label={alternate || title}
     >
-      {showLogo ? <LogoSvg className="h-8" /> : <p class="logo-text">{alternate || title}</p>}
+      {showLogo ? <img src={logoSrc.src} alt={alternate || title} class="h-16" /> : <p class="logo-text">{alternate || title}</p>}
     </a>
     <!-- Mobile: MobilePostHeader (shows heading on post pages, logo otherwise) -->
     <div class="tablet:flex tablet:grow hidden items-center justify-center">
@@ -45,7 +44,7 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
         enableNumbering={tocNumbering}
         logoElement={showLogo ? 'svg' : 'text'}
         logoText={alternate || title}
-        logoSrc={logoSrc}
+        logoSrc={logoSrc.src}
       />
     </div>
     <Navigator client:load currentPath={Astro.url.pathname} locale={locale} />
