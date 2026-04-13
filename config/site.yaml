@@ -60,18 +60,15 @@ i18n:
 # Example: '随笔' category URL becomes /categories/life
 # =============================================================================
 categoryMap:
-  # Primary categories
-  # 随笔: life
-  # 笔记: note
-  # 工具: tools
-  # 周刊: weekly
-  # Secondary categories (for nested paths)
-  # 前端: front-end
-  # Add more as needed:
-  # 书摘: reading
-  # 后端: back-end
-  # 算法: algorithm
-  # 项目: project
+  随笔: essay
+  生活: life
+  笔记: note
+  前端: front-end
+  书摘: reading
+  算法: algorithm
+  项目: project
+  面经: interview
+  工具: tools
 
 # =============================================================================
 # Featured Categories (Homepage)
@@ -83,23 +80,43 @@ categoryMap:
 #   image: 封面图片路径（相对于 public 目录）
 #   description: 分类描述文字，显示在卡片上
 # -----------------------------------------------------------------------------
-featuredCategories: []
-  # - link: life # 对应 categoryMap 中 随笔: life
-  #   label: 随笔
-  #   image: /img/cover/2.webp
-  #   description: 生活记录、随想随笔
-  # - link: note # 对应 categoryMap 中 笔记: note
-  #   label: 笔记
-  #   image: /img/cover/4.webp
-  #   description: 技术笔记、学习笔记
-  # - link: note/front-end # 嵌套分类：笔记/前端
-  #   label: 前端
-  #   image: /img/cover/1.webp
-  #   description: 前端技术相关
-  # - link: tools # 对应 categoryMap 中 工具: tools
-  #   label: 工具
-  #   image: /img/cover/11.webp
-  #   description: 工具使用、效率提升
+featuredCategories:
+  - link: essay
+    label: 随笔
+    image: /img/cover/essay.webp
+    description: 生活记录、随想随笔
+  - link: life
+    label: 生活
+    image: /img/cover/life.webp
+    description: 日常生活分享
+  - link: note
+    label: 笔记
+    image: /img/cover/note.webp
+    description: 学习笔记、技术记录
+  - link: front-end
+    label: 前端
+    image: /img/cover/front-end.webp
+    description: 前端技术相关
+  - link: reading
+    label: 书摘
+    image: /img/cover/reading.webp
+    description: 读书笔记与读后感
+  - link: algorithm
+    label: 算法
+    image: /img/cover/algorithm.webp
+    description: 算法学习与题解
+  - link: project
+    label: 项目
+    image: /img/cover/project.webp
+    description: 项目开发与实践
+  - link: interview
+    label: 面经
+    image: /img/cover/interview.webp
+    description: 面试经验分享
+  - link: tools
+    label: 工具
+    image: /img/cover/tools.webp
+    description: 工具使用、效率提升
 
 # =============================================================================
 # Featured Series
@@ -583,12 +600,9 @@ bgm:
   enabled: true # (有 audio 时自动启用，显式 false 可禁用)
   # metingApi: https://163.hyc.moe/  # Meting API 地址，默认为 https://163.hyc.moe/，推荐自部署
   audio:
-    - title: 最爱山山
+    - title: 与你美好的回忆
       list:
-        - https://music.163.com/playlist?id=8676645748
-    - title: Love Vocaloid
-      list:
-        - https://music.163.com/playlist?id=8882890045
+        - https://music.163.com/playlist?id=13524805330
 
 christmas:
   enabled: false # 总开关
