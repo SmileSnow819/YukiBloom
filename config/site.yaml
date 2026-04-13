@@ -61,12 +61,12 @@ i18n:
 # =============================================================================
 categoryMap:
   # Primary categories
-  随笔: life
-  笔记: note
-  工具: tools
+  # 随笔: life
+  # 笔记: note
+  # 工具: tools
   # 周刊: weekly
   # Secondary categories (for nested paths)
-  前端: front-end
+  # 前端: front-end
   # Add more as needed:
   # 书摘: reading
   # 后端: back-end
@@ -83,23 +83,23 @@ categoryMap:
 #   image: 封面图片路径（相对于 public 目录）
 #   description: 分类描述文字，显示在卡片上
 # -----------------------------------------------------------------------------
-featuredCategories:
-  - link: life # 对应 categoryMap 中 随笔: life
-    label: 随笔
-    image: /img/cover/2.webp
-    description: 生活记录、随想随笔
-  - link: note # 对应 categoryMap 中 笔记: note
-    label: 笔记
-    image: /img/cover/4.webp
-    description: 技术笔记、学习笔记
-  - link: note/front-end # 嵌套分类：笔记/前端
-    label: 前端
-    image: /img/cover/1.webp
-    description: 前端技术相关
-  - link: tools # 对应 categoryMap 中 工具: tools
-    label: 工具
-    image: /img/cover/11.webp
-    description: 工具使用、效率提升
+featuredCategories: []
+  # - link: life # 对应 categoryMap 中 随笔: life
+  #   label: 随笔
+  #   image: /img/cover/2.webp
+  #   description: 生活记录、随想随笔
+  # - link: note # 对应 categoryMap 中 笔记: note
+  #   label: 笔记
+  #   image: /img/cover/4.webp
+  #   description: 技术笔记、学习笔记
+  # - link: note/front-end # 嵌套分类：笔记/前端
+  #   label: 前端
+  #   image: /img/cover/1.webp
+  #   description: 前端技术相关
+  # - link: tools # 对应 categoryMap 中 工具: tools
+  #   label: 工具
+  #   image: /img/cover/11.webp
+  #   description: 工具使用、效率提升
 
 # =============================================================================
 # Featured Series
