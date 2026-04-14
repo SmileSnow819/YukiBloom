@@ -36,7 +36,8 @@ const nextPost = adjacentPosts.nextPost ? toPostRef(adjacentPosts.nextPost) : nu
 
 <div
   class={cn(
-    'page-home-sider shadow-home-sider sticky top-0 tablet:overscroll-none self-start flex min-w-64 max-w-64 flex-col items-stretch tablet:hidden overflow-auto h-screen px-2 scroll-gutter-stable',
+    'page-home-sider shadow-home-sider sticky top-0 tablet:overscroll-none self-start flex min-w-64 max-w-64 flex-col items-stretch tablet:hidden overflow-auto h-screen scroll-gutter-stable tablet:min-w-full tablet:max-w-full',
+    isDrawer ? 'px-0' : 'px-2',
     className,
   )}
   transition:name={isDrawer ? 'page-home-sider-drawer' : 'page-home-sider'}
@@ -54,7 +55,7 @@ const nextPost = adjacentPosts.nextPost ? toPostRef(adjacentPosts.nextPost) : nu
   }
 
   <sider-content
-    class="vertical-scrollbar flex-1 overflow-x-hidden overflow-y-auto md:pt-3 md:pl-3 tablet:-mx-2"
+    class="vertical-scrollbar flex-1 overflow-x-hidden overflow-y-auto md:pt-3 md:pl-3"
     data-type={type}
     data-default-type={defaultSegmentType}
   >

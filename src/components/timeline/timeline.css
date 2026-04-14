@@ -4,7 +4,8 @@
   container-name: timeline;
   position: relative;
   width: 100%;
-  padding: 0.5rem 0 0.5rem 0.75rem; /* 添加左内边距，为圆点留空间 */
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  margin-top: 1rem;
 }
 
 /* Timeline Item */
@@ -293,7 +294,7 @@
 /* 移动端额外优化 */
 @media (max-width: 640px) {
   .timeline-container {
-    padding: 0.25rem 0 0.25rem 0.5rem; /* 移动端稍微减少左内边距 */
+    padding: 0.25rem 0.5rem 0.25rem 0.5rem;
   }
 
   .timeline-item {
