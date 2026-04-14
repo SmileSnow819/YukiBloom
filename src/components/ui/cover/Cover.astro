@@ -30,7 +30,7 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
 
 <div class="relative flex h-[60dvh] z-0 max-h-200 overflow-hidden">
   <div class="absolute inset-0 h-full bg-black/40"></div>
-  <div class="absolute inset-0 bottom-[8dvh] flex flex-col items-center justify-center px-5 pl-[70%] text-white">
+  <div class="absolute inset-0 bottom-[8dvh] flex flex-col items-center justify-center px-5 pl-[70%] tablet:pl-0 text-white">
     {
       title ? (
         <h1

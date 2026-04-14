@@ -34,8 +34,11 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
     }
   }, []);
 
-  // 将文本转换为 HTML（处理换行符）
-  const textToHtml = useCallback((str: string) => str.replace(/\n/g, '<br/>'), []);
+  // 将文本转换为 HTML（处理换行符），并在打字时添加光标
+  const textToHtml = useCallback((str: string, showCursor = false) => {
+    const html = str.replace(/\n/g, '<br/>');
+    return showCursor ? html + '<span class="typewriter-cursor ml-1"></span>' : html;
+  }, []);
 
   // 使用 requestAnimationFrame 的打字机效果
   const startTyping = useCallback(() => {
@@ -58,7 +61,7 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
 
       if (charIndex < text.length && containerRef.current) {
         const currentText = text.slice(0, charIndex + 1);
-        containerRef.current.innerHTML = textToHtml(currentText);
+        containerRef.current.innerHTML = textToHtml(currentText, true);
         animationRef.current = requestAnimationFrame(animate);
       } else {
         if (containerRef.current) {
@@ -84,7 +87,6 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
 
       {/* 视觉展示 */}
       <p ref={containerRef} className={className} aria-hidden="true" />
-      {isTyping && <span className="typewriter-cursor ml-1" />}
     </>
   );
 }
