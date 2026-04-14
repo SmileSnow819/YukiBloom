@@ -209,7 +209,7 @@ export const icpConfig: { text: string; link?: string } | undefined = (() => {
 const { title, alternate, subtitle } = siteConfig;
 
 export const seoConfig = {
-  title: `${alternate ? `${alternate} = ` : ''}${title}${subtitle ? ` = ${subtitle}` : ''}`,
+  title: alternate || title,
   description: siteConfig.description,
   keywords: siteConfig?.keywords?.join(',') ?? '',
   url: siteConfig.site,
