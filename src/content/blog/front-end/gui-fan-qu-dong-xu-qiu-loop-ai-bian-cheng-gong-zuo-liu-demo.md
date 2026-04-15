@@ -1,7 +1,7 @@
 ---
 title: 规范驱动 + 需求 Loop AI 编程工作流 Demo
 link: gui-fan-qu-dong-xu-qiu-loop-ai-bian-cheng-gong-zuo-liu-demo
-date: 2024-04-14 19:43:46
+date: 2026-04-14 19:43:46
 description: '在现有 React 项目中，通过扩展 OpenSpec 自定义 Schema，实现一套完整的"Skill 知识库 + 需求 Loop + 规范驱动实现 + 自动验证"工作流。'
 cover: /img/cover/blog1.jpg
 tags:
