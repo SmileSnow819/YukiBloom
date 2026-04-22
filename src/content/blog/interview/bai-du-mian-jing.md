@@ -8,7 +8,6 @@ tags:
   - 百度
 categories:
   - 面经
-cover: /img/cover/interview.jpg
 ---
 
 ## 百度
