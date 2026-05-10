@@ -50,18 +50,18 @@ pnpm dev
 
 ```yaml
 site:
-  title: 你的博客名称              # 网站标题
-  alternate: myblog               # 英文短名，用于 logo
-  subtitle: 你的副标题            # 副标题
-  name: 你的名字                  # 作者名
-  description: 博客简介            # 一句话介绍
-  author: 你的名字                # 文章作者
-  url: https://your-domain.com/   # 部署后的域名
+  title: 你的博客名称 # 网站标题
+  alternate: myblog # 英文短名，用于 logo
+  subtitle: 你的副标题 # 副标题
+  name: 你的名字 # 作者名
+  description: 博客简介 # 一句话介绍
+  author: 你的名字 # 文章作者
+  url: https://your-domain.com/ # 部署后的域名
   defaultOgImage: /img/avatar.webp # 默认 Open Graph 图片
-  startYear: 2024                 # 建站年份
-  avatar: /img/avatar.webp        # 头像路径
-  showLogo: true                  # 是否显示 logo
-  keywords:                       # SEO 关键词
+  startYear: 2024 # 建站年份
+  avatar: /img/avatar.webp # 头像路径
+  showLogo: true # 是否显示 logo
+  keywords: # SEO 关键词
     - 博客
     - 技术
 ```
@@ -79,15 +79,15 @@ social:
   github:
     url: https://github.com/your-username
     icon: ri:github-fill
-    color: '#191717'
+    color: "#191717"
   email:
     url: mailto:your@email.com
     icon: ri:mail-line
-    color: '#55acd5'
+    color: "#55acd5"
   rss:
     url: /rss.xml
     icon: ri:rss-line
-    color: '#ff6600'
+    color: "#ff6600"
   # 添加更多社交链接...
 ```
 
@@ -200,10 +200,10 @@ featuredSeries:
   label: 我的周刊
   fullName: 我的技术周刊
   description: 每周技术分享
-  cover: /img/weekly_header.webp
+  cover: /img/weekly/2026-05_10.webp
   enabled: true
   links:
-    github: https://github.com/your-username/your-repo
+    github: https://github.com/SmileSnow819
     rss: /rss.xml
 ```
 
@@ -215,7 +215,7 @@ featuredSeries:
 
 ```yaml
 i18n:
-  defaultLocale: zh        # 默认语言（URL 无前缀）
+  defaultLocale: zh # 默认语言（URL 无前缀）
   locales:
     - code: zh
       label: 中文
@@ -270,19 +270,19 @@ pnpm koharu generate all          # 生成全部
 
 ## 常用命令
 
-| 命令                        | 说明                               |
-| --------------------------- | ---------------------------------- |
-| `pnpm dev`                  | 启动开发服务器                     |
-| `pnpm build`                | 构建生产版本                       |
-| `pnpm preview`              | 预览生产构建                       |
-| `pnpm lint`                 | 代码检查                           |
-| `pnpm koharu`               | 交互式 CLI 菜单                    |
-| `pnpm koharu backup`        | 备份博客内容（--full 完整备份）    |
-| `pnpm koharu restore`       | 从备份恢复（--latest 还原最新）    |
-| `pnpm koharu update`        | 更新主题（--check, --clean, --rebase 等）|
-| `pnpm koharu generate`      | 生成内容资产                       |
-| `pnpm koharu clean`         | 清理旧备份（--keep N 保留 N 个）   |
-| `pnpm koharu list`          | 查看所有备份                       |
+| 命令                   | 说明                                      |
+| ---------------------- | ----------------------------------------- |
+| `pnpm dev`             | 启动开发服务器                            |
+| `pnpm build`           | 构建生产版本                              |
+| `pnpm preview`         | 预览生产构建                              |
+| `pnpm lint`            | 代码检查                                  |
+| `pnpm koharu`          | 交互式 CLI 菜单                           |
+| `pnpm koharu backup`   | 备份博客内容（--full 完整备份）           |
+| `pnpm koharu restore`  | 从备份恢复（--latest 还原最新）           |
+| `pnpm koharu update`   | 更新主题（--check, --clean, --rebase 等） |
+| `pnpm koharu generate` | 生成内容资产                              |
+| `pnpm koharu clean`    | 清理旧备份（--keep N 保留 N 个）          |
+| `pnpm koharu list`     | 查看所有备份                              |
 
 ## 7. 更新主题
 
@@ -317,11 +317,11 @@ pnpm koharu update --tag v2.1.0
 
 **三种更新模式：**
 
-| 模式 | 命令 | 适合场景 | 备份 |
-|------|------|---------|------|
-| **默认** | `pnpm koharu update` | 日常更新 | 可选 |
-| **Clean** | `pnpm koharu update --clean` | 首次迁移、冲突较多 | 强制 |
-| **Rebase** | `pnpm koharu update --rebase` | 熟悉 git 的用户 | 强制 |
+| 模式       | 命令                          | 适合场景           | 备份 |
+| ---------- | ----------------------------- | ------------------ | ---- |
+| **默认**   | `pnpm koharu update`          | 日常更新           | 可选 |
+| **Clean**  | `pnpm koharu update --clean`  | 首次迁移、冲突较多 | 强制 |
+| **Rebase** | `pnpm koharu update --rebase` | 熟悉 git 的用户    | 强制 |
 
 - **默认模式**：使用 `git merge` 合并上游更新。用户内容（博客文章、配置等）冲突会自动保留本地版本，仅主题文件冲突需手动解决。
 - **Clean 模式**：用上游最新版本替换所有主题文件，再从备份还原你的用户内容，实现零冲突。**注意：你对主题文件的自定义修改不会被保留。**
@@ -330,6 +330,7 @@ pnpm koharu update --tag v2.1.0
 > **💡 给熟悉 git 的用户：** CLI 更新命令是对 git 操作的封装便利工具。如果你对 git 比较熟悉，完全可以直接使用 `git fetch upstream && git rebase upstream/main`（或 `git merge`）手动操作，这样能更精确地控制合并过程。
 
 更新过程中会自动：
+
 1. 检查工作区状态
 2. 备份你的个人内容（可选，clean/rebase 模式强制备份）
 3. 设置 upstream remote（如果没有）

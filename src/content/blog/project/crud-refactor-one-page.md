@@ -10,7 +10,7 @@ tags:
   - 实习日记
 categories:
   - [项目, 前端]
-cover: /img/cover/project1.jpg
+cover: /img/cover/project1.webp
 ---
 
 ## 写在前面

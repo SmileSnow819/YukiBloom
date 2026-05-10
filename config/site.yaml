@@ -19,9 +19,9 @@ site:
   avatar: /img/avatar.webp # 网站头像
   showLogo: true # 是否显示 Logo
   author: Author # 作者名称 - 请修改为你的名字
-  url: https://koharu.cosine.ren # 站点 URL 用于 RSS 和 SEO
+  url: https://yuki-bloom.vercel.app/ # 站点 URL 用于 RSS 和 SEO
   defaultOgImage: /img/avatar.webp # 默认 Open Graph 图片
-  startYear: 2024 # 建站年份
+  startYear: 2026 # 建站年份
   timezone: Asia/Shanghai # 时区配置 (IANA 格式)，用于日期显示和处理
   keywords: # SEO 关键词
     - 博客
@@ -69,6 +69,7 @@ categoryMap:
   项目: project
   面经: interview
   工具: tools
+  周刊: weekly
 
 # =============================================================================
 # Featured Categories (Homepage)
@@ -141,14 +142,13 @@ featuredSeries:
     label: 我的周刊 # 简短名称
     fullName: 我的技术周刊 # 完整名称
     description: | # 支持多行 Markdown
-      这是周刊/系列文章功能的示例配置。
-      你可以用它来发布定期更新的系列内容，如技术周刊、读书笔记系列等。
-      设置 enabled: false 可以关闭此功能。
-    cover: /img/weekly_header.webp # 系列页面头图
+      记录每周的生活、工作与学习复盘。
+      会持续更新实习过程中的思考、踩坑与成长。
+    cover: /img/weekly_header_1920.png # 系列页面头图
     enabled: true # 启用此系列
     icon: ri:newspaper-line # 导航图标
     links: # 相关链接（可选）
-      github: https://github.com/your-username/your-repo # (可选) GitHub 仓库
+      github: https://github.com/SmileSnow819 # (可选) GitHub 仓库
       rss: /rss.xml # (可选) RSS 订阅链接
       # chrome: https://chromewebstore.google.com/detail/your-extension-id # (可选) 浏览器插件
       # docs: https://your-docs-url # (可选) 文档链接
@@ -386,10 +386,10 @@ navigation:
     icon: ri:home-heart-fill # 图标
   # - name: 书摘
   #   path: /reading
-  # - name: 周刊
-  #   nameKey: nav.weekly
-  #   path: /weekly
-  #   icon: ri:newspaper-line
+  - name: 周刊
+    nameKey: nav.weekly
+    path: /weekly
+    icon: ri:newspaper-line
   - name: 文章 # 有子菜单时，path 可省略
     nameKey: nav.posts
     icon: ri:quill-pen-ai-fill

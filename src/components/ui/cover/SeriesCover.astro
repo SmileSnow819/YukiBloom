@@ -24,6 +24,8 @@ const seriesTitle = seriesFullName || seriesLabel || series.categoryName;
 // Convert Markdown description to HTML and sanitize for XSS protection
 const rawHtml = series.description ? await marked.parse(series.description) : '';
 const descriptionHtml = getSanitizeHtml(rawHtml);
+// Derive mobile cover from naming convention: *_1920.ext -> *_800.ext
+const mobileSeriesCover = series.cover?.replace(/_1920(\.[a-zA-Z0-9]+)$/u, '_800$1');
 ---
 
 <div class="relative flex z-0 max-h-200 min-h-[70dvh] items-center justify-center overflow-hidden pb-6">
@@ -32,14 +34,17 @@ const descriptionHtml = getSanitizeHtml(rawHtml);
   {
     series.cover && (
       <div class="absolute inset-0 -z-10 h-full w-full" style={getLqipStyle(series.cover)}>
-        <img
-          src={series.cover}
-          alt={seriesTitle}
-          class="h-full w-full object-cover"
-          loading="eager"
-          fetchpriority="high"
-          decoding="async"
-        />
+        <picture>
+          {mobileSeriesCover && mobileSeriesCover !== series.cover && <source media="(max-width: 768px)" srcset={mobileSeriesCover} />}
+          <img
+            src={series.cover}
+            alt={seriesTitle}
+            class="h-full w-full object-cover"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+          />
+        </picture>
       </div>
     )
   }
