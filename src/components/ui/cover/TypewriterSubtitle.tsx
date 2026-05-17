@@ -6,7 +6,7 @@
  */
 
 import { usePrefersReducedMotion } from '@hooks/index';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef } from 'react';
 
 export interface TypewriterSubtitleProps {
   /** 副标题文本，支持 \n 换行 */
@@ -18,7 +18,6 @@ export interface TypewriterSubtitleProps {
 }
 
 function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: TypewriterSubtitleProps) {
-  const [isTyping, setIsTyping] = useState(true);
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLParagraphElement | null>(null);
@@ -47,11 +46,9 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
     // 如果用户偏好减少动画，直接显示全部
     if (prefersReducedMotion) {
       containerRef.current.innerHTML = textToHtml(text);
-      setIsTyping(false);
       return;
     }
 
-    setIsTyping(true);
     containerRef.current.innerHTML = '';
     startTimeRef.current = performance.now();
 
@@ -67,7 +64,6 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
         if (containerRef.current) {
           containerRef.current.innerHTML = textToHtml(text);
         }
-        setIsTyping(false);
       }
     };
 

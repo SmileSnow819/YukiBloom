@@ -60,7 +60,11 @@ function createHeadingStore(offsetTop: number) {
       const heading = cachedHeadings[i];
       if (heading.getBoundingClientRect().top < offsetTop) {
         const level = parseInt(heading.tagName.substring(1), 10) as 2 | 3;
-        return { id: heading.id, text: heading.textContent?.trim() || '', level };
+        return {
+          id: heading.id,
+          text: heading.textContent?.trim() || '',
+          level,
+        };
       }
     }
     return null;
@@ -93,15 +97,15 @@ function createHeadingStore(offsetTop: number) {
       if (top < closestTop) {
         closestTop = top;
         closestId = id;
-        closestElement = element;
+        closestElement = element as unknown as HTMLElement;
       }
     });
 
     if (closestElement && closestId) {
-      const level = parseInt(closestElement.tagName.substring(1), 10) as 2 | 3;
+      const level = parseInt((closestElement as HTMLElement).tagName.substring(1), 10) as 2 | 3;
       updateHeading({
         id: closestId,
-        text: closestElement.textContent?.trim() || '',
+        text: (closestElement as HTMLElement).textContent?.trim() || '',
         level,
       });
     }
@@ -154,7 +158,11 @@ function createHeadingStore(offsetTop: number) {
           if (!element) return;
           if (element.tagName === 'H2' || element.tagName === 'H3') {
             const level = parseInt(element.tagName.substring(1), 10) as 2 | 3;
-            updateHeading({ id: locked, text: element.textContent?.trim() || '', level });
+            updateHeading({
+              id: locked,
+              text: element.textContent?.trim() || '',
+              level,
+            });
           }
           return;
         }
