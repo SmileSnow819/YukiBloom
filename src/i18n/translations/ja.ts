@@ -62,6 +62,7 @@ export const uiStrings: UIStrings = {
   'category.postsInCategory': '{name}の投稿',
   'category.totalCategories': '{count}件のカテゴリー',
   'category.categoryLabel': 'カテゴリー',
+  'category.timeline': 'タイムライン',
   'tag.allTags': 'すべてのタグ',
   'tag.postsWithTag': '「{name}」のタグが付けられた投稿',
   'tag.totalTags': '{count}個のタグ',

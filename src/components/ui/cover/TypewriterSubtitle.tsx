@@ -36,7 +36,7 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
   // 将文本转换为 HTML（处理换行符），并在打字时添加光标
   const textToHtml = useCallback((str: string, showCursor = false) => {
     const html = str.replace(/\n/g, '<br/>');
-    return showCursor ? html + '<span class="typewriter-cursor ml-1"></span>' : html;
+    return showCursor ? `${html}<span class="typewriter-cursor ml-1"></span>` : html;
   }, []);
 
   // 使用 requestAnimationFrame 的打字机效果

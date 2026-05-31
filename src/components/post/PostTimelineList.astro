@@ -1,0 +1,34 @@
+---
+import { getPostSlug } from '@lib/content';
+import { displayDate } from '@lib/date';
+import { encodeSlug } from '@lib/route';
+import type { BlogPost } from 'types/blog';
+import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+
+interface Props {
+  posts: BlogPost[];
+}
+
+const { posts } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url.pathname);
+---
+
+{
+  !posts?.length && (
+    <p class="text-muted-foreground px-6 py-4 text-sm">{t(locale, 'post.noPostsFound')}</p>
+  )
+}
+{
+  posts?.length > 0 && (
+    <div class="category-second-level-container flex flex-col">
+      {posts.map((post) => (
+        <p class="shoka-decoration-circle group text-primary hover:text-blue relative px-6 py-2 text-base/9">
+          <span class="text-muted-foreground mr-2 text-xs">{displayDate.shortDate(post.data.date)}</span>
+          <a href={localizedPath(`/post/${encodeSlug(getPostSlug(post))}`, locale)} class="dashed-border">
+            {post?.data?.title}
+          </a>
+        </p>
+      ))}
+    </div>
+  )
+}

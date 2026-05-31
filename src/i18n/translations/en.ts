@@ -63,6 +63,7 @@ export const uiStrings: UIStrings = {
   'category.postsInCategory': 'Posts in {name}',
   'category.totalCategories': '{count} categories',
   'category.categoryLabel': 'Category',
+  'category.timeline': 'Timeline',
   'tag.allTags': 'All Tags',
   'tag.postsWithTag': 'Posts tagged "{name}"',
   'tag.totalTags': '{count} tags',

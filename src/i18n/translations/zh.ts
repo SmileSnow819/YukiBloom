@@ -62,6 +62,7 @@ export const uiStrings = {
   'category.postsInCategory': '{name} 分类下的文章',
   'category.totalCategories': '共 {count} 个分类',
   'category.categoryLabel': '分类',
+  'category.timeline': '时间线',
   'tag.allTags': '所有标签',
   'tag.postsWithTag': '标签「{name}」下的文章',
   'tag.totalTags': '共 {count} 个标签',
