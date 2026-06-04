@@ -25,7 +25,7 @@ categories:
 2. 是否仍在快手实习？
 3. 询问跨域 iframe 实时预览功能。
 4. 解释一下 React Hooks
-5. 是否了解 React 都 forwardRef？
+5. 是否了解 React 的 forwardRef？
 6. 事件循环
 7. 事件循环输出题
 8. 解释 HTTP 缓存机制
@@ -39,8 +39,9 @@ categories:
 16. 怎么实现图片懒加载
 17. css 动画
 18. animation 的具体使用
-19. AI 相关内容的讨论
-20. 业务方面（旅游门票）
+19. 手撕：leetcode [128. 最长连续序列](https://leetcode.cn/problems/longest-consecutive-sequence/description/)
+20. AI 相关内容的讨论
+21. 业务方面（旅游门票）
 
 ---
 
