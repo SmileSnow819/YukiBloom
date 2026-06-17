@@ -33,8 +33,8 @@ import TimelineWrapper from '../components/timeline/TimelineWrapper.astro';
 ```yaml
 timeline:
   - startDate: "2026.03"
-    endDate: ""
-    isPresent: true
+    endDate: "2026.06"
+    isPresent: false
     company: "快手"
     position: "前端开发实习生"
     description: "负责前端开发工作"

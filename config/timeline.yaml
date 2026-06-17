@@ -4,8 +4,8 @@
 
 timeline:
   - startDate: "2026.03"
-    endDate: ""
-    isPresent: true
+    endDate: "2026.06"
+    isPresent: false
     company: "快手"
     position: "前端开发实习生"
     description: ""
@@ -13,6 +13,6 @@ timeline:
   - startDate: "2025.12"
     endDate: "2026.03"
     isPresent: false
-    company: "北京蓝色光标数字传媒"
+    company: "蓝色光标数字传媒"
     position: "前端开发实习生"
     description: ""
