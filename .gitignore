@@ -37,3 +37,4 @@ pnpm-debug.log*
 
 # Backup files
 backups/
+pnpm-workspace.yaml
