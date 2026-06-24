@@ -1,0 +1,32 @@
+---
+import HomeSider from '@components/layout/HomeSider.astro';
+import PostTimelineList from '@components/post/PostTimelineList.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
+import { getSortedPosts } from '@lib/content';
+import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+
+const locale = getLocaleFromUrl(Astro.url.pathname);
+const posts = await getSortedPosts(locale);
+const title = t(locale, 'category.timeline');
+---
+
+<Layout title={`${title} | ${siteConfig.title}`} description={title}>
+  <TwoColumnLayout>
+    <Cover slot="cover" title={title} />
+    <HomeSider slot="sider" />
+    <div class={`shadow-box bg-gradient-start mx-0 flex w-full flex-col ${CONTENT_PADDING.standard}`}>
+      <h2 class="shoka-decoration-circle group relative h-19 px-6 py-5 text-2xl/9 font-bold md:text-xl/9">
+        <a href={localizedPath('/', locale)} class="dashed-border text-muted-foreground group-hover:border-blue group-hover:text-blue border-b">{t(locale, 'nav.home')}</a>
+        <span class="text-muted-foreground text-lg md:text-base"> / </span>
+        {title}
+      </h2>
+      <div class="post-timeline-grow">
+        <PostTimelineList posts={posts} />
+      </div>
+    </div>
+  </TwoColumnLayout>
+</Layout>

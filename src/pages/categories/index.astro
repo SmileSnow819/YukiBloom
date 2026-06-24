@@ -1,73 +1,22 @@
 ---
 import CategoryList from '@components/category/CategoryList.astro';
 import HomeSider from '@components/layout/HomeSider.astro';
-import PostTimelineList from '@components/post/PostTimelineList.astro';
 import Cover from '@components/ui/cover/Cover.astro';
-import { CONTENT_PADDING } from '@constants/layout';
 import { seoConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getCategoryLinks, getCategoryList, getSortedPosts } from '@lib/content';
+import { getCategoryLinks, getCategoryList } from '@lib/content';
 import { getLocaleFromUrl, t } from '@/i18n';
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const { categories, countMap } = await getCategoryList(locale);
 const links = getCategoryLinks(categories, '');
-const posts = await getSortedPosts(locale);
 ---
 
 <Layout title={`${t(locale, 'category.allCategories')} | ${seoConfig.title}`}>
   <TwoColumnLayout>
     <Cover slot="cover" title={t(locale, 'category.allCategories')} />
     <HomeSider slot="sider" />
-    <div class="tab-group" data-tab-group="categories-view">
-      <div class="tab-headers" role="tablist">
-        <button class="tab-header" role="tab" aria-selected="true" data-tab-index="0" data-tab-group="categories-view">
-          {t(locale, 'category.categoryLabel')}
-        </button>
-        <button class="tab-header" role="tab" aria-selected="false" data-tab-index="1" data-tab-group="categories-view">
-          {t(locale, 'category.timeline')}
-        </button>
-      </div>
-      <div class="tab-panel active" role="tabpanel" data-tab-index="0">
-        <CategoryList categories={categories} countMap={countMap} totalCount={links.length ?? 0} />
-      </div>
-      <div class="tab-panel" role="tabpanel" data-tab-index="1">
-        <div class={`shadow-box mx-0 flex w-full flex-col bg-gradient-start ${CONTENT_PADDING.normal}`}>
-          <PostTimelineList posts={posts} />
-        </div>
-      </div>
-    </div>
+    <CategoryList categories={categories} countMap={countMap} totalCount={links.length ?? 0} />
   </TwoColumnLayout>
 </Layout>
-
-<script>
-  function initTabGroup(group) {
-    if (group.dataset.tabBound === 'true') return;
-    group.dataset.tabBound = 'true';
-    const headers = group.querySelectorAll('.tab-header[role="tab"]');
-    headers.forEach((header) => {
-      header.addEventListener('click', () => {
-        const tabIndex = header.dataset.tabIndex;
-        if (tabIndex === undefined) return;
-        headers.forEach((h) => {
-          h.setAttribute('aria-selected', String(h.dataset.tabIndex === tabIndex));
-        });
-        group.querySelectorAll('.tab-panel').forEach((panel) => {
-          panel.classList.toggle('active', panel.dataset.tabIndex === tabIndex);
-        });
-      });
-    });
-  }
-
-  function initTabs() {
-    document.querySelectorAll('.tab-group[data-tab-group="categories-view"]').forEach(initTabGroup);
-  }
-
-  document.addEventListener('astro:page-load', initTabs);
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTabs);
-  } else {
-    initTabs();
-  }
-</script>

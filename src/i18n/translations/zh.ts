@@ -17,6 +17,7 @@ export const uiStrings = {
   'nav.music': '歌单',
   'nav.weekly': '周刊',
   'nav.bangumi': '追番',
+  'nav.timeline': '时间线',
 
   // ── Common ──────────────────────────────────────────────────
   'common.search': '搜索',

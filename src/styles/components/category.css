@@ -90,6 +90,49 @@ p.shoka-decoration-circle:hover {
   }
 }
 
+.post-timeline-grow .category-second-level-container {
+  overflow: hidden;
+}
+
+.post-timeline-grow p.shoka-decoration-circle {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: timeline-item-rise 0.45s ease-out forwards;
+  animation-delay: calc(var(--timeline-index, 0) * 70ms);
+}
+
+.post-timeline-grow p.shoka-decoration-circle::before {
+  transform: translateY(-50%) scale(0.25);
+  animation: timeline-dot-bloom 0.36s ease-out forwards;
+  animation-delay: calc(var(--timeline-index, 0) * 70ms + 120ms);
+}
+
+.post-timeline-grow p.shoka-decoration-circle::after {
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: timeline-line-grow 0.55s ease-out forwards;
+  animation-delay: calc(var(--timeline-index, 0) * 70ms + 220ms);
+}
+
+@keyframes timeline-item-rise {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes timeline-dot-bloom {
+  to {
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes timeline-line-grow {
+  to {
+    transform: scaleY(1);
+  }
+}
+
 @media (max-width: 768px) {
   p.shoka-decoration-circle {
     height: 70px;
@@ -100,5 +143,19 @@ p.shoka-decoration-circle:hover {
       height: 70px;
       top: 24px;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .post-timeline-grow p.shoka-decoration-circle,
+  .post-timeline-grow p.shoka-decoration-circle::before,
+  .post-timeline-grow p.shoka-decoration-circle::after {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .post-timeline-grow p.shoka-decoration-circle::before {
+    transform: translateY(-50%);
   }
 }

@@ -120,6 +120,28 @@
   animation: cursor-blink 0.6s step-end infinite;
 }
 
+.typewriter-subtitle-rainbow {
+  color: #fff;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .typewriter-subtitle-rainbow {
+    display: inline-block;
+    background-image: linear-gradient(90deg, #ff7ab6, #ffd166, #7bdff2, #8ec5ff, #c3f584, #ff7ab6);
+    background-size: 280% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: subtitle-rainbow-flow 8s linear infinite;
+  }
+
+  .typewriter-subtitle-rainbow .typewriter-cursor {
+    background-image: linear-gradient(180deg, #ff7ab6, #ffd166, #7bdff2);
+    background-color: transparent;
+  }
+}
+
 @keyframes cursor-blink {
   0%,
   100% {
@@ -130,8 +152,18 @@
   }
 }
 
+@keyframes subtitle-rainbow-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 280% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .typewriter-cursor {
+  .typewriter-cursor,
+  .typewriter-subtitle-rainbow {
     animation: none;
   }
 }

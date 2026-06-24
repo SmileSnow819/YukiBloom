@@ -6,7 +6,7 @@
  */
 
 import { usePrefersReducedMotion } from '@hooks/index';
-import { memo, useCallback, useEffect, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 
 export interface TypewriterSubtitleProps {
   /** 副标题文本，支持 \n 换行 */
@@ -21,6 +21,8 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
   const animationRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const containerRef = useRef<HTMLParagraphElement | null>(null);
+  const displayText = useMemo(() => text.replace(/<br\s*\/?>/gi, '\n'), [text]);
+  const characters = useMemo(() => Array.from(displayText), [displayText]);
 
   // 检测用户是否偏好减少动画
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -35,7 +37,7 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
 
   // 将文本转换为 HTML（处理换行符），并在打字时添加光标
   const textToHtml = useCallback((str: string, showCursor = false) => {
-    const html = str.replace(/\n/g, '<br/>');
+    const html = str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>');
     return showCursor ? `${html}<span class="typewriter-cursor ml-1"></span>` : html;
   }, []);
 
@@ -45,7 +47,7 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
 
     // 如果用户偏好减少动画，直接显示全部
     if (prefersReducedMotion) {
-      containerRef.current.innerHTML = textToHtml(text);
+      containerRef.current.innerHTML = textToHtml(displayText);
       return;
     }
 
@@ -56,19 +58,19 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
       const elapsed = currentTime - startTimeRef.current;
       const charIndex = Math.floor(elapsed / typingSpeed);
 
-      if (charIndex < text.length && containerRef.current) {
-        const currentText = text.slice(0, charIndex + 1);
+      if (charIndex < characters.length && containerRef.current) {
+        const currentText = characters.slice(0, charIndex + 1).join('');
         containerRef.current.innerHTML = textToHtml(currentText, true);
         animationRef.current = requestAnimationFrame(animate);
       } else {
         if (containerRef.current) {
-          containerRef.current.innerHTML = textToHtml(text);
+          containerRef.current.innerHTML = textToHtml(displayText);
         }
       }
     };
 
     animationRef.current = requestAnimationFrame(animate);
-  }, [text, typingSpeed, prefersReducedMotion, textToHtml]);
+  }, [characters, displayText, typingSpeed, prefersReducedMotion, textToHtml]);
 
   // 组件挂载时开始打字
   useEffect(() => {
@@ -79,10 +81,10 @@ function TypewriterSubtitle({ text, typingSpeed = 50, className = '' }: Typewrit
   return (
     <>
       {/* 屏幕阅读器专用 */}
-      <span className="sr-only">{text}</span>
+      <span className="sr-only">{displayText}</span>
 
       {/* 视觉展示 */}
-      <p ref={containerRef} className={className} aria-hidden="true" />
+      <p ref={containerRef} className={`typewriter-subtitle-rainbow ${className}`} aria-hidden="true" />
     </>
   );
 }

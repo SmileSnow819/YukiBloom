@@ -390,6 +390,10 @@ navigation:
     nameKey: nav.weekly
     path: /weekly
     icon: ri:newspaper-line
+  - name: 时间线
+    nameKey: nav.timeline
+    path: /timeline
+    icon: ri:history-line
   - name: 文章 # 有子菜单时，path 可省略
     nameKey: nav.posts
     icon: ri:quill-pen-ai-fill
