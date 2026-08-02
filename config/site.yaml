@@ -202,10 +202,10 @@ social:
   #   url: https://www.zhihu.com/people/your-id
   #   icon: ri:zhihu-fill
   #   color: '#1e88e5'
-  music:
-    url: https://music.163.com/#/user/home?id=1573754661
-    icon: ri:netease-cloud-music-line
-    color: "#e60026"
+  # music:
+  #   url: https://music.163.com/#/user/home?id=1573754661
+  #   icon: ri:netease-cloud-music-line
+  #   color: "#e60026"
 
 # =============================================================================
 # Friends Links
