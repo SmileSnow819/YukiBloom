@@ -1,5 +1,5 @@
 ---
-title: 中科紫东太初面经
+title: 中科紫东太初面经（OC）
 date: 2026-07-16 14:15:00
 link: zhong-ke-zi-dong-tai-chu-mian-jing
 cover: /img/cover/interview.jpg

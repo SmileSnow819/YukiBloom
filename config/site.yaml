@@ -15,7 +15,7 @@ site:
   alternate: YukiBloom # 网站英文名称 用于页脚、Logo、@ handle 等
   subtitle: 生活或许有不如意，但温柔与善意能治愈一切。<br/>愿你被世界温柔以待，也能做温暖别人的小太阳。<br/>——《生如冬花的你》
   name: smile丶snow # 作者名称 - 请修改为你的名字
-  description: 大三/前端开发/百合汉化组成员/百合/偶尔也会做些动态壁纸 # 网站描述
+  description: 大三/前端开发/百合汉化组成员/百合/日语/偶尔做动态壁纸 # 网站描述
   avatar: /img/avatar.webp # 网站头像
   showLogo: true # 是否显示 Logo
   author: Author # 作者名称 - 请修改为你的名字

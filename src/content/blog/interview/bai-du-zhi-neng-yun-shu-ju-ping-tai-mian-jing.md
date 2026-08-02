@@ -1,5 +1,5 @@
 ---
-title: 百度智能云数据平台面经
+title: 百度智能云数据平台面经（OC）
 date: 2026-07-24 17:00:00
 link: bai-du-zhi-neng-yun-shu-ju-ping-tai-mian-jing
 cover: /img/cover/interview.jpg
@@ -70,6 +70,10 @@ categories:
 
 ---
 
+### 二面结果
+
+隔天通知二面通过 oc。
+
 ## 面试复盘总结
 
 ### 1) iframe 沙箱隔离为什么要用 iframe？（一面 Q2-Q3）
@@ -89,19 +93,19 @@ iframe 通信通常用 `postMessage`：
 // parent
 iframe.contentWindow?.postMessage(
   {
-    type: 'PREVIEW_UPDATE',
+    type: "PREVIEW_UPDATE",
     payload: schema,
   },
   targetOrigin,
 );
 
 // iframe
-window.addEventListener('message', (event) => {
+window.addEventListener("message", (event) => {
   if (event.origin !== allowOrigin) {
     return;
   }
 
-  if (event.data.type === 'PREVIEW_UPDATE') {
+  if (event.data.type === "PREVIEW_UPDATE") {
     renderPreview(event.data.payload);
   }
 });
@@ -282,8 +286,8 @@ AI 写代码常见错误：
 `Symbol` 用来创建唯一值，主要用于避免属性名冲突。
 
 ```javascript
-const a = Symbol('id');
-const b = Symbol('id');
+const a = Symbol("id");
+const b = Symbol("id");
 
 console.log(a === b); // false
 ```
@@ -296,26 +300,26 @@ console.log(a === b); // false
 - 如果不存在，就创建一个新的 Symbol 并注册到全局表。
 
 ```javascript
-const a = Symbol.for('id');
-const b = Symbol.for('id');
+const a = Symbol.for("id");
+const b = Symbol.for("id");
 
 console.log(a === b); // true
 ```
 
 区别总结：
 
-| 对比点 | `Symbol()` | `Symbol.for()` |
-| --- | --- | --- |
-| 是否每次唯一 | 是，每次创建新值 | 同 key 复用同一个值 |
-| 是否进入全局注册表 | 否 | 是 |
-| 能否跨模块共享 | 不方便 | 可以通过 key 共享 |
-| 适合场景 | 私有属性、防止冲突 | 全局约定、跨模块复用 |
+| 对比点             | `Symbol()`         | `Symbol.for()`       |
+| ------------------ | ------------------ | -------------------- |
+| 是否每次唯一       | 是，每次创建新值   | 同 key 复用同一个值  |
+| 是否进入全局注册表 | 否                 | 是                   |
+| 能否跨模块共享     | 不方便             | 可以通过 key 共享    |
+| 适合场景           | 私有属性、防止冲突 | 全局约定、跨模块复用 |
 
 补充：
 
 ```javascript
-const local = Symbol('foo');
-const global = Symbol.for('foo');
+const local = Symbol("foo");
+const global = Symbol.for("foo");
 
 console.log(Symbol.keyFor(local)); // undefined
 console.log(Symbol.keyFor(global)); // 'foo'
