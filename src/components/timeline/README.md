@@ -10,6 +10,7 @@ Timeline 是一个用于展示时间线（如实习经历）的可配置组件�
 - ✅ 支持无限添加条目
 - ✅ 竖向时间线，从现在到过去排序
 - ✅ 支持"至今"状态
+- ✅ 支持可选公司图标（Iconify）
 - ✅ 响应式设计
 - ✅ 深色模式支持
 - ✅ 悬浮动画效果
@@ -36,6 +37,8 @@ timeline:
     endDate: "2026.06"
     isPresent: false
     company: "快手"
+    icon: "simple-icons:kuaishou"
+    iconColor: "#ffb300"
     position: "前端开发实习生"
     description: "负责前端开发工作"
     
@@ -43,6 +46,7 @@ timeline:
     endDate: "2026.03"
     isPresent: false
     company: "北京蓝色光标数字传媒有限科技公司"
+    icon: "ri:building-4-line"
     position: "前端开发实习生"
     description: "参与多个项目的前端开发"
 ```
@@ -55,6 +59,8 @@ timeline:
 | `endDate` | string | ❌ | 结束日期（如 "2026.03"，当 `isPresent` 为 true 时可为空） |
 | `isPresent` | boolean | ✅ | 是否为当前正在进行的经历 |
 | `company` | string | ✅ | 公司名称 |
+| `icon` | string | ❌ | 公司前显示的 Iconify 图标名称；不填则不渲染图标 |
+| `iconColor` | string | ❌ | 公司图标颜色；不填则使用默认主题色 |
 | `position` | string | ✅ | 职位名称 |
 | `description` | string | ❌ | 工作描述 |
 
@@ -69,6 +75,8 @@ timeline:
     endDate: ""
     isPresent: true
     company: "新公司"
+    icon: "ri:building-4-line"
+    iconColor: "#ed788c"
     position: "高级前端开发工程师"
     description: ""
   
@@ -109,7 +117,7 @@ config/
 
 时间线会以竖向排列，每个条目包含：
 - 时间段标签（紫色渐变背景）
-- 公司名称（大标题）
+- 公司图标（可选）和公司名称（大标题）
 - 职位名称（副标题）
 - 可选的工作描述
 

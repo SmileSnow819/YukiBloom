@@ -3,16 +3,28 @@
 # 按时间倒序排列（最新的在最上面）
 
 timeline:
+  - startDate: "2026.08"
+    endDate: ""
+    isPresent: true
+    company: "百度"
+    icon: "simple-icons:baidu"
+    iconColor: "#2932e1"
+    position: "前端数据平台"
+    description: ""
+
   - startDate: "2026.03"
     endDate: "2026.06"
     isPresent: false
     company: "快手"
-    position: "前端开发实习生"
+    icon: "simple-icons:kuaishou"
+    iconColor: "#ffb300"
+    position: "前端电商"
     description: ""
 
   - startDate: "2025.12"
     endDate: "2026.03"
     isPresent: false
-    company: "蓝色光标数字传媒"
+    company: "蓝色光标"
+    icon: "ri:building-4-line"
     position: "前端开发实习生"
     description: ""
