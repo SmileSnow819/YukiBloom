@@ -15,7 +15,7 @@ en:
   categories:
     life: Life
     note: Notes
-    tools: Tools
+    tools: Reposts
     weekly: Weekly
     front-end: Frontend
 
@@ -35,14 +35,14 @@ en:
       label: Frontend
       description: Frontend technologies
     tools:
-      label: Tools
-      description: Tool usage and productivity
+      label: Reposts
+      description: Translated and republished technical articles
 
 ja:
   categories:
     life: 日常
     note: ノート
-    tools: ツール
+    tools: 転載
     weekly: 週刊
     front-end: フロントエンド
 
@@ -62,5 +62,5 @@ ja:
       label: フロントエンド
       description: フロントエンド技術
     tools:
-      label: ツール
-      description: ツールの使い方と生産性
+      label: 転載
+      description: 翻訳・転載した技術記事

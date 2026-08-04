@@ -68,7 +68,7 @@ categoryMap:
   算法: algorithm
   项目: project
   面经: interview
-  工具: tools
+  转载: tools
   周刊: weekly
 
 # =============================================================================
@@ -115,9 +115,9 @@ featuredCategories:
     image: /img/cover/interview.webp
     description: 面试经验分享
   - link: tools
-    label: 工具
+    label: 转载
     image: /img/cover/tools.webp
-    description: 工具使用、效率提升
+    description: 优质文章译文与转载
 
 # =============================================================================
 # Featured Series
