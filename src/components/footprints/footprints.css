@@ -24,10 +24,31 @@
   border: 0;
   border-radius: 0;
   background:
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, #ff7dac 18%, transparent), transparent 28%),
-    radial-gradient(circle at 86% 12%, color-mix(in srgb, #69b7ff 16%, transparent), transparent 30%),
-    color-mix(in srgb, var(--card) 94%, white);
+    radial-gradient(circle at 12% 18%, rgba(255, 125, 172, 0.18), transparent 28%),
+    radial-gradient(circle at 86% 12%, rgba(105, 183, 255, 0.16), transparent 30%), linear-gradient(135deg, #fffafd, #fff2f7);
+  color: #171923;
   box-shadow: none;
+}
+
+.footprints-hero:fullscreen::backdrop {
+  background: #fff7fb;
+}
+
+.footprints-hero:fullscreen .footprints-eyebrow,
+.footprints-hero.is-fullscreen .footprints-eyebrow {
+  color: #e95485;
+}
+
+.footprints-hero:fullscreen .footprints-map-toolbar h3,
+.footprints-hero.is-fullscreen .footprints-map-toolbar h3,
+.footprints-hero:fullscreen .footprints-map-detail strong,
+.footprints-hero.is-fullscreen .footprints-map-detail strong {
+  color: #171923;
+}
+
+.footprints-hero:fullscreen .footprints-map-detail,
+.footprints-hero.is-fullscreen .footprints-map-detail {
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .footprints-map-toolbar {

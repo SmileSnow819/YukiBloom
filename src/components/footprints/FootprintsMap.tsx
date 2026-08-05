@@ -54,6 +54,19 @@ const ROUTE_DURATION = 2100;
 const ROUTE_EFFECT_PERIOD = 2.08;
 const MAP_SWITCH_DURATION = 260;
 const CHINA_CENTER: [number, number] = [104.2, 36.2];
+const LOCATION_COLOR_PALETTE = [
+  '#e11d48',
+  '#2563eb',
+  '#f59e0b',
+  '#16a34a',
+  '#7c3aed',
+  '#0891b2',
+  '#db2777',
+  '#ea580c',
+  '#4f46e5',
+  '#059669',
+  '#be123c',
+];
 
 const transportRunnerIconMap: Record<string, string> = {
   train: 'ri:train-line',
@@ -90,11 +103,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function getGeneratedLocationColor(index: number): string {
-  const red = 238 - ((index * 29) % 76);
-  const green = 96 + ((index * 47) % 112);
-  const blue = 146 + ((index * 61) % 86);
-
-  return `rgb(${red}, ${green}, ${blue})`;
+  return LOCATION_COLOR_PALETTE[index % LOCATION_COLOR_PALETTE.length];
 }
 
 function getDistance(from: FootprintLocation, to: FootprintLocation): number {
