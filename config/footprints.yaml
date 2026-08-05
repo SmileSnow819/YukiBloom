@@ -1,5 +1,7 @@
 # Footprints Configuration
 # 足迹配置文件
+# 图片放在 public/img/footprints，命名建议：footprints-地点-日期.webp
+# 在 routes 的 images 中引用：/img/footprints/luo-yang.jpg
 
 locations:
   - id: sanmenxia
@@ -105,122 +107,136 @@ stays:
 routes:
   - from: sanmenxia
     to: luoyang
-    date: "2026.03.08"
-    transport: train
-    label: 火车
-    description: "从三门峡出发到洛阳，作为这段足迹路线的起点。"
+    date: "2010.01.01"
+    transport: car
+    label: 汽车
+    description: "去洛阳的医院看病，之后小初高大学也一直在洛阳上学～"
+    images:
+      - /img/footprints/luo-yang.jpg
 
   - from: luoyang
     to: xian
-    date: "2026.03.09"
-    transport: highspeed
-    label: 高铁
-    description: "从洛阳去西安，短暂切换到另一座古都。"
+    date: "2023.12.02"
+    transport: car
+    label: 汽车
+    description: "去参加日语等级考试，顺便去西安转一转"
+    images:
+      - /img/footprints/xi-an.jpg
 
   - from: xian
     to: luoyang
-    date: "2026.03.10"
-    transport: highspeed
-    label: 高铁
-    description: "从西安回到洛阳，再准备出发去北京。"
+    date: "2026.12.04"
+    transport: car
+    label: 汽车
+    description: "考试结束，回去啦～"
 
   - from: luoyang
     to: beijing
-    date: "2026.03.10"
+    date: "2025.12.17"
     transport: train
     label: 火车
-    description: "从洛阳出发去北京，开始一段新的实习和生活节奏。"
+    description: "找到了第一份实习，第一次一个人外出～"
     images:
-      - /img/weekly/2026-05_10.webp
+      - /img/footprints/bei-jing.jpg
 
   - from: beijing
     to: tianjin
-    date: "2026.03.12"
+    date: "2026.03.08"
     transport: highspeed
     label: 高铁
-    description: "坐高铁去天津短暂停留，给春天留一点出门走走的记忆。"
+    description: "骑驴找马有点累了，离职去天津休息一会吧"
     images:
-      - /img/weekly/2026-05_17.webp
+      - /img/footprints/tian-jin.jpg
 
   - from: tianjin
     to: beijing
-    date: "2026.03.16"
+    date: "2026.03.11"
     transport: highspeed
     label: 高铁
-    description: "从天津回到北京，继续进入编辑、实习和学习的日常。"
+    description: "想着挂了就回学校沉淀了，没想到快手顺利过关，回北京继续实习～"
     images:
-      - /img/weekly/2026-05_31.webp
+      - /img/footprints/bei-jing-kuai-shou.jpg
 
   - from: beijing
     to: wuhan
-    date: "2026.04.01"
+    date: "2026.05.01"
     transport: train
     label: 火车
-    description: "从北方一路向南，路上的时间也算是生活的留白。"
+    description: "五一出去发～找朋友去武汉玩，顺便去看一看江城的夜景。"
+    images:
+      - /img/footprints/wu-han.jpg
 
   - from: wuhan
     to: changsha
-    date: "2026.04.03"
+    date: "2026.05.03"
     transport: highspeed
     label: 高铁
-    description: "短距离高铁继续南下，去长沙转一转。"
+    description: "品尝湘菜～逛逛网红城市长沙"
+    images:
+      - /img/footprints/chang-sha.jpg
 
   - from: changsha
     to: beijing
-    date: "2026.04.06"
+    date: "2026.05.06"
     transport: highspeed
     label: 高铁
     description: "从长沙返回北京，把短途旅行收束回工作日。"
 
   - from: beijing
     to: luoyang
-    date: "2026.05.01"
+    date: "2026.06.11"
     transport: train
     label: 火车
-    description: "假期回洛阳，回到最熟悉的地方充一下电。"
+    description: "离职回洛阳，准备考试还有回到最熟悉的地方充一下电。"
 
   - from: luoyang
     to: shanghai
-    date: "2026.05.10"
+    date: "2026.07.04"
     transport: highspeed
     label: 高铁
-    description: "从洛阳去上海，看一看不一样的城市节奏。"
+    description: "魔都不愧是魔都～，比北京好多了，心情也跟着变得轻松起来。"
     images:
-      - /img/weekly/2026-06_07.webp
+      - /img/footprints/shang-hai.jpg
 
   - from: shanghai
     to: hangzhou
-    date: "2026.05.12"
+    date: "2026.07.07"
     transport: highspeed
     label: 高铁
-    description: "从上海到杭州，城市切换得很快，心情也跟着换了频道。"
+    description: "看看互联网之城～，打卡美食荒漠kfc，顺便逛逛西湖"
+    images:
+      - /img/footprints/hang-zhou.jpg
 
   - from: hangzhou
     to: nanjing
-    date: "2026.05.14"
+    date: "2026.07.08"
     transport: highspeed
     label: 高铁
-    description: "继续坐高铁去南京，沿着江南一带慢慢补足旅行地图。"
+    description: "中国第一大商场居然在南京，还有这么豪华的厕所"
+    images:
+      - /img/footprints/nan-jing.jpg
 
   - from: nanjing
     to: luoyang
-    date: "2026.05.16"
+    date: "2026.07.11"
     transport: train
     label: 火车
-    description: "从南京回洛阳，结束这一段绕了一圈的路线。"
-    images:
-      - /img/weekly/2026-06_14.webp
+    description: "台风来了，不得不先回去了"
 
   - from: luoyang
     to: shijiazhuang
-    date: "2026.08.01"
+    date: "2026.07.25"
     transport: highspeed
     label: 高铁
-    description: "从洛阳出发去石家庄中转，把返京路线拆成一段一段记录。"
+    description: "这真的不是火箭嘛？怎么会是麦穗！？"
+    images:
+      - /img/footprints/shi-jia-zhuang.jpg
 
   - from: shijiazhuang
     to: beijing
-    date: "2026.08.02"
+    date: "2026.08.03"
     transport: highspeed
     label: 高铁
-    description: "从石家庄回到北京，进入新的实习阶段。"
+    description: "获得了百度的offer，继续开始新的实习了～，终究逃离不掉西二旗。"
+    images:
+      - /img/footprints/bei-jing-bai-du.jpg

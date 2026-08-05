@@ -16,11 +16,12 @@
 }
 
 .footprints-hero:fullscreen,
-.footprints-hero.is-fullscreen {
+.footprints-hero.is-fullscreen,
+.footprints-hero.is-immersive {
   display: flex;
   flex-direction: column;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   border: 0;
   border-radius: 0;
   background:
@@ -30,24 +31,34 @@
   box-shadow: none;
 }
 
+.footprints-hero.is-immersive {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+}
+
 .footprints-hero:fullscreen::backdrop {
   background: #fff7fb;
 }
 
 .footprints-hero:fullscreen .footprints-eyebrow,
-.footprints-hero.is-fullscreen .footprints-eyebrow {
+.footprints-hero.is-fullscreen .footprints-eyebrow,
+.footprints-hero.is-immersive .footprints-eyebrow {
   color: #e95485;
 }
 
 .footprints-hero:fullscreen .footprints-map-toolbar h3,
 .footprints-hero.is-fullscreen .footprints-map-toolbar h3,
+.footprints-hero.is-immersive .footprints-map-toolbar h3,
 .footprints-hero:fullscreen .footprints-map-detail strong,
-.footprints-hero.is-fullscreen .footprints-map-detail strong {
+.footprints-hero.is-fullscreen .footprints-map-detail strong,
+.footprints-hero.is-immersive .footprints-map-detail strong {
   color: #171923;
 }
 
 .footprints-hero:fullscreen .footprints-map-detail,
-.footprints-hero.is-fullscreen .footprints-map-detail {
+.footprints-hero.is-fullscreen .footprints-map-detail,
+.footprints-hero.is-immersive .footprints-map-detail {
   background: rgba(255, 255, 255, 0.94);
 }
 
@@ -112,7 +123,8 @@
 }
 
 .footprints-hero:fullscreen .footprints-map-stage,
-.footprints-hero.is-fullscreen .footprints-map-stage {
+.footprints-hero.is-fullscreen .footprints-map-stage,
+.footprints-hero.is-immersive .footprints-map-stage {
   flex: 1;
   min-height: 0;
   padding: 0 1.25rem;
@@ -131,7 +143,8 @@
 }
 
 .footprints-hero:fullscreen .footprints-map,
-.footprints-hero.is-fullscreen .footprints-map {
+.footprints-hero.is-fullscreen .footprints-map,
+.footprints-hero.is-immersive .footprints-map {
   height: 100%;
   min-height: 0;
 }
@@ -361,11 +374,11 @@
   position: absolute;
   z-index: 2;
   top: clamp(1rem, 3vw, 1.45rem);
-  left: clamp(1rem, 4vw, 4.5rem);
+  left: 1.25rem;
   display: grid;
   grid-template-columns: 2.75rem minmax(0, 1fr);
   gap: 0.85rem;
-  width: min(27.5rem, calc(100% - 2rem));
+  width: min(34rem, calc(100% - 2rem));
   padding: 1rem 1.05rem;
   border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
   border-radius: 0.875rem;
@@ -428,17 +441,26 @@
 
 .footprints-map-detail-images {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin-top: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+  gap: 0.6rem;
+  margin-top: 0.8rem;
 }
 
 .footprints-map-detail-images img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 0.55rem;
-  object-fit: cover;
+  display: block;
+  justify-self: center;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 17rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--muted) 42%, transparent);
+  object-fit: contain;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--foreground) 10%, transparent);
+}
+
+.footprints-map-detail-images img:only-child {
+  max-height: 20rem;
 }
 
 .footprints-panel {
@@ -518,8 +540,8 @@
 .footprints-route-card {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.95rem;
+  gap: 0.95rem;
+  padding: 1.05rem;
   border: 1px solid transparent;
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--muted) 38%, transparent);
@@ -536,8 +558,9 @@
 }
 
 .footprints-transport-icon {
-  width: 1.45rem;
-  height: 1.45rem;
+  flex: 0 0 auto;
+  width: 2.15rem;
+  height: 2.15rem;
   color: var(--primary);
 }
 
@@ -565,16 +588,21 @@
 
 .footprints-route-images {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.7rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+  gap: 0.7rem;
+  margin-top: 0.8rem;
 }
 
 .footprints-route-images img {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 0.55rem;
-  object-fit: cover;
+  display: block;
+  justify-self: center;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 24rem;
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--muted) 42%, transparent);
+  object-fit: contain;
   box-shadow: 0 8px 18px color-mix(in srgb, var(--foreground) 8%, transparent);
 }
 

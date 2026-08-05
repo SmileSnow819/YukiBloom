@@ -120,10 +120,6 @@ function getGeoView(route: RouteSegment | undefined, isOverview: boolean) {
   };
 }
 
-function formatStayDate(stay: FootprintStay): string {
-  return `${stay.startDate} - ${stay.isPresent ? '至今' : stay.endDate || ''}`;
-}
-
 function getTypeLabel(type?: string): string {
   const labelMap: Record<string, string> = {
     hometown: '故乡',
@@ -135,6 +131,15 @@ function getTypeLabel(type?: string): string {
   };
 
   return type ? labelMap[type] || type : '足迹';
+}
+
+function getCurrentDateText(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const date = String(now.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${date}`;
 }
 
 function createRouteLine(segment: RouteSegment) {
@@ -164,6 +169,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const [isMapSwitching, setIsMapSwitching] = useState(false);
   const [isPlaying, setIsPlaying] = useState(!reduceMotion);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isImmersive, setIsImmersive] = useState(true);
 
   const locationMap = useMemo(() => new Map(data.locations.map((location) => [location.id, location])), [data.locations]);
   const locationColorMap = useMemo(
@@ -197,6 +203,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const activeRunnerIcon = activeRoute?.transport
     ? transportRunnerIconMap[activeRoute.transport] || 'ri:map-pin-line'
     : 'ri:map-pin-line';
+  const currentDateText = useMemo(() => getCurrentDateText(), []);
+  const isFullscreenView = isFullscreen || isImmersive;
   const visibleRouteSegments = isOverview ? routeSegments : activeRoute ? [activeRoute] : [];
   const progressPercent =
     routeSegments.length <= 1 || isOverview ? 100 : (activeRouteIndex / Math.max(routeSegments.length - 1, 1)) * 100;
@@ -252,6 +260,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
     if (document.fullscreenElement === heroRef.current) {
       await document.exitFullscreen();
+      setIsImmersive(false);
+    } else if (isImmersive) {
+      setIsImmersive(false);
+      window.setTimeout(() => chartRef.current?.resize(), 120);
     } else {
       await heroRef.current.requestFullscreen();
     }
@@ -298,6 +310,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     const syncFullscreenState = () => {
       const nextIsFullscreen = document.fullscreenElement === heroRef.current;
       setIsFullscreen(nextIsFullscreen);
+      if (nextIsFullscreen) setIsImmersive(false);
       window.setTimeout(() => chartRef.current?.resize(), 120);
     };
 
@@ -305,6 +318,11 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
     return () => document.removeEventListener('fullscreenchange', syncFullscreenState);
   }, []);
+
+  useEffect(() => {
+    if (!isImmersive) return;
+    window.setTimeout(() => chartRef.current?.resize(), 120);
+  }, [isImmersive]);
 
   useEffect(() => {
     startPlayback();
@@ -525,11 +543,17 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
   return (
     <div className="footprints">
-      <section ref={heroRef} className={`footprints-hero ${isFullscreen ? 'is-fullscreen' : ''}`} aria-label="足迹地图">
+      <section
+        ref={heroRef}
+        className={`footprints-hero ${isFullscreen ? 'is-fullscreen' : ''} ${isImmersive ? 'is-immersive' : ''}`}
+        aria-label="足迹地图"
+      >
         <div className="footprints-map-toolbar">
           <div>
             <p className="footprints-eyebrow">足迹地图</p>
-            <h3>当前位置：{finalLocation?.name || '未标记'}</h3>
+            <h3>
+              {currentDateText} 位置：{finalLocation?.name || '未标记'}
+            </h3>
           </div>
           <div className="footprints-map-actions">
             <button type="button" className="footprints-action-button" onClick={replayRoutes}>
@@ -543,8 +567,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
               </button>
             )}
             <button type="button" className="footprints-action-button" onClick={toggleFullscreen}>
-              <Icon icon={isFullscreen ? 'ri:fullscreen-exit-line' : 'ri:fullscreen-line'} />
-              {isFullscreen ? '退出全屏' : '全屏'}
+              <Icon icon={isFullscreenView ? 'ri:fullscreen-exit-line' : 'ri:fullscreen-line'} />
+              {isFullscreenView ? '退出全屏' : '全屏'}
             </button>
           </div>
         </div>
@@ -583,7 +607,6 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
                       ))}
                     </div>
                   ) : null}
-                  {activeLocation && <small>当前：{activeLocation.name}</small>}
                 </div>
               </motion.article>
             )}
@@ -618,25 +641,42 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       <section className="footprints-content">
         <div className="footprints-panel">
           <div className="footprints-section-heading">
-            <Icon icon="ri:map-pin-time-line" />
-            <h3>停留记录</h3>
+            <Icon icon="ri:route-line" />
+            <h3>路线记录</h3>
           </div>
-          <div className="footprints-stay-list">
-            {data.stays.map((stay) => {
-              const location = locationMap.get(stay.locationId);
-              return (
-                <article key={`${stay.locationId}-${stay.startDate}`} className="footprints-stay">
-                  <div className="footprints-stay-date">{formatStayDate(stay)}</div>
-                  <div>
-                    <div className="footprints-stay-title">
-                      <span>{location?.name || stay.locationId}</span>
-                      <em>{getTypeLabel(stay.type)}</em>
+          <div className="footprints-route-list">
+            {routeSegments.map((segment) => (
+              <article
+                key={`${segment.from}-${segment.to}-${segment.index}-route`}
+                className={`footprints-route-card ${segment.index === activeRouteIndex ? 'is-active' : ''}`}
+              >
+                <Icon
+                  className="footprints-transport-icon"
+                  icon={transportRunnerIconMap[segment.transport || ''] || 'ri:map-pin-line'}
+                />
+                <div>
+                  <strong>
+                    {segment.fromLocation.name} <span>{'->'}</span> {segment.toLocation.name}
+                  </strong>
+                  <span>
+                    {segment.date || '未标记日期'} / {segment.label || getTypeLabel(segment.transport)}
+                  </span>
+                  {segment.description && <p>{segment.description}</p>}
+                  {segment.images?.length ? (
+                    <div className="footprints-route-images">
+                      {segment.images.slice(0, 4).map((image) => (
+                        <img
+                          key={image}
+                          src={image}
+                          alt={`${segment.fromLocation.name} 到 ${segment.toLocation.name}的照片`}
+                          loading="lazy"
+                        />
+                      ))}
                     </div>
-                    <p>{stay.description}</p>
-                  </div>
-                </article>
-              );
-            })}
+                  ) : null}
+                </div>
+              </article>
+            ))}
           </div>
         </div>
       </section>
