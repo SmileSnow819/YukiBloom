@@ -1,0 +1,28 @@
+---
+import FootprintsWrapper from '@components/footprints/FootprintsWrapper.astro';
+import HomeSider from '@components/layout/HomeSider.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
+import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+
+const locale = getLocaleFromUrl(Astro.url.pathname);
+const title = t(locale, 'category.footprints');
+---
+
+<Layout title={`${title} | ${siteConfig.title}`} description="用地图记录去过的地方、停留的时间和一路走来的路线。">
+  <TwoColumnLayout>
+    <Cover slot="cover" title={title} />
+    <HomeSider slot="sider" />
+    <div class={`shadow-box bg-gradient-start mx-0 flex w-full flex-col gap-5 ${CONTENT_PADDING.standard}`}>
+      <h2 class="shoka-decoration-circle group relative h-19 px-6 py-5 text-2xl/9 font-bold md:text-xl/9">
+        <a href={localizedPath('/', locale)} class="dashed-border text-muted-foreground group-hover:border-blue group-hover:text-blue border-b">{t(locale, 'nav.home')}</a>
+        <span class="text-muted-foreground text-lg md:text-base"> / </span>
+        {title}
+      </h2>
+      <FootprintsWrapper />
+    </div>
+  </TwoColumnLayout>
+</Layout>

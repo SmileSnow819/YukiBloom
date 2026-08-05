@@ -18,6 +18,7 @@ export const uiStrings = {
   'nav.weekly': '周刊',
   'nav.bangumi': '追番',
   'nav.timeline': '时间线',
+  'nav.footprints': '足迹',
 
   // ── Common ──────────────────────────────────────────────────
   'common.search': '搜索',
@@ -64,6 +65,7 @@ export const uiStrings = {
   'category.totalCategories': '共 {count} 个分类',
   'category.categoryLabel': '分类',
   'category.timeline': '时间线',
+  'category.footprints': '足迹',
   'tag.allTags': '所有标签',
   'tag.postsWithTag': '标签「{name}」下的文章',
   'tag.totalTags': '共 {count} 个标签',

@@ -1,0 +1,157 @@
+# Footprints Configuration
+# 足迹配置文件
+
+locations:
+  - id: luoyang
+    name: 洛阳
+    lat: 34.6197
+    lng: 112.4540
+    type: hometown
+    color: "#ff5f93"
+    icon: ri:home-heart-line
+
+  - id: beijing
+    name: 北京
+    lat: 39.9042
+    lng: 116.4074
+    type: internship
+    color: "#4f8cff"
+    icon: ri:building-4-line
+
+  - id: tianjin
+    name: 天津
+    lat: 39.3434
+    lng: 117.3616
+    type: travel
+    color: "#ffb300"
+    icon: ri:sun-cloudy-line
+
+  - id: wuhan
+    name: 武汉
+    lat: 30.5928
+    lng: 114.3055
+    type: travel
+    color: "#a56eff"
+    icon: ri:map-pin-2-line
+
+  - id: changsha
+    name: 长沙
+    lat: 28.2282
+    lng: 112.9388
+    type: travel
+    color: "#ff7a59"
+    icon: ri:map-pin-2-line
+
+  - id: shanghai
+    name: 上海
+    lat: 31.2304
+    lng: 121.4737
+    type: travel
+    color: "#55acd5"
+    icon: ri:building-line
+
+  - id: hangzhou
+    name: 杭州
+    lat: 30.2741
+    lng: 120.1551
+    type: travel
+    color: "#74c69d"
+    icon: ri:leaf-line
+
+  - id: nanjing
+    name: 南京
+    lat: 32.0603
+    lng: 118.7969
+    type: travel
+    color: "#da708a"
+    icon: ri:map-pin-2-line
+
+stays:
+  - startDate: "2026.03.12"
+    endDate: "2026.03.16"
+    locationId: tianjin
+    title: 天津短暂停留
+    type: travel
+    description: 去天津待了几天，记录一段春天里的小旅行。
+
+  - startDate: "2026.03.16"
+    endDate: "2026.06.16"
+    locationId: beijing
+    title: 北京编辑与实习
+    type: internship
+    description: 这段时间主要在北京编辑、实习和学习。
+
+  - startDate: "2026.08"
+    endDate: ""
+    isPresent: true
+    locationId: beijing
+    title: 北京前端数据平台
+    type: internship
+    description: 新阶段继续在数据平台方向探索前端与 AI 结合的工作流。
+
+routes:
+  - from: luoyang
+    to: beijing
+    date: "2026.03.10"
+    transport: train
+    label: 火车
+
+  - from: beijing
+    to: tianjin
+    date: "2026.03.12"
+    transport: highspeed
+    label: 高铁
+
+  - from: tianjin
+    to: beijing
+    date: "2026.03.16"
+    transport: highspeed
+    label: 高铁
+
+  - from: beijing
+    to: wuhan
+    date: "2026.04.01"
+    transport: train
+    label: 火车
+
+  - from: wuhan
+    to: changsha
+    date: "2026.04.03"
+    transport: highspeed
+    label: 高铁
+
+  - from: changsha
+    to: beijing
+    date: "2026.04.06"
+    transport: highspeed
+    label: 高铁
+
+  - from: beijing
+    to: luoyang
+    date: "2026.05.01"
+    transport: train
+    label: 火车
+
+  - from: luoyang
+    to: shanghai
+    date: "2026.05.10"
+    transport: highspeed
+    label: 高铁
+
+  - from: shanghai
+    to: hangzhou
+    date: "2026.05.12"
+    transport: highspeed
+    label: 高铁
+
+  - from: hangzhou
+    to: nanjing
+    date: "2026.05.14"
+    transport: highspeed
+    label: 高铁
+
+  - from: nanjing
+    to: luoyang
+    date: "2026.05.16"
+    transport: train
+    label: 火车

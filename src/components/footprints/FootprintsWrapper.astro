@@ -1,0 +1,13 @@
+---
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { parse } from 'yaml';
+import type { FootprintsData } from './FootprintsMap';
+import FootprintsMap from './FootprintsMap';
+
+const footprintsConfigPath = resolve(process.cwd(), 'config/footprints.yaml');
+const footprintsYaml = readFileSync(footprintsConfigPath, 'utf-8');
+const footprintsData = parse(footprintsYaml) as FootprintsData;
+---
+
+<FootprintsMap data={footprintsData} client:load />
