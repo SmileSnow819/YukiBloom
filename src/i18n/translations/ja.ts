@@ -17,6 +17,7 @@ export const uiStrings: UIStrings = {
   'nav.about': 'ブログについて',
   'nav.music': '音楽',
   'nav.weekly': '週刊',
+  'nav.footprints': '足跡',
 
   // ── 一般 ──────────────────────────────────────────────────
   'common.search': '検索',
@@ -63,6 +64,7 @@ export const uiStrings: UIStrings = {
   'category.totalCategories': '{count}件のカテゴリー',
   'category.categoryLabel': 'カテゴリー',
   'category.timeline': 'タイムライン',
+  'category.footprints': '足跡',
   'tag.allTags': 'すべてのタグ',
   'tag.postsWithTag': '「{name}」のタグが付けられた投稿',
   'tag.totalTags': '{count}個のタグ',

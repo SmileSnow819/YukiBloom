@@ -19,6 +19,7 @@ export const uiStrings: UIStrings = {
   'nav.weekly': 'Weekly',
   'nav.bangumi': 'Bangumi',
   'nav.timeline': 'Timeline',
+  'nav.footprints': 'Footprints',
 
   // ── Common ──────────────────────────────────────────────────
   'common.search': 'Search',
@@ -65,6 +66,7 @@ export const uiStrings: UIStrings = {
   'category.totalCategories': '{count} categories',
   'category.categoryLabel': 'Category',
   'category.timeline': 'Timeline',
+  'category.footprints': 'Footprints',
   'tag.allTags': 'All Tags',
   'tag.postsWithTag': 'Posts tagged "{name}"',
   'tag.totalTags': '{count} tags',

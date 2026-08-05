@@ -394,6 +394,10 @@ navigation:
     nameKey: nav.timeline
     path: /timeline
     icon: ri:history-line
+  - name: 足迹
+    nameKey: nav.footprints
+    path: /footprints
+    icon: ri:road-map-line
   - name: 文章 # 有子菜单时，path 可省略
     nameKey: nav.posts
     icon: ri:quill-pen-ai-fill
