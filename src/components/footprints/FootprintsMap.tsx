@@ -142,6 +142,7 @@ function createRouteLine(segment: RouteSegment) {
 }
 
 export default function FootprintsMap({ data }: FootprintsMapProps) {
+  const heroRef = useRef<HTMLElement | null>(null);
   const chartNodeRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
   const routeTimerRef = useRef<number | null>(null);
@@ -153,6 +154,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const [activeLocationId, setActiveLocationId] = useState<string | undefined>(undefined);
   const [isMapSwitching, setIsMapSwitching] = useState(false);
   const [isPlaying, setIsPlaying] = useState(!reduceMotion);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const locationMap = useMemo(() => new Map(data.locations.map((location) => [location.id, location])), [data.locations]);
   const locationColorMap = useMemo(
@@ -236,6 +238,16 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     startPlayback();
   };
 
+  const toggleFullscreen = async () => {
+    if (!heroRef.current) return;
+
+    if (document.fullscreenElement === heroRef.current) {
+      await document.exitFullscreen();
+    } else {
+      await heroRef.current.requestFullscreen();
+    }
+  };
+
   useEffect(() => {
     let disposed = false;
     let cleanupResize: (() => void) | undefined;
@@ -271,6 +283,18 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       chartRef.current?.dispose();
       chartRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      const nextIsFullscreen = document.fullscreenElement === heroRef.current;
+      setIsFullscreen(nextIsFullscreen);
+      window.setTimeout(() => chartRef.current?.resize(), 120);
+    };
+
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+
+    return () => document.removeEventListener('fullscreenchange', syncFullscreenState);
   }, []);
 
   useEffect(() => {
@@ -492,7 +516,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
   return (
     <div className="footprints">
-      <section className="footprints-hero" aria-label="足迹地图">
+      <section ref={heroRef} className={`footprints-hero ${isFullscreen ? 'is-fullscreen' : ''}`} aria-label="足迹地图">
         <div className="footprints-map-toolbar">
           <div>
             <p className="footprints-eyebrow">足迹地图</p>
@@ -509,6 +533,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
                 跳过
               </button>
             )}
+            <button type="button" className="footprints-action-button" onClick={toggleFullscreen}>
+              <Icon icon={isFullscreen ? 'ri:fullscreen-exit-line' : 'ri:fullscreen-line'} />
+              {isFullscreen ? '退出全屏' : '全屏'}
+            </button>
           </div>
         </div>
 
