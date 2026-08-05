@@ -2,7 +2,7 @@ import './footprints.css';
 import { Icon } from '@iconify/react';
 import type { ECharts, EChartsOption } from 'echarts';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface FootprintLocation {
   id: string;
@@ -51,8 +51,6 @@ type RouteSegment = FootprintRoute & {
 };
 
 const ROUTE_DURATION = 2100;
-const ROUTE_GAP = 0;
-const POINT_REVEAL_DELAY = 0;
 const ROUTE_EFFECT_PERIOD = 2.08;
 const MAP_SWITCH_DURATION = 260;
 const CHINA_CENTER: [number, number] = [104.2, 36.2];
@@ -146,14 +144,15 @@ function createRouteLine(segment: RouteSegment) {
 export default function FootprintsMap({ data }: FootprintsMapProps) {
   const chartNodeRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
+  const routeTimerRef = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
-  const [playKey, setPlayKey] = useState(0);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState('');
   const [activeRouteIndex, setActiveRouteIndex] = useState(reduceMotion ? data.routes.length - 1 : 0);
   const [completedRouteCount, setCompletedRouteCount] = useState(reduceMotion ? data.routes.length : 0);
   const [activeLocationId, setActiveLocationId] = useState<string | undefined>(undefined);
   const [isMapSwitching, setIsMapSwitching] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(!reduceMotion);
 
   const locationMap = useMemo(() => new Map(data.locations.map((location) => [location.id, location])), [data.locations]);
   const locationColorMap = useMemo(
@@ -183,10 +182,59 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const activeRoute = routeSegments[Math.min(activeRouteIndex, routeSegments.length - 1)];
   const isOverview = reduceMotion || completedRouteCount >= routeSegments.length;
   const activeLocation = activeLocationId ? locationMap.get(activeLocationId) : undefined;
+  const finalLocation = routeSegments.at(-1)?.toLocation;
   const activeRunnerIcon = activeRoute?.transport
     ? transportRunnerIconMap[activeRoute.transport] || 'ri:map-pin-line'
     : 'ri:map-pin-line';
   const visibleRouteSegments = isOverview ? routeSegments : activeRoute ? [activeRoute] : [];
+  const progressPercent =
+    routeSegments.length <= 1 || isOverview ? 100 : (activeRouteIndex / Math.max(routeSegments.length - 1, 1)) * 100;
+
+  const clearRouteTimer = useCallback(() => {
+    if (routeTimerRef.current === null) return;
+    window.clearTimeout(routeTimerRef.current);
+    routeTimerRef.current = null;
+  }, []);
+
+  const startPlayback = useCallback(() => {
+    clearRouteTimer();
+
+    if (reduceMotion || routeSegments.length === 0) {
+      setIsPlaying(false);
+      setActiveRouteIndex(routeSegments.length - 1);
+      setCompletedRouteCount(routeSegments.length);
+      setActiveLocationId(routeSegments.at(-1)?.to);
+      return;
+    }
+
+    setIsPlaying(true);
+    setActiveRouteIndex(0);
+    setCompletedRouteCount(0);
+    setActiveLocationId(routeSegments[0]?.from);
+  }, [clearRouteTimer, reduceMotion, routeSegments]);
+
+  const jumpToRoute = (index: number) => {
+    const segment = routeSegments[index];
+    if (!segment) return;
+
+    clearRouteTimer();
+    setIsPlaying(false);
+    setActiveRouteIndex(index);
+    setCompletedRouteCount(index);
+    setActiveLocationId(segment.from);
+  };
+
+  const skipPlayback = () => {
+    clearRouteTimer();
+    setIsPlaying(false);
+    setActiveRouteIndex(Math.max(routeSegments.length - 1, 0));
+    setCompletedRouteCount(routeSegments.length);
+    setActiveLocationId(routeSegments.at(-1)?.to);
+  };
+
+  const replayRoutes = () => {
+    startPlayback();
+  };
 
   useEffect(() => {
     let disposed = false;
@@ -226,40 +274,33 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   }, []);
 
   useEffect(() => {
-    const currentPlayKey = playKey;
-    if (reduceMotion || routeSegments.length === 0) {
-      setActiveRouteIndex(routeSegments.length - 1);
-      setCompletedRouteCount(routeSegments.length);
-      setActiveLocationId(routeSegments.at(-1)?.to);
-      return;
-    }
+    startPlayback();
 
-    if (currentPlayKey < 0) return;
+    return clearRouteTimer;
+  }, [clearRouteTimer, startPlayback]);
 
-    setActiveRouteIndex(0);
-    setCompletedRouteCount(0);
-    setActiveLocationId(routeSegments[0]?.from);
-    const timers = routeSegments.flatMap((segment, index) => [
-      window.setTimeout(
-        () => {
-          setActiveRouteIndex(index);
-          setActiveLocationId(segment.from);
-        },
-        (ROUTE_DURATION + ROUTE_GAP) * index,
-      ),
-      window.setTimeout(
-        () => {
-          setCompletedRouteCount(index + 1);
-          setActiveLocationId(segment.to);
-        },
-        (ROUTE_DURATION + ROUTE_GAP) * index + ROUTE_DURATION + POINT_REVEAL_DELAY,
-      ),
-    ]);
+  useEffect(() => {
+    if (reduceMotion || !isPlaying || routeSegments.length === 0) return;
 
-    return () => {
-      for (const timer of timers) window.clearTimeout(timer);
-    };
-  }, [playKey, reduceMotion, routeSegments]);
+    const segment = routeSegments[activeRouteIndex];
+    if (!segment) return;
+
+    clearRouteTimer();
+    setActiveLocationId(segment.from);
+    routeTimerRef.current = window.setTimeout(() => {
+      routeTimerRef.current = null;
+      setCompletedRouteCount(activeRouteIndex + 1);
+      setActiveLocationId(segment.to);
+
+      if (activeRouteIndex >= routeSegments.length - 1) {
+        setIsPlaying(false);
+      } else {
+        setActiveRouteIndex((index) => index + 1);
+      }
+    }, ROUTE_DURATION);
+
+    return clearRouteTimer;
+  }, [activeRouteIndex, clearRouteTimer, isPlaying, reduceMotion, routeSegments]);
 
   useEffect(() => {
     if (activeRouteIndex < 0 || reduceMotion || isOverview) return;
@@ -455,12 +496,20 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
         <div className="footprints-map-toolbar">
           <div>
             <p className="footprints-eyebrow">足迹地图</p>
-            <h3>{activeRoute ? `${activeRoute.fromLocation.name} -> ${activeRoute.toLocation.name}` : '我的足迹地图'}</h3>
+            <h3>当前位置：{finalLocation?.name || '未标记'}</h3>
           </div>
-          <button type="button" className="footprints-replay-button" onClick={() => setPlayKey((value) => value + 1)}>
-            <Icon icon="ri:replay-line" />
-            再次播放
-          </button>
+          <div className="footprints-map-actions">
+            <button type="button" className="footprints-action-button" onClick={replayRoutes}>
+              <Icon icon="ri:replay-line" />
+              再次播放
+            </button>
+            {!isOverview && (
+              <button type="button" className="footprints-action-button" onClick={skipPlayback}>
+                <Icon icon="ri:skip-forward-line" />
+                跳过
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="footprints-map-stage">
@@ -510,6 +559,23 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           />
           {!mapReady && <div className="footprints-map-loading">{mapError || '地图加载中...'}</div>}
         </div>
+        <fieldset className="footprints-progress">
+          <legend className="footprints-progress-label">足迹播放进度</legend>
+          <div className="footprints-progress-track">
+            <div className="footprints-progress-fill" style={{ width: `${progressPercent}%` }} />
+            {routeSegments.map((segment, index) => (
+              <button
+                key={`${segment.from}-${segment.to}-${index}-progress`}
+                type="button"
+                className={`footprints-progress-dot ${index <= activeRouteIndex || isOverview ? 'is-active' : ''}`}
+                style={{ left: `${routeSegments.length <= 1 ? 100 : (index / (routeSegments.length - 1)) * 100}%` }}
+                onClick={() => jumpToRoute(index)}
+                aria-label={`跳到 ${segment.fromLocation.name} 到 ${segment.toLocation.name}`}
+                title={`${segment.fromLocation.name} -> ${segment.toLocation.name}`}
+              />
+            ))}
+          </div>
+        </fieldset>
       </section>
 
       <section className="footprints-content">

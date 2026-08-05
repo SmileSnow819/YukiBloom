@@ -38,7 +38,14 @@
   font-weight: 800;
 }
 
-.footprints-replay-button {
+.footprints-map-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.footprints-action-button {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
@@ -57,7 +64,7 @@
     box-shadow 0.2s ease;
 }
 
-.footprints-replay-button:hover {
+.footprints-action-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 14px 28px color-mix(in srgb, var(--primary) 18%, transparent);
 }
@@ -94,6 +101,76 @@
   font-size: 0.9rem;
   font-weight: 700;
   pointer-events: none;
+}
+
+.footprints-progress {
+  min-width: 0;
+  padding: 0.35rem 1.8rem 1.25rem;
+  border: 0;
+  margin: 0;
+}
+
+.footprints-progress-label {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.footprints-progress-track {
+  position: relative;
+  height: 1.8rem;
+}
+
+.footprints-progress-track::before,
+.footprints-progress-fill {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 0.2rem;
+  border-radius: 999px;
+  content: "";
+  transform: translateY(-50%);
+}
+
+.footprints-progress-track::before {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.footprints-progress-fill {
+  right: auto;
+  background: linear-gradient(90deg, #ff5f93, #ff9ebb);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 22%, transparent);
+  transition: width 0.26s ease;
+}
+
+.footprints-progress-dot {
+  position: absolute;
+  top: 50%;
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted-foreground) 22%, #fff);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--foreground) 12%, transparent);
+  transform: translate(-50%, -50%);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.footprints-progress-dot:hover,
+.footprints-progress-dot.is-active {
+  background: var(--primary);
+  box-shadow: 0 0 0 0.32rem color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.footprints-progress-dot:hover {
+  transform: translate(-50%, -50%) scale(1.15);
 }
 
 .footprints-grid line {
@@ -481,8 +558,18 @@
     font-size: 1.08rem;
   }
 
-  .footprints-replay-button {
+  .footprints-map-actions,
+  .footprints-action-button {
     width: 100%;
+  }
+
+  .footprints-map-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .footprints-progress {
+    padding: 0.15rem 1.2rem 1rem;
   }
 
   .footprints-map-detail {
