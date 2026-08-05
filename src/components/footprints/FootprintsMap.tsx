@@ -50,9 +50,11 @@ type RouteSegment = FootprintRoute & {
   toLocation: FootprintLocation;
 };
 
-const ROUTE_DURATION = 2200;
-const ROUTE_GAP = 1000;
-const POINT_REVEAL_DELAY = 420;
+const ROUTE_DURATION = 2500;
+const ROUTE_GAP = 0;
+const POINT_REVEAL_DELAY = 0;
+const ROUTE_EFFECT_PERIOD = 2.48;
+const MAP_SWITCH_DURATION = 260;
 const CHINA_CENTER: [number, number] = [104.2, 36.2];
 
 const transportRunnerIconMap: Record<string, string> = {
@@ -122,6 +124,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const [activeRouteIndex, setActiveRouteIndex] = useState(reduceMotion ? data.routes.length - 1 : 0);
   const [completedRouteCount, setCompletedRouteCount] = useState(reduceMotion ? data.routes.length : 0);
   const [activeLocationId, setActiveLocationId] = useState<string | undefined>(undefined);
+  const [isMapSwitching, setIsMapSwitching] = useState(false);
 
   const locationMap = useMemo(() => new Map(data.locations.map((location) => [location.id, location])), [data.locations]);
 
@@ -151,15 +154,6 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     ? transportRunnerIconMap[activeRoute.transport] || 'ri:map-pin-line'
     : 'ri:map-pin-line';
   const visibleRouteSegments = isOverview ? routeSegments : activeRoute ? [activeRoute] : [];
-  const routeSummary = routeSegments
-    .map((segment, index) => ({
-      key: `${segment.from}-${segment.to}-${index}-from`,
-      name: segment.fromLocation.name,
-    }))
-    .concat({
-      key: `${routeSegments.at(-1)?.to || 'end'}-final`,
-      name: routeSegments.at(-1)?.toLocation.name || '',
-    });
 
   useEffect(() => {
     let disposed = false;
@@ -235,6 +229,15 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   }, [playKey, reduceMotion, routeSegments]);
 
   useEffect(() => {
+    if (activeRouteIndex < 0 || reduceMotion || isOverview) return;
+
+    setIsMapSwitching(true);
+    const timer = window.setTimeout(() => setIsMapSwitching(false), MAP_SWITCH_DURATION);
+
+    return () => window.clearTimeout(timer);
+  }, [activeRouteIndex, isOverview, reduceMotion]);
+
+  useEffect(() => {
     if (!mapReady || !chartRef.current) return;
 
     const visibleLocationIds = new Set<string>();
@@ -267,7 +270,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     const lineData = visibleRouteSegments.map(createRouteLine);
 
     const option: EChartsOption = {
-      animationDurationUpdate: reduceMotion ? 0 : 980,
+      animationDurationUpdate: reduceMotion || !isOverview ? 0 : 980,
       animationEasingUpdate: 'cubicInOut',
       tooltip: {
         trigger: 'item',
@@ -316,7 +319,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           data: lineData,
           effect: {
             show: !isOverview && !reduceMotion,
-            period: 3.2,
+            period: ROUTE_EFFECT_PERIOD,
             trailLength: 0.18,
             symbol: activeRoute?.transport === 'flight' ? 'triangle' : 'arrow',
             symbolSize: activeRoute?.transport === 'flight' ? 12 : 10,
@@ -442,19 +445,13 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
               </motion.article>
             )}
           </AnimatePresence>
-          <div ref={chartNodeRef} className="footprints-map" role="img" aria-label="足迹路线地图" />
+          <div
+            ref={chartNodeRef}
+            className={`footprints-map ${isMapSwitching ? 'is-switching' : ''}`}
+            role="img"
+            aria-label="足迹路线地图"
+          />
           {!mapReady && <div className="footprints-map-loading">{mapError || '地图加载中...'}</div>}
-        </div>
-
-        <div className="footprints-route-summary">
-          {routeSummary
-            .filter((item) => Boolean(item.name))
-            .map((item, index) => (
-              <span key={item.key}>
-                {index > 0 && <i aria-hidden="true">{'->'}</i>}
-                {item.name}
-              </span>
-            ))}
         </div>
       </section>
 

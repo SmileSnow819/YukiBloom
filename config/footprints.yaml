@@ -2,6 +2,14 @@
 # 足迹配置文件
 
 locations:
+  - id: sanmenxia
+    name: 三门峡
+    lat: 34.7728
+    lng: 111.2003
+    type: hometown
+    color: "#fb7185"
+    icon: ri:home-smile-line
+
   - id: luoyang
     name: 洛阳
     lat: 34.6197
@@ -9,6 +17,14 @@ locations:
     type: hometown
     color: "#ff5f93"
     icon: ri:home-heart-line
+
+  - id: xian
+    name: 西安
+    lat: 34.3416
+    lng: 108.9398
+    type: travel
+    color: "#f59e0b"
+    icon: ri:ancient-gate-line
 
   - id: beijing
     name: 北京
@@ -98,6 +114,27 @@ stays:
     description: 新阶段继续在数据平台方向探索前端与 AI 结合的工作流。
 
 routes:
+  - from: sanmenxia
+    to: luoyang
+    date: "2026.03.08"
+    transport: train
+    label: 火车
+    description: "从三门峡出发到洛阳，作为这段足迹路线的起点。"
+
+  - from: luoyang
+    to: xian
+    date: "2026.03.09"
+    transport: highspeed
+    label: 高铁
+    description: "从洛阳去西安，短暂切换到另一座古都。"
+
+  - from: xian
+    to: luoyang
+    date: "2026.03.10"
+    transport: highspeed
+    label: 高铁
+    description: "从西安回到洛阳，再准备出发去北京。"
+
   - from: luoyang
     to: beijing
     date: "2026.03.10"
