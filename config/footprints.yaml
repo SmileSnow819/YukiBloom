@@ -7,7 +7,6 @@ locations:
     lat: 34.7728
     lng: 111.2003
     type: hometown
-    color: "#fb7185"
     icon: ri:home-smile-line
 
   - id: luoyang
@@ -15,7 +14,6 @@ locations:
     lat: 34.6197
     lng: 112.4540
     type: hometown
-    color: "#ff5f93"
     icon: ri:home-heart-line
 
   - id: xian
@@ -23,7 +21,6 @@ locations:
     lat: 34.3416
     lng: 108.9398
     type: travel
-    color: "#f59e0b"
     icon: ri:ancient-gate-line
 
   - id: beijing
@@ -31,7 +28,6 @@ locations:
     lat: 39.9042
     lng: 116.4074
     type: internship
-    color: "#4f8cff"
     icon: ri:building-4-line
 
   - id: tianjin
@@ -39,7 +35,6 @@ locations:
     lat: 39.3434
     lng: 117.3616
     type: travel
-    color: "#ffb300"
     icon: ri:sun-cloudy-line
 
   - id: shijiazhuang
@@ -47,7 +42,6 @@ locations:
     lat: 38.0428
     lng: 114.5149
     type: pass
-    color: "#8b5cf6"
     icon: ri:map-pin-2-line
 
   - id: wuhan
@@ -55,7 +49,6 @@ locations:
     lat: 30.5928
     lng: 114.3055
     type: travel
-    color: "#a56eff"
     icon: ri:map-pin-2-line
 
   - id: changsha
@@ -63,7 +56,6 @@ locations:
     lat: 28.2282
     lng: 112.9388
     type: travel
-    color: "#ff7a59"
     icon: ri:map-pin-2-line
 
   - id: shanghai
@@ -71,7 +63,6 @@ locations:
     lat: 31.2304
     lng: 121.4737
     type: travel
-    color: "#55acd5"
     icon: ri:building-line
 
   - id: hangzhou
@@ -79,7 +70,6 @@ locations:
     lat: 30.2741
     lng: 120.1551
     type: travel
-    color: "#74c69d"
     icon: ri:leaf-line
 
   - id: nanjing
@@ -87,7 +77,6 @@ locations:
     lat: 32.0603
     lng: 118.7969
     type: travel
-    color: "#da708a"
     icon: ri:map-pin-2-line
 
 stays:

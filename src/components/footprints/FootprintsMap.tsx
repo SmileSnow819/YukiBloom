@@ -50,10 +50,10 @@ type RouteSegment = FootprintRoute & {
   toLocation: FootprintLocation;
 };
 
-const ROUTE_DURATION = 2500;
+const ROUTE_DURATION = 2100;
 const ROUTE_GAP = 0;
 const POINT_REVEAL_DELAY = 0;
-const ROUTE_EFFECT_PERIOD = 2.48;
+const ROUTE_EFFECT_PERIOD = 2.08;
 const MAP_SWITCH_DURATION = 260;
 const CHINA_CENTER: [number, number] = [104.2, 36.2];
 
@@ -66,8 +66,37 @@ const transportRunnerIconMap: Record<string, string> = {
   ship: 'ri:ship-line',
 };
 
+const labelPositionMap: Record<string, 'top' | 'right' | 'bottom' | 'left'> = {
+  sanmenxia: 'top',
+  luoyang: 'right',
+  xian: 'left',
+  beijing: 'top',
+  tianjin: 'right',
+  shijiazhuang: 'bottom',
+  shanghai: 'right',
+  hangzhou: 'bottom',
+  nanjing: 'top',
+};
+
+const labelDistanceMap: Record<string, number> = {
+  sanmenxia: 18,
+  luoyang: 12,
+  xian: 18,
+  beijing: 12,
+  tianjin: 16,
+  shijiazhuang: 16,
+};
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function getGeneratedLocationColor(index: number): string {
+  const red = 238 - ((index * 29) % 76);
+  const green = 96 + ((index * 47) % 112);
+  const blue = 146 + ((index * 61) % 86);
+
+  return `rgb(${red}, ${green}, ${blue})`;
 }
 
 function getDistance(from: FootprintLocation, to: FootprintLocation): number {
@@ -127,6 +156,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const [isMapSwitching, setIsMapSwitching] = useState(false);
 
   const locationMap = useMemo(() => new Map(data.locations.map((location) => [location.id, location])), [data.locations]);
+  const locationColorMap = useMemo(
+    () => new Map(data.locations.map((location, index) => [location.id, location.color || getGeneratedLocationColor(index)])),
+    [data.locations],
+  );
 
   const routeSegments = useMemo(
     () =>
@@ -255,7 +288,11 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       .map((location) => ({
         name: location.name,
         value: [location.lng, location.lat],
-        itemStyle: { color: location.color || '#ff6b9a' },
+        label: {
+          position: labelPositionMap[location.id] || 'right',
+          distance: labelDistanceMap[location.id] || 10,
+        },
+        itemStyle: { color: locationColorMap.get(location.id) || '#ff6b9a' },
       }));
     const activePoint =
       activeLocation && visibleLocationIds.has(activeLocation.id)
@@ -263,7 +300,11 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             {
               name: activeLocation.name,
               value: [activeLocation.lng, activeLocation.lat],
-              itemStyle: { color: activeLocation.color || '#ff6b9a' },
+              label: {
+                position: labelPositionMap[activeLocation.id] || 'top',
+                distance: labelDistanceMap[activeLocation.id] || 10,
+              },
+              itemStyle: { color: locationColorMap.get(activeLocation.id) || '#ff6b9a' },
             },
           ]
         : [];
@@ -349,6 +390,9 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             textBorderColor: '#fff',
             textBorderWidth: 4,
           },
+          labelLayout: {
+            hideOverlap: true,
+          },
           itemStyle: {
             borderColor: '#fff',
             borderWidth: 3,
@@ -379,6 +423,9 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             textBorderColor: '#fff',
             textBorderWidth: 5,
           },
+          labelLayout: {
+            hideOverlap: true,
+          },
           itemStyle: {
             borderColor: '#fff',
             borderWidth: 4,
@@ -390,7 +437,17 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     };
 
     chartRef.current.setOption(option, true);
-  }, [activeLocation, activeLocationId, activeRoute, data.locations, isOverview, mapReady, reduceMotion, visibleRouteSegments]);
+  }, [
+    activeLocation,
+    activeLocationId,
+    activeRoute,
+    data.locations,
+    isOverview,
+    locationColorMap,
+    mapReady,
+    reduceMotion,
+    visibleRouteSegments,
+  ]);
 
   return (
     <div className="footprints">
