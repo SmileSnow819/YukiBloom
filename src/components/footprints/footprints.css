@@ -652,7 +652,37 @@
   .footprints-map-detail {
     top: 0.85rem;
     left: 1rem;
+    grid-template-columns: 2.1rem minmax(0, 1fr);
+    gap: 0.65rem;
     width: calc(100% - 2rem);
+    padding: 0.78rem 0.85rem;
+  }
+
+  .footprints-map-detail-icon {
+    width: 2.1rem;
+    height: 2.1rem;
+    font-size: 1.12rem;
+  }
+
+  .footprints-map-detail strong {
+    font-size: 0.92rem;
+  }
+
+  .footprints-map-detail em {
+    font-size: 0.76rem;
+  }
+
+  .footprints-map-detail p {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .footprints-map-detail-images {
+    display: none;
   }
 
   .footprints-stay {
