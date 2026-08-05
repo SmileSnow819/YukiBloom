@@ -26,6 +26,14 @@ locations:
     color: "#ffb300"
     icon: ri:sun-cloudy-line
 
+  - id: shijiazhuang
+    name: 石家庄
+    lat: 38.0428
+    lng: 114.5149
+    type: pass
+    color: "#8b5cf6"
+    icon: ri:map-pin-2-line
+
   - id: wuhan
     name: 武汉
     lat: 30.5928
@@ -95,63 +103,98 @@ routes:
     date: "2026.03.10"
     transport: train
     label: 火车
+    description: "从洛阳出发去北京，开始一段新的实习和生活节奏。"
+    images:
+      - /img/weekly/2026-05_10.webp
 
   - from: beijing
     to: tianjin
     date: "2026.03.12"
     transport: highspeed
     label: 高铁
+    description: "坐高铁去天津短暂停留，给春天留一点出门走走的记忆。"
+    images:
+      - /img/weekly/2026-05_17.webp
 
   - from: tianjin
     to: beijing
     date: "2026.03.16"
     transport: highspeed
     label: 高铁
+    description: "从天津回到北京，继续进入编辑、实习和学习的日常。"
+    images:
+      - /img/weekly/2026-05_31.webp
 
   - from: beijing
     to: wuhan
     date: "2026.04.01"
     transport: train
     label: 火车
+    description: "从北方一路向南，路上的时间也算是生活的留白。"
 
   - from: wuhan
     to: changsha
     date: "2026.04.03"
     transport: highspeed
     label: 高铁
+    description: "短距离高铁继续南下，去长沙转一转。"
 
   - from: changsha
     to: beijing
     date: "2026.04.06"
     transport: highspeed
     label: 高铁
+    description: "从长沙返回北京，把短途旅行收束回工作日。"
 
   - from: beijing
     to: luoyang
     date: "2026.05.01"
     transport: train
     label: 火车
+    description: "假期回洛阳，回到最熟悉的地方充一下电。"
 
   - from: luoyang
     to: shanghai
     date: "2026.05.10"
     transport: highspeed
     label: 高铁
+    description: "从洛阳去上海，看一看不一样的城市节奏。"
+    images:
+      - /img/weekly/2026-06_07.webp
 
   - from: shanghai
     to: hangzhou
     date: "2026.05.12"
     transport: highspeed
     label: 高铁
+    description: "从上海到杭州，城市切换得很快，心情也跟着换了频道。"
 
   - from: hangzhou
     to: nanjing
     date: "2026.05.14"
     transport: highspeed
     label: 高铁
+    description: "继续坐高铁去南京，沿着江南一带慢慢补足旅行地图。"
 
   - from: nanjing
     to: luoyang
     date: "2026.05.16"
     transport: train
     label: 火车
+    description: "从南京回洛阳，结束这一段绕了一圈的路线。"
+    images:
+      - /img/weekly/2026-06_14.webp
+
+  - from: luoyang
+    to: shijiazhuang
+    date: "2026.08.01"
+    transport: highspeed
+    label: 高铁
+    description: "从洛阳出发去石家庄中转，把返京路线拆成一段一段记录。"
+
+  - from: shijiazhuang
+    to: beijing
+    date: "2026.08.02"
+    transport: highspeed
+    label: 高铁
+    description: "从石家庄回到北京，进入新的实习阶段。"

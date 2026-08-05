@@ -228,7 +228,7 @@ export default defineConfig({
       noExternal: ['react-tweet'],
     },
     optimizeDeps: {
-      include: ['@antv/infographic'],
+      include: ['@antv/infographic', 'echarts'],
     },
   },
   // Only enable Astro i18n routing when multiple locales are configured.
