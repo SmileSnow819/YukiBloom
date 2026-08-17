@@ -6,6 +6,15 @@ timeline:
   - startDate: "2026.08"
     endDate: ""
     isPresent: true
+    company: "Bilibili"
+    icon: "simple-icons:bilibili"
+    iconColor: "#3B82F6"
+    position: "Bilibili公益平台"
+    description: ""
+
+  - startDate: "2026.06"
+    endDate: "2026.08"
+    isPresent: false
     company: "百度"
     icon: "simple-icons:baidu"
     iconColor: "#2932e1"
@@ -18,7 +27,7 @@ timeline:
     company: "快手"
     icon: "simple-icons:kuaishou"
     iconColor: "#ffb300"
-    position: "前端电商"
+    position: "快手前端电商"
     description: ""
 
   - startDate: "2025.12"
