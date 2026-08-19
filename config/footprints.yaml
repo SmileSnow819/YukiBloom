@@ -240,3 +240,12 @@ routes:
     description: "获得了百度的offer，继续开始新的实习了～，终究逃离不掉西二旗。"
     images:
       - /img/footprints/bei-jing-bai-du.jpg
+
+  - from: beijing
+    to: shanghai
+    date: "2026.08.16"
+    transport: highspeed
+    label: 高铁
+    description: "入职自己的梦中情厂啦～bilibili"
+    images:
+      - /img/footprints/shang-hai-bilibili.jpg

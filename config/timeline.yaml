@@ -6,10 +6,10 @@ timeline:
   - startDate: "2026.08"
     endDate: ""
     isPresent: true
-    company: "Bilibili"
+    company: "bilibili"
     icon: "simple-icons:bilibili"
     iconColor: "#3B82F6"
-    position: "Bilibili公益平台"
+    position: "bilibili公益平台"
     description: ""
 
   - startDate: "2026.06"
