@@ -1,6 +1,7 @@
 ---
 import CustomContent from '@components/common/CustomContent.astro';
 import HomeSider from '@components/layout/HomeSider.astro';
+import PostImageDownload from '@components/post/PostImageDownload';
 import SummaryPanel, { type SummarySource } from '@components/post/SummaryPanel';
 import Cover from '@components/ui/cover/Cover.astro';
 import { defaultContentConfig } from '@constants/content-config';
@@ -202,6 +203,15 @@ if (post.data.description) {
       <article class="prose md:prose-sm dark:prose-invert" data-pagefind-body>
         <CustomContent Content={Content} />
       </article>
+      <PostImageDownload
+        client:idle
+        coverUrl={ogImage}
+        date={formatForSeo(date)}
+        description={finalDescription}
+        siteName={siteConfig.title}
+        title={title}
+        url={Astro.url.href}
+      />
       <Comment />
     </div>
   </TwoColumnLayout>
