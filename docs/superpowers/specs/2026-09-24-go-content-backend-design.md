@@ -1,58 +1,58 @@
-# Go content backend design
+# YukiBloom Go 内容后端设计
 
-## Goal and scope
+## 目标与范围
 
-Turn YukiBloom into a blog whose owner can upload Markdown files or write in an online editor, upload images, and publish posts that appear immediately. The production source of truth for posts, footprints, and internship experiences is PostgreSQL. Site appearance settings and non-content assets may remain in frontend configuration. The Astro frontend reads published content from the Go API at request time. Existing post URLs and exact rendering are not migration requirements, but the import must retain titles, body text, dates, taxonomy, draft state, and usable image references.
+为 YukiBloom 增加在线内容管理能力：站长可以上传 Markdown 文件，也可以在编辑器中写文章、上传图片；文章发布后立即出现在网站上。PostgreSQL 是文章、足迹和实习经历的唯一生产数据来源。Astro 在收到页面请求时从 Go API 获取已发布内容。迁移不要求保留旧文章 URL 或完全一致的排版，但必须保留标题、正文、日期、分类、标签、草稿状态和可用的图片引用。
 
-Deliver in two increments:
+分两阶段交付：
 
-1. Posts, images, owner login, admin editor, public post pages, lists, taxonomy, RSS, and search.
-2. Footprint locations, stays, routes, and internship timeline entries, with admin editing and live public pages.
+1. 文章、图片、站长登录、管理后台、公开文章页面、文章列表、分类、标签、RSS 和搜索。
+2. 足迹的地点、停留和路线，以及实习经历时间线；在后台编辑后，公开页面立即更新。
 
-No public registration, comments replacement, multi-author permissions, or distributed storage in the first release.
+第一版不做公开注册、多作者权限、评论系统替换或分布式文件存储。
 
-## Existing system
+## 现有系统
 
-- Astro 5 currently builds posts from 55 Markdown files in `src/content/blog`. Content helpers, page routes, RSS, and Pagefind consume that build-time collection.
-- `cms/` already has a local article list and editor. Its Hono server edits repository files and restricts API access to localhost. Reuse its UI where practical, replacing its file API with the Go API; do not expose the current Hono server as the production admin backend.
-- `config/footprints.yaml` and `config/timeline.yaml` supply the two personal-history views at build time.
-- Docker currently builds a static site served by Nginx. On-demand Astro routes require an Astro Node runtime, so production Compose and Nginx routing must change.
-- The working tree already contains an unrelated edit to `config/site.yaml`; leave it untouched.
+- Astro 5 目前从 `src/content/blog` 中的 55 篇 Markdown 文件构建文章。内容工具、页面路由、RSS 和 Pagefind 都依赖构建时的文章集合。
+- `cms/` 已有本地文章列表和编辑器。它的 Hono 服务直接修改仓库文件，API 只允许本机访问。可以复用适合的界面组件，但生产环境的管理 API 改由 Go 提供，不能直接公开现有 Hono 服务。
+- `config/footprints.yaml` 和 `config/timeline.yaml` 在构建时为足迹和实习经历页面提供数据。
+- 当前 Docker 部署把静态站点交给 Nginx。改为按需渲染后，生产环境还需要运行 Astro Node 服务。
+- 工作区现有一处与本项目无关的 `config/site.yaml` 修改，实施时不得覆盖。
 
-## Architecture
+## 整体架构
 
-Nginx is the only public entry point. It routes page requests to an Astro Node service, `/api/v1/*` to a Gin service, `/admin/*` to the built admin UI, and `/uploads/*` to controlled media files. Gin and Astro communicate over the private Compose network. PostgreSQL is reachable only from Gin. Astro obtains published records through the public Go API, including for server-rendered page requests. Internal service URLs stay server-side.
+Nginx 是唯一的公网入口：页面请求转发到 Astro Node 服务，`/api/v1/*` 转发到 Gin，`/admin/*` 提供后台页面，`/uploads/*` 提供受控的图片文件。Gin、Astro 和 PostgreSQL 通过 Docker Compose 内部网络通信，数据库不直接暴露到公网。Astro 在服务端通过 Go API 获取公开内容，内部服务地址不打包进浏览器代码。
 
-Use a single Go module in `backend/`, organized by feature rather than a generic framework: configuration and database bootstrap, auth, posts, media, footprints, and timeline. Each feature owns request validation, data access, and HTTP handlers. Start with explicit SQL through `pgx`; use versioned SQL migrations. Avoid an ORM and a broad repository abstraction so the project teaches SQL and HTTP directly.
+在 `backend/` 中建立单个 Go 模块，按功能组织配置与数据库初始化、登录、文章、图片、足迹和实习经历代码。每块负责自己的请求校验、数据访问和 HTTP 处理。数据库访问先用 `pgx` 写明确的 SQL，并使用带版本号的 SQL 迁移文件。不在第一版引入 ORM 或复杂的通用分层，让这个项目能清楚地练习 HTTP 和 SQL。
 
-Keep a small set of Astro pages static where they contain no live data. Convert post detail, home/list/pagination, archives, categories, tags, and RSS to on-demand rendering. Convert footprint and internship pages in increment 2. Extract the site's Markdown plugin configuration into a shared runtime renderer, then use it for database Markdown in Astro. Audit the existing custom syntax and test representative articles. Do not model a database article as an Astro build-time `CollectionEntry` indefinitely; introduce a clear post view model and adapt components that depend on collection internals.
+不依赖实时内容的 Astro 页面可以继续保持静态。文章详情、首页及列表分页、归档、分类、标签和 RSS 改为按需渲染；第二阶段再改足迹和实习经历页面。现有 Markdown 插件配置需要整理为运行时可复用的渲染流程，用来显示数据库中的正文。检查站内已有的特殊语法，并用有代表性的文章验证。长期不把数据库文章伪装成 Astro 构建时的 `CollectionEntry`，而是建立清晰的文章视图模型，逐步调整依赖旧类型的组件。
 
-## Content and storage
+## 内容与存储
 
-PostgreSQL is the sole production content store. A post has an immutable ID, locale, unique slug per locale, title, description, Markdown body, status (`draft` or `published`), publication and update timestamps, optional cover media ID, ordered categories, tags, and validated extra frontmatter fields needed by the current site. Keep structured, query-critical fields in columns; JSONB can hold low-frequency presentation options. Published endpoints exclude drafts; scheduled publication is outside the first release, so pressing Publish makes a valid post visible immediately regardless of its display date. Slug conflicts return a clear validation error. Edits use an update version or timestamp check so concurrent saves cannot silently overwrite one another.
+PostgreSQL 是生产内容的唯一数据来源。文章包含固定 ID、语言、语言范围内唯一的 slug、标题、摘要、Markdown 正文、状态（草稿或已发布）、发布时间、更新时间、可选封面图片 ID、有序分类、标签，以及现有网站需要的其他已校验 frontmatter 字段。需要查询和筛选的字段使用独立列；少量展示选项可以放在 JSONB 字段中。公开接口只返回已发布文章。第一版不做定时发布，点击“发布”后有效文章立即可见，文章展示日期可以与实际发布时间不同。slug 冲突要返回明确错误；编辑时检查版本号或更新时间，避免覆盖另一处尚未保存的修改。
 
-The import command reads current Markdown and YAML files before their corresponding frontend reads are removed. It has dry-run and apply modes, reports invalid records and duplicate slugs, and is safe to rerun without duplicates. The application must not read imported content from the repository in production. After each increment is verified, remove its old frontend content files and file-based loaders. Database migrations and import code remain in `backend/`; the deployment does not depend on original content files after import.
+导入命令在移除前端文件读取逻辑前，读取现有 Markdown 和 YAML。命令提供预检查和正式导入两种模式，报告格式错误和重复 slug，重复执行也不能生成重复数据。生产应用不再读取仓库中的已导入内容。每个阶段验证完成后，移除对应的前端内容文件和读取代码。数据库迁移文件与导入程序保留在 `backend/`，正式部署不依赖原始内容文件。网站样式配置和与内容无关的装饰资源仍可留在前端。
 
-Images are stored as files in a persistent server volume, with metadata in PostgreSQL. The upload endpoint verifies actual image type, size, and dimensions; assigns a generated filename; and serves only safe raster formats in the first release. The admin can select a cover and insert an uploaded image URL into Markdown. Existing images referenced by posts or footprints are copied into the media volume during migration, with references rewritten before their frontend copies are removed. Unrelated site decoration images can stay in `public/`. Backups must include both PostgreSQL and the media volume. Do not store image binaries in PostgreSQL.
+图片文件放在服务器持久化目录，PostgreSQL 保存图片元数据。上传接口检查实际文件类型、大小和尺寸，使用生成的文件名；第一版只允许安全的常见位图格式。后台可以选择封面，并把图片地址插入 Markdown。迁移时把文章或足迹引用的旧图片复制到后端目录，在删除其前端副本前改好引用。与内容无关的装饰图片仍可留在 `public/`。备份必须同时覆盖 PostgreSQL 和图片目录。图片二进制不存入 PostgreSQL。
 
-## API and admin flows
+## API 与后台流程
 
-Public read API, under `/api/v1`, returns published posts with pagination and filters, a post by locale and slug, a search endpoint, and the phase-2 footprint and timeline views. Responses have stable JSON shapes, explicit HTTP status codes, and bounded page sizes. Search uses PostgreSQL queries with a simple initial strategy that works for Chinese titles and body text; at this site's size, correctness matters more than a search cluster. Replace Pagefind for live posts because its static index is generated at build time.
+公开的 `/api/v1` 接口提供已发布文章的分页与筛选、按语言和 slug 查询单篇文章、搜索，以及第二阶段的足迹和实习经历数据。JSON 响应格式、HTTP 状态码和最大分页大小保持明确稳定。搜索先用适合中文标题和正文的 PostgreSQL 查询实现；当前内容量不需要单独的搜索服务。现有 Pagefind 索引在构建时生成，不能直接反映实时发布的文章，因此文章搜索要切换到后端。
 
-Admin API supports login/logout/session, Markdown upload and parsing preview, post create/read/update/publish/unpublish, image upload/list, and later footprint/timeline CRUD and ordering. Both Markdown upload and editor save pass through the same validation and persistence code. Importing a Markdown file creates a draft by default; publishing is a separate deliberate action. Upload failures never create a published partial post. A successful publish transaction makes the public API record visible immediately.
+后台接口支持登录、退出、查询会话、上传 Markdown 并预览解析结果、创建和编辑文章、发布和撤回、上传与查看图片；第二阶段增加足迹和实习经历的增删改与排序。Markdown 文件上传和编辑器保存共用同一套校验及持久化规则。上传 Markdown 默认生成草稿，发布是单独的操作。上传失败不能留下已发布的不完整文章；发布成功后，公开 API 应立即查到该文章。
 
-Reuse the current CMS's editor and article table where this reduces work, but host a production build under `/admin`. Add image selection/upload and import controls. The admin shows save, validation, conflict, and publish states clearly. The production UI calls Gin only; the current local Hono filesystem server is retired after migration.
+尽量复用现有 CMS 的文章列表和编辑器，在生产环境把构建后的后台放在 `/admin`。增加图片上传、选择图片和 Markdown 导入入口。后台要清楚显示保存成功、字段错误、编辑冲突和发布结果。生产后台只调用 Gin；迁移完成后，现有直接改文件的 Hono 服务退出生产流程。
 
-## Authentication and operational behavior
+## 登录与运行保障
 
-One owner account is provisioned by a setup command or deployment secret; there is no public signup. Store a strong password hash, use an HTTP-only, Secure, SameSite cookie session, protect state-changing requests against CSRF, and rate-limit login. Require HTTPS at the public edge. Check authorization on every admin endpoint, including uploads. Never put service secrets into Astro client bundles.
+第一版只有一个站长账号，通过初始化命令或部署密钥创建，不开放注册。密码保存为安全哈希；登录会话使用 `HttpOnly`、`Secure`、`SameSite` Cookie；修改内容的请求需要 CSRF 防护，登录接口需要限流。公网入口使用 HTTPS。每个后台接口（包括图片上传）都要检查登录状态。服务密钥不能进入 Astro 浏览器代码。
 
-Deploy the first release on the owner's Tencent Cloud Linux server (CVM or Lighthouse, depending on the actual instance type) as one Docker Compose stack: Nginx, Astro Node, Gin, and PostgreSQL, plus persistent database and media volumes. Expose only HTTP/HTTPS through the cloud firewall; keep PostgreSQL private and restrict administrative server access. Terminate HTTPS at the public edge. Add health checks, startup configuration validation, structured Go logs, and a documented backup/restore command. Store PostgreSQL dumps and media backups outside the instance, for example in a private Tencent Cloud COS bucket; a server-disk snapshot can supplement this but is not the only backup. Migrations run as an explicit deploy step before serving the new version. If Gin is unavailable, Astro returns a clear server error rather than stale or misleading published content.
+第一版部署在腾讯云 Linux 服务器上；具体实例可以是 CVM 或轻量应用服务器，取决于实际购买的机型。Docker Compose 运行 Nginx、Astro Node、Gin 和 PostgreSQL，并挂载数据库与图片持久化目录。云防火墙只开放网站需要的 HTTP/HTTPS 端口，数据库只在内部网络使用，服务器管理端口限制访问范围。加入健康检查、启动配置校验、结构化 Go 日志，以及备份和恢复说明。PostgreSQL 导出文件和图片备份要放在服务器之外，例如私有的腾讯云 COS 存储桶；云硬盘快照可以作为补充。新版本提供服务前，先执行明确的数据库迁移步骤。Gin 不可用时，Astro 返回清楚的服务错误，不能显示误导性的旧内容。
 
-## Verification and release sequence
+## 实施与验收顺序
 
-Implement increment 1 as vertical slices: database and health endpoint; owner auth; post CRUD; Markdown upload and migration; media; Astro post rendering and lists; search and RSS; production admin; Compose deployment. Verify each slice with focused Go handler/database tests and Astro rendering checks. A release check creates a draft, uploads an image, publishes the post, and confirms that the page, list, RSS, and search show it without rebuilding. Verify unpublished posts are invisible publicly. Compare representative imported articles with their source Markdown, especially custom blocks, code, math, and image paths.
+第一阶段按完整功能链逐步实施：数据库和健康检查、站长登录、文章增删改查、Markdown 上传与旧文导入、图片、Astro 文章页面和列表、搜索与 RSS、生产后台、Docker Compose 部署。每一步用针对性的 Go 接口与数据库测试，以及 Astro 页面渲染检查来验证。发布验收包括：创建草稿、上传图片、发布文章，确认无需重新构建，详情页、列表、RSS 和搜索都能看到；撤回或草稿文章不能被公开访问。对照源 Markdown 检查几篇有特殊区块、代码、数学公式和图片的旧文章。
 
-Increment 2 imports YAML into typed PostgreSQL tables. Footprint locations are referenced by stays and routes, and deletion is rejected while referenced unless the owner explicitly removes those references. Internship entries have start/end dates and explicit display order. The admin edits these records; the two public pages read them on demand. Verify an admin edit appears after refresh without a rebuild, then remove the YAML readers and files from the frontend.
+第二阶段把 YAML 数据导入 PostgreSQL 的明确表结构。足迹地点被停留和路线引用时，不能直接删除地点而留下无效引用；实习经历保存开始和结束日期及明确的展示顺序。后台可以编辑这些数据，公开页面按需读取。验证后台修改后刷新页面即可看到结果，再移除前端 YAML 文件和读取逻辑。
 
-Roll out with a database/media backup and an import report. Since preserving old article URLs is optional, redirecting an old slug is a convenience, not a release gate. The release gate is complete content in PostgreSQL, working live publication, safe admin access, and no production dependency on frontend content files.
+上线前保存数据库和图片备份，检查导入报告。保留旧文章 URL 不是上线门槛，有需要时可以补充重定向。上线门槛是内容完整进入 PostgreSQL、文章发布后立即可见、后台访问安全，并且生产环境不再依赖前端内容文件。
