@@ -219,6 +219,14 @@ export default defineConfig({
     enabled: true,
   },
   vite: {
+    // Keep the development dependency optimizer separate from production builds.
+    cacheDir: process.argv.includes('build') ? './node_modules/.vite-build' : './node_modules/.vite-dev',
+    server: {
+      proxy: {
+        '/api/v1': { target: process.env.BACKEND_API_URL || 'http://127.0.0.1:8080', changeOrigin: true },
+        '/uploads': { target: process.env.BACKEND_API_URL || 'http://127.0.0.1:8080', changeOrigin: true },
+      },
+    },
     build: {
       // Enable sourcemap for Sonda bundle analysis
       sourcemap: isAnalyze,
