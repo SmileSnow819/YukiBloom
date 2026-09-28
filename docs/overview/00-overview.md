@@ -143,8 +143,8 @@ astro-koharu/
 ├── tailwind.config.mjs         # Tailwind 配置
 ├── tsconfig.json               # TypeScript 配置
 ├── package.json                # 依赖和脚本
-├── _config.yml                 # Hexo 分类映射（遗留）
-└── CLAUDE.md                   # AI 助手指南
+├── config/site.yaml            # 站点配置与分类映射
+└── AGENTS.md                   # Codex 项目指南
 ```
 
 ---

@@ -20,3 +20,5 @@ Generate AntV Infographic syntax output from user content, following the rules i
    - First line is `infographic <template-name>`.
    - Use two-space indentation; key/value pairs are `key value`; arrays use `-`.
    - Compare templates (`compare-*`) must have exactly two root nodes with children.
+
+博客文章内的语法应放在 fenced `infographic` 代码块；仅请求纯语法时保持上面的单个 `plain` 代码块输出约定。

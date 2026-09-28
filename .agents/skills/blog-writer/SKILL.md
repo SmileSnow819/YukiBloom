@@ -36,7 +36,7 @@ description: 帮助用户按照 astro-koharu 博客的规范创建新博文。�
    **分类格式说明**：
    - 嵌套分类使用数组格式：`- [一级分类, 二级分类]`
    - 例如：`- [笔记, 前端]` 会创建 URL `/categories/note/front-end` 和面包屑 "笔记 → 前端"
-   - 单个分类直接写分类名：`categories: 随笔`
+   - 单个分类直接写分类名：`categories: [随笔]`
 
 3. **确定文件路径**：
    - 基础路径：`src/content/blog/`
@@ -59,15 +59,15 @@ description: 帮助用户按照 astro-koharu 博客的规范创建新博文。�
      - TypeScript
      - CSS
      - 性能优化
-   - 后端 (back-end/) - 如果需要使用，确保已在 `_config.yml` 中添加映射
-   - 其他新增子分类 - 需要先在 `_config.yml` 添加映射
+   - 后端 (back-end/) - 如果需要使用，确保已在 `config/site.yaml` 中添加映射
+   - 其他新增子分类 - 需要先在 `config/site.yaml` 添加映射
 
-2. **工具 (tools/)**
+2. **转载 (tools/)**
    - 开发工具
    - 效率工具
    - 使用指南
 
-3. **随笔 (life/)**
+3. **随笔 (essay/)**
    - 生活随笔
    - 年度总结
    - 读书笔记
@@ -85,13 +85,13 @@ categories:
   - [笔记, 前端]
 
 # 单个分类 - 直接写分类名
-categories: 随笔
+categories: [随笔]
 ```
 
 **URL 和路径映射**：
-- `categories: 随笔` → URL: `/categories/life` → 文件路径: `src/content/blog/life/`
+- `categories: [随笔]` → URL: `/categories/essay` → 文件路径: `src/content/blog/essay/`
 - `categories: - [笔记, 前端]` → URL: `/categories/note/front-end` → 文件路径: `src/content/blog/note/front-end/`
-- `categories: - [笔记, 前端, CSS]` → URL: `/categories/note/front-end` → 文件路径: `src/content/blog/note/front-end/`（三级分类作为标签）
+- 多级分类的 URL 与路径以当前 `config/site.yaml`、相邻文章和路由实现为准。
 
 **注意**：
 - 嵌套分类必须使用 `- [一级, 二级]` 格式
@@ -101,13 +101,13 @@ categories: 随笔
 
 如果用户需要创建上述分类之外的新分类，需要：
 
-1. **更新 `_config.yml`**：
+1. **更新 `config/site.yaml`**：
    ```yaml
-   category_map:
+   categoryMap:
      # 一级分类
-     随笔: life
+     随笔: essay
      笔记: note
-     工具: tools
+     转载: tools
      周刊: weekly
 
      # 二级分类
@@ -123,7 +123,7 @@ categories: 随笔
    - 例如：新增"后端"分类需要创建 `src/content/blog/note/back-end/`
 
 3. **提醒用户**：
-   - 告知用户已添加新分类映射到 `_config.yml`
+   - 告知用户已添加新分类映射到 `config/site.yaml`
    - 说明新分类的 URL 路径
 
 ## 文件命名规范
@@ -222,7 +222,7 @@ categories: 随笔
 创建完博文后：
 
 1. **如果添加了新分类**：
-   - 确认已更新 `_config.yml` 中的 `category_map`
+   - 确认已更新 `config/site.yaml` 中的 `categoryMap`
    - 确认已创建对应的目录结构
    - 告知用户新分类的 URL 路径
 
@@ -258,11 +258,15 @@ categories: 随笔
 1. 发现"后端"分类不在现有分类列表中
 2. 询问用户是否要添加"后端"分类
 3. 如果用户同意：
-   - 更新 `_config.yml`，添加 `后端: back-end`
+   - 更新 `config/site.yaml`，添加 `后端: back-end`
    - 创建目录 `src/content/blog/note/back-end/`
    - 生成文章文件 `src/content/blog/note/back-end/nodejs-development.md`
    - frontmatter 使用 `- [笔记, 后端]` 分类格式
 4. 告知用户：
-   - 新分类已添加到 `_config.yml`
+   - 新分类已添加到 `config/site.yaml`
    - URL 路径为 `/categories/note/back-end`
    - 已创建对应目录结构
+
+## Codex 与当前仓库
+
+写入前先读取 `src/content/config.ts`、`config/site.yaml` 的 `categoryMap` 和目标分类中的现有文章。使用 Codex 的工作区编辑工具；文章中的信息图以 fenced `infographic` 代码块嵌入，由站点现有组件渲染。

@@ -417,7 +417,7 @@ AntVInfographic.registerResourceLoader(async (config) => {
 </script>
 ```
 
-2. Write the HTML file named `<title>-infographic.html` using the Write tool
+2. Write the HTML file named `<title>-infographic.html` using the workspace editing tools
 
 3. Display to the user:
    - The generated file path with instruction: "Open this file directly in a browser to view and save the SVG"
@@ -428,3 +428,7 @@ AntVInfographic.registerResourceLoader(async (config) => {
 - SVG export functionality via the export button
 - Responsive container that takes 100% width and height
 - Proper error handling for failed resource loads
+
+## 本仓库集成
+
+博客正文直接使用 fenced `infographic` 代码块；`src/components/markdown/InfographicToolbar.tsx` 已使用项目安装的 `@antv/infographic` 渲染、切换主题并提供全屏交互。仅在用户要求独立文件时创建上述 HTML 页面；生成后验证渲染和 SVG 导出。模板与语法可参照 `.agents/skills/infographic-syntax-creator/references/prompt.md`。

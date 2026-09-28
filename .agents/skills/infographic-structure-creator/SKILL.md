@@ -1,6 +1,6 @@
 ---
 name: infographic-structure-creator
-description: Generate or update infographic Structure components for this repo (TypeScript/TSX in src/designs/structures). Use when asked to design, implement, or modify structure layouts (list/compare/sequence/hierarchy/relation/geo/chart), including layout logic, component composition, and registration.
+description: Generate or update infographic Structure components in an AntV Infographic source checkout (TypeScript/TSX in src/designs/structures). Use when asked to design, implement, or modify structure layouts (list/compare/sequence/hierarchy/relation/geo/chart), including layout logic, component composition, and registration.
 ---
 
 # Infographic Structure Creator
@@ -21,3 +21,7 @@ Generate complete Structure component code for the infographic framework, follow
 
 - Prefer scanning `src/designs/structures` for similar existing structures to match local patterns when appropriate.
 - Keep output concise; avoid React-only features (keys, hooks).
+
+## 适用范围
+
+当前博客仓库没有 `src/designs/structures`。仅在用户提供或切换到包含该目录的 AntV Infographic 源码仓库时按上述流程创建 Structure；当前博客的信息图使用 `infographic-creator` 或 `infographic-syntax-creator`。

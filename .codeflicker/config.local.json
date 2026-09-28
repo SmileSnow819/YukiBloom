@@ -1,5 +1,0 @@
-{
-  "permissions": {
-    "allow": ["Edit(/src/components/layout/**)", "Edit(/config/**)", "Edit(/src/pages/**)"]
-  }
-}

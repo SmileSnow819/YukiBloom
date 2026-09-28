@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Codex when working with code in this repository.
 
 ## Project Overview
 
@@ -43,15 +43,15 @@ astro-koharu is an Astro-based blog rebuilt from Hexo, inspired by the Shoka the
 
 ## IMPORTANT Guidelines
 
-- **Documentation lookup**: Use Context7 MCP server or WebSearch for official docs
-- **Keep CLAUDE.md updated**: Ask to update when making architectural changes
+- **Documentation lookup**: Consult official framework documentation when APIs or behavior are uncertain
+- **Keep AGENTS.md updated** when changing architectural conventions
 - **Run lint before completion**: `pnpm lint:fix` must pass before completing tasks
 - **Check for dead code**: Run `pnpm knip` periodically
 - **Build cache**: `.cache/og-data.json` is intentionally committed to Git for build acceleration (OG metadata cache for link embeds). Do NOT add it to `.gitignore`. Other files under `.cache/` (transformers models, summaries-cache) are already ignored.
 
 ## Development Commands
 
-Package manager: **pnpm** (`pnpm@9.15.1`)
+Package manager: **pnpm** (follow the repository lockfile)
 
 ```bash
 # Development
@@ -241,10 +241,10 @@ Biome (line width: 128, single quotes, trailing commas). Tailwind classes must b
 
 **Immutability**: Always use immutable updates: `setUser(prev => ({ ...prev, name: 'Alice' }))`.
 
-**URL State Management**: Use **nuqs** (https://nuqs.dev/) for shareable state (search, pagination, filters, tabs). Benefits: shareable URLs, bookmarkable, browser navigation, SEO-friendly.
+**URL State Management**: Use URL query parameters for shareable state (search, pagination, filters, tabs). The native `URLSearchParams` API is available; `nuqs` requires adding a dependency first. Benefits: shareable URLs, bookmarkable, browser navigation, SEO-friendly.
 
 ```typescript
-// ✅ Good: URL state for filters
+// Example with nuqs after adding it as a dependency
 const [search, setSearch] = useQueryState('q', { defaultValue: '' });
 const [category, setCategory] = useQueryState('category');
 // URL: /posts?q=react&category=tech (shareable!)
@@ -342,7 +342,7 @@ describe("getCategoryLinks", () => {
 
 **State Management**:
 - Duplicate state → single source of truth
-- Missing URL state for shareable filters → use nuqs
+- Missing URL state for shareable filters → use URL query parameters
 
 **Performance**:
 - Unnecessary re-renders → missing memo when needed
@@ -385,3 +385,7 @@ Keep business logic pure, framework calls at boundaries.
 - Reusable hooks: `src/hooks/`
 - Animation presets: `src/constants/anim/`
 - Site configuration: `src/constants/site-config.ts`
+
+## Codex Skills
+
+Project skills live in `.agents/skills/`. Read the relevant `SKILL.md` when writing blog posts or AntV infographics.

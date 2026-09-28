@@ -1,6 +1,6 @@
 ---
 name: infographic-item-creator
-description: Generate or update infographic Item components for this repo (TypeScript/TSX in src/designs/items). Use when asked to design, implement, or modify data item visuals, layout logic, or registerItem composites.
+description: Generate or update infographic Item components in an AntV Infographic source checkout (TypeScript/TSX in src/designs/items). Use when asked to design, implement, or modify data item visuals, layout logic, or registerItem composites.
 ---
 
 # Infographic Item Generator
@@ -21,3 +21,7 @@ Generate complete Item component code for the infographic framework, following t
 
 - Prefer scanning `src/designs/items` for similar items to match local patterns when appropriate.
 - Keep output concise; avoid React-only features (keys, hooks).
+
+## 适用范围
+
+当前博客仓库没有 `src/designs/items`。仅在用户提供或切换到包含该目录的 AntV Infographic 源码仓库时按上述流程创建 Item；当前博客的信息图使用 `infographic-creator` 或 `infographic-syntax-creator`。
