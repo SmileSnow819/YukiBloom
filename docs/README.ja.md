@@ -104,116 +104,20 @@ pnpm dev
 - [切り替え可能] クリスマス特集：雪降り、クリスマスカラー、サンタ帽、イルミネーションなど季節エフェクト
 - サーバーレスサイトお知らせシステム：設定ファイルで管理、時間制御・複数お知らせスタック・カスタムカラー・ホバーで既読
 - スタイル付き [RSS](https://blog.cosine.ren/rss.xml) フィードページ
-- **Koharu CLI**：バックアップ/リストア、コンテンツ生成、バックアップ管理のためのインタラクティブ CLI ツール
 - **ローカル軽量 CMS アプリ**：`pnpm cms` で独立した CMS インターフェースを起動、記事管理・ブラウザ内編集・Markdown プレビューに対応。記事ページの編集ボタンからローカルエディター（VS Code / Cursor / Zed）へワンクリックジャンプ、`config/site.yaml` の `dev` セクションで設定（バックエンド版は今後検討、現在は静的版）
 
-## Koharu CLI
+## コンテンツアセットの生成
 
-ブログにはコンテンツ管理用のインタラクティブ CLI ツールが付属しています：
-
-```bash
-pnpm koharu              # インタラクティブメインメニュー
-pnpm koharu new          # 新規コンテンツ作成（投稿/フレンドリンク）
-pnpm koharu backup       # ブログコンテンツと設定のバックアップ
-pnpm koharu restore      # バックアップからリストア
-pnpm koharu update       # テーマの更新
-pnpm koharu generate     # コンテンツアセット生成（LQIP、類似度、AI 要約）
-pnpm koharu clean        # 古いバックアップの削除
-pnpm koharu list         # すべてのバックアップを一覧表示
-```
-
-### コンテンツの作成
-
-ブログ投稿とフレンドリンクをすばやく作成：
+必要に応じて、既存のスクリプトでコンテンツアセットを生成できます：
 
 ```bash
-# インタラクティブタイプ選択
-pnpm koharu new
-
-# またはタイプを直接指定
-pnpm koharu new post     # 新規ブログ投稿（インタラクティブにタイトル、カテゴリー、タグなどを入力）
-pnpm koharu new friend   # 新規フレンドリンク（config/site.yaml に自動追加）
+pnpm generate:lqips         # 画像プレースホルダー
+pnpm generate:similarities  # 関連記事の類似度データ
+pnpm generate:summaries     # AI 要約
+pnpm generate:all           # すべての生成処理を順に実行
 ```
 
-**新規投稿機能**：
-
-- ピンイン slug の自動生成
-- 既存カテゴリーからの選択
-- マルチタグ対応
-- ファイル重複検出
-- frontmatter の自動生成
-
-**新規フレンドリンク機能**：
-
-- インタラクティブなサイト情報入力
-- 設定ファイルへの自動追加
-- YAML フォーマットとコメントの保持
-
-### バックアップとリストア
-
-テーマ更新前に CLI でコンテンツをバックアップ：
-
-```bash
-# 基本バックアップ（ブログ投稿、設定、アバター、.env）
-pnpm koharu backup
-
-# 完全バックアップ（すべての画像と生成アセットを含む）
-pnpm koharu backup --full
-
-# 最新バックアップからリストア
-pnpm koharu restore --latest
-
-# リストア対象ファイルのプレビュー（ドライラン）
-pnpm koharu restore --dry-run
-```
-
-### テーマの更新
-
-CLI で自動的にテーマを更新（自動バックアップ → プル → マージ → 依存関係インストール）：
-
-```bash
-# 完全更新フロー（デフォルトで先にバックアップ）
-pnpm koharu update
-
-# 更新のみチェック
-pnpm koharu update --check
-
-# バックアップをスキップして直接更新
-pnpm koharu update --skip-backup
-
-# 特定バージョンに更新
-pnpm koharu update --tag v2.1.0
-
-# クリーンモード（コンフリクトゼロ、強制バックアップ、初回マイグレーションやコンフリクトが多い場合に最適）
-pnpm koharu update --clean
-
-# リベースモード（履歴の書き換え、強制バックアップ、git に詳しいユーザー向け）
-pnpm koharu update --rebase
-
-# プレビュー（ドライラン）
-pnpm koharu update --dry-run
-```
-
-> **更新モードの詳細：**
->
-> - **デフォルトモード**：`git merge --no-ff` でアップストリームの更新をマージし、merge-base 情報を保持します。ユーザーコンテンツ（ブログ投稿、設定など）のコンフリクトはローカル版を自動採用し、テーマファイルのコンフリクトのみ手動解決が必要です。
-> - **クリーンモード** (`--clean`)：すべてのテーマファイルを最新のアップストリーム版に置き換え、バックアップからユーザーコンテンツをリストアしてコンフリクトゼロの更新を実現します。初回マイグレーションやコンフリクトが多い場合に最適です。**注意：テーマファイルへのカスタム変更は保持されません。**
-> - **リベースモード** (`--rebase`)：ローカルコミットをアップストリームの上にリプレイし、コミット履歴を書き換えます。git に詳しいユーザー向けです。
->
-> CLI 更新コマンドは git 操作のラッパーです。git に詳しいユーザーは `git merge`/`git rebase` を直接使用することもできます。
-
-### コンテンツ生成
-
-```bash
-# インタラクティブタイプ選択
-pnpm koharu generate
-
-# またはタイプを直接指定
-pnpm koharu generate lqips        # LQIP 画像プレースホルダーの生成
-pnpm koharu generate similarities # 類似度ベクトルの生成
-pnpm koharu generate summaries    # AI 要約の生成
-pnpm koharu generate all          # すべて生成
-```
+記事とフレンドリンクはコンテンツファイルおよび `config/site.yaml` で管理します。テーマの更新には Git を使用し、更新前に個人コンテンツをバックアップしてください。
 
 ## 設定
 

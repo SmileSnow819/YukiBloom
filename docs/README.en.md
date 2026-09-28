@@ -104,116 +104,20 @@ pnpm dev
 - [Toggleable] Christmas special: snowfall, Christmas colors, Santa hats, string lights, and other festive effects
 - Serverless site announcement system: Manage announcements via config file with time controls, stacking, custom colors, and hover-to-read
 - Styled [RSS](https://blog.cosine.ren/rss.xml) feed page
-- **Koharu CLI**: Interactive command-line tool for backup/restore, content generation, and backup management
 - **Local lightweight CMS app**: Run `pnpm cms` to launch a standalone CMS interface with article management, in-browser editing, and Markdown preview. The edit button on article pages supports one-click jump to local editors (VS Code / Cursor / Zed), configured in the `dev` section of `config/site.yaml`. (A backend version may be considered later; this version is static)
 
-## Koharu CLI
+## Content Asset Generation
 
-The blog comes with an interactive CLI tool for managing blog content:
-
-```bash
-pnpm koharu              # Interactive main menu
-pnpm koharu new          # Create new content (post/friend link)
-pnpm koharu backup       # Backup blog content and config
-pnpm koharu restore      # Restore from backup
-pnpm koharu update       # Update theme
-pnpm koharu generate     # Generate content assets (LQIP, similarity, AI summaries)
-pnpm koharu clean        # Clean old backups
-pnpm koharu list         # List all backups
-```
-
-### Creating Content
-
-Quickly create blog posts and friend links:
+Generate content assets as needed with the existing scripts:
 
 ```bash
-# Interactive type selection
-pnpm koharu new
-
-# Or specify the type directly
-pnpm koharu new post     # Create a new blog post (interactive title, category, tags, etc.)
-pnpm koharu new friend   # Create a new friend link (auto-appended to config/site.yaml)
+pnpm generate:lqips         # Image placeholders
+pnpm generate:similarities  # Related-post similarity data
+pnpm generate:summaries     # AI summaries
+pnpm generate:all           # Run all generators in sequence
 ```
 
-**New Post features**:
-
-- Auto-generated pinyin slug
-- Select from existing categories
-- Multi-tag support
-- Duplicate file detection
-- Auto-generated frontmatter
-
-**New Friend Link features**:
-
-- Interactive friend site info input
-- Auto-appended to config file
-- Preserves YAML format and comments
-
-### Backup & Restore
-
-Before updating the theme, use the CLI to backup your personal content:
-
-```bash
-# Basic backup (blog posts, config, avatar, .env)
-pnpm koharu backup
-
-# Full backup (includes all images and generated assets)
-pnpm koharu backup --full
-
-# Restore latest backup
-pnpm koharu restore --latest
-
-# Preview files to be restored (dry run)
-pnpm koharu restore --dry-run
-```
-
-### Updating the Theme
-
-Use the CLI to automatically update the theme (auto backup → pull → merge → install dependencies):
-
-```bash
-# Full update flow (backs up first by default)
-pnpm koharu update
-
-# Check for updates only
-pnpm koharu update --check
-
-# Skip backup and update directly
-pnpm koharu update --skip-backup
-
-# Update to a specific version
-pnpm koharu update --tag v2.1.0
-
-# Clean mode (zero conflicts, forced backup, ideal for first migration or heavy conflicts)
-pnpm koharu update --clean
-
-# Rebase mode (rewrites history, forced backup, for git-savvy users)
-pnpm koharu update --rebase
-
-# Preview operations (dry run)
-pnpm koharu update --dry-run
-```
-
-> **Update Mode Details:**
->
-> - **Default mode**: Uses `git merge --no-ff` to merge upstream updates, preserving merge-base info. User content conflicts (blog posts, config, etc.) are automatically resolved in favor of the local version; only theme file conflicts require manual resolution.
-> - **Clean mode** (`--clean`): Replaces all theme files with the latest upstream version, then restores user content from backup for zero-conflict updates. Ideal for first-time migration or heavy conflicts. **Note: Custom modifications to theme files will not be preserved.**
-> - **Rebase mode** (`--rebase`): Replays local commits on top of upstream, rewriting commit history. Suitable for git-savvy users.
->
-> The CLI update command wraps git operations. Users familiar with git can also use `git merge`/`git rebase` manually.
-
-### Content Generation
-
-```bash
-# Interactive type selection
-pnpm koharu generate
-
-# Or specify the type directly
-pnpm koharu generate lqips        # Generate LQIP image placeholders
-pnpm koharu generate similarities # Generate similarity vectors
-pnpm koharu generate summaries    # Generate AI summaries
-pnpm koharu generate all          # Generate all
-```
+Manage posts and friend links in their content files and `config/site.yaml`. Use Git to update the theme and back up personal content before updating.
 
 ## Configuration
 

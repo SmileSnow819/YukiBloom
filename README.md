@@ -105,116 +105,20 @@ pnpm dev
 - [可开关] 圣诞特辑：包含雪花飘落、圣诞配色、圣诞帽装饰、灯串装饰等节日氛围效果
 - 无后端站点公告系统：可通过配置文件管理公告，支持时间控制、多条公告堆叠、自定义颜色、hover 已读
 - 有样式的 [RSS](https://blog.cosine.ren/rss.xml) 订阅源链接
-- **Koharu CLI**：交互式命令行工具，支持备份/还原、内容生成、备份管理
 - **本地轻 CMS 应用**：运行 `pnpm cms` 启动独立的 CMS 管理界面，支持文章管理、浏览器内编辑、Markdown 预览等功能。文章页的编辑按钮支持一键跳转到本地编辑器（VS Code / Cursor / Zed），配置见 `config/site.yaml` 的 `dev` 部分。(后期会考虑做个有后端的版本，这期先静态)
 
-## Koharu CLI
+## 内容资产生成
 
-博客自带交互式 CLI 工具，方便管理博客内容：
-
-```bash
-pnpm koharu              # 交互式主菜单
-pnpm koharu new          # 新建内容（文章/友链）
-pnpm koharu backup       # 备份博客内容和配置
-pnpm koharu restore      # 从备份恢复
-pnpm koharu update       # 更新主题
-pnpm koharu generate     # 生成内容资产 (LQIP, 相似度, AI 摘要)
-pnpm koharu clean        # 清理旧备份
-pnpm koharu list         # 查看所有备份
-```
-
-### 新建内容
-
-快速创建博客文章和友链：
+内容资产可按需生成。命令分别写入 LQIP 图片占位数据、文章相似度数据和 AI 摘要：
 
 ```bash
-# 交互式选择创建类型
-pnpm koharu new
-
-# 或直接指定类型
-pnpm koharu new post     # 新建博客文章（交互式输入标题、分类、标签等）
-pnpm koharu new friend   # 新建友情链接（自动追加到 config/site.yaml）
+pnpm generate:lqips         # 生成图片占位数据
+pnpm generate:similarities  # 生成相关文章所需的相似度数据
+pnpm generate:summaries     # 生成文章摘要
+pnpm generate:all           # 依次执行全部生成任务
 ```
 
-**新建文章功能**：
-
-- 自动生成拼音 slug
-- 选择已有分类
-- 支持多标签
-- 检查文件重复
-- 自动创建 frontmatter
-
-**新建友链功能**：
-
-- 交互式输入友站信息
-- 自动追加到配置文件
-- 保留 YAML 格式和注释
-
-### 备份与还原
-
-更新主题前，使用 CLI 备份你的个人内容：
-
-```bash
-# 基础备份（博客文章、配置、头像、.env）
-pnpm koharu backup
-
-# 完整备份（包含所有图片和生成的资产）
-pnpm koharu backup --full
-
-# 还原最新备份
-pnpm koharu restore --latest
-
-# 预览将要还原的文件（不实际还原）
-pnpm koharu restore --dry-run
-```
-
-### 更新主题
-
-使用 CLI 自动更新主题（会自动备份 → 拉取 → 合并 → 安装依赖）：
-
-```bash
-# 完整更新流程（默认会先备份）
-pnpm koharu update
-
-# 仅检查更新
-pnpm koharu update --check
-
-# 跳过备份直接更新
-pnpm koharu update --skip-backup
-
-# 更新到指定版本
-pnpm koharu update --tag v2.1.0
-
-# clean 模式（零冲突，强制备份，适合首次迁移或冲突较多时）
-pnpm koharu update --clean
-
-# rebase 模式（重写历史，强制备份，适合熟悉 git 的用户）
-pnpm koharu update --rebase
-
-# 预览操作（不实际执行）
-pnpm koharu update --dry-run
-```
-
-> **💡 更新模式说明：**
->
-> - **默认模式**：使用 `git merge --no-ff` 合并上游更新，保留 merge-base 信息。遇到用户内容（博客文章、配置等）冲突时自动保留本地版本，仅主题文件冲突需手动解决。
-> - **Clean 模式** (`--clean`)：用上游最新版本替换所有主题文件，然后从备份还原用户内容，实现零冲突更新。适合首次从旧版迁移或冲突较多时使用。**注意：用户对主题文件的自定义修改不会被保留。**
-> - **Rebase 模式** (`--rebase`)：将本地提交重放到上游之上，重写提交历史。适合熟悉 git 的用户。
->
-> CLI 更新命令是对 git 操作的封装，熟悉 git 的用户也可以直接使用 `git merge`/`git rebase` 手动操作。
-
-### 内容生成
-
-```bash
-# 交互式选择生成类型
-pnpm koharu generate
-
-# 或直接指定类型
-pnpm koharu generate lqips        # 生成 LQIP 图片占位符
-pnpm koharu generate similarities # 生成相似度向量
-pnpm koharu generate summaries    # 生成 AI 摘要
-pnpm koharu generate all          # 生成全部
-```
+文章内容和友链在对应内容文件与 `config/site.yaml` 中管理；主题更新使用 Git，更新前请自行备份个人内容。
 
 ## 构建缓存
 

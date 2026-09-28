@@ -87,7 +87,7 @@ pnpm docker:rebuild   # 完整重建（停旧容器 → 重新构建 → 启动�
 
 ```bash
 # 建议先生成内容资产（LQIP、相似度、AI 摘要）
-pnpm koharu generate all
+pnpm generate:all
 
 # 然后重新构建部署
 pnpm docker:rebuild

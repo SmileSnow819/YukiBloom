@@ -15,7 +15,7 @@ set -euo pipefail
 # Reminder for content generation
 echo "================================================"
 echo "  Reminder: If you added new content, consider running first:"
-echo "    pnpm koharu generate all"
+echo "    pnpm generate:all"
 echo "  to update LQIP, similarity vectors, and AI summaries."
 echo "================================================"
 

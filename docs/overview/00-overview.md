@@ -218,7 +218,6 @@ import type { BlogPost } from '@types/blog';  // src/types/blog.ts
 | `@content/*`    | `src/content/*`    |
 | `@styles/*`     | `src/styles/*`     |
 | `@assets/*`     | `src/assets/*`     |
-| `@scripts/*`    | `src/scripts/*`    |
 
 ---
 

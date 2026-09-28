@@ -267,9 +267,6 @@ importers:
       '@iconify/react':
         specifier: ^5.2.1
         version: 5.2.1(react@19.2.8)
-      '@inkjs/ui':
-        specifier: ^2.0.0
-        version: 2.0.0(ink@6.6.0(@types/react@19.2.18)(react@19.2.8))
       '@lint-md/cli':
         specifier: ^2.0.0
         version: 2.2.4
@@ -318,9 +315,6 @@ importers:
       husky:
         specifier: ^9.1.7
         version: 9.1.7
-      ink:
-        specifier: ^6.6.0
-        version: 6.6.0(@types/react@19.2.18)(react@19.2.8)
       knip:
         specifier: ^5.71.0
         version: 5.88.1(@types/node@24.13.3)(typescript@5.9.3)
@@ -1714,12 +1708,6 @@ packages:
 
   '@import-maps/resolve@2.0.0':
     resolution: {integrity: sha512-RwzRTpmrrS6Q1ZhQExwuxJGK1Wqhv4stt+OF2JzS+uawewpwNyU7EJL1WpBex7aDiiGLs4FsXGkfUBdYuX7xiQ==}
-
-  '@inkjs/ui@2.0.0':
-    resolution: {integrity: sha512-5+8fJmwtF9UvikzLfph9sA+LS+l37Ij/szQltkuXLOAXwNkBX9innfzh4pLGXIB59vKEQUtc6D4qGvhD7h3pAg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      ink: '>=5'
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -5707,19 +5695,6 @@ packages:
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
-
-  ink@6.6.0:
-    resolution: {integrity: sha512-QDt6FgJxgmSxAelcOvOHUvFxbIUjVpCH5bx+Slvc5m7IEcpGt3dYwbz/L+oRnqEGeRvwy1tineKK4ect3nW1vQ==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@types/react': '>=19.0.0'
-      react: '>=19.0.0'
-      react-devtools-core: ^6.1.2
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react-devtools-core:
-        optional: true
 
   install-artifact-from-github@1.7.0:
     resolution: {integrity: sha512-qAb91yAKVF9rFY4rVP21ZtYUyCScxAFt9udwzVWNLBE1pQcdQeB2gd1HlNPcQNYCzCDvJ/QJQPuWQ6aTmSlU8g==}
@@ -9917,14 +9892,6 @@ snapshots:
     optional: true
 
   '@import-maps/resolve@2.0.0': {}
-
-  '@inkjs/ui@2.0.0(ink@6.6.0(@types/react@19.2.18)(react@19.2.8))':
-    dependencies:
-      chalk: 5.6.2
-      cli-spinners: 3.3.0
-      deepmerge: 4.3.1
-      figures: 6.1.0
-      ink: 6.6.0(@types/react@19.2.18)(react@19.2.8)
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -14336,38 +14303,6 @@ snapshots:
   index-to-position@1.2.0: {}
 
   inherits@2.0.4: {}
-
-  ink@6.6.0(@types/react@19.2.18)(react@19.2.8):
-    dependencies:
-      '@alcalzone/ansi-tokenize': 0.2.3
-      ansi-escapes: 7.2.0
-      ansi-styles: 6.2.3
-      auto-bind: 5.0.1
-      chalk: 5.6.2
-      cli-boxes: 3.0.0
-      cli-cursor: 4.0.0
-      cli-truncate: 5.1.1
-      code-excerpt: 4.0.0
-      es-toolkit: 1.50.0
-      indent-string: 5.0.0
-      is-in-ci: 2.0.0
-      patch-console: 2.0.0
-      react: 19.2.8
-      react-reconciler: 0.33.0(react@19.2.8)
-      signal-exit: 3.0.7
-      slice-ansi: 7.1.2
-      stack-utils: 2.0.6
-      string-width: 8.1.0
-      type-fest: 4.41.0
-      widest-line: 5.0.0
-      wrap-ansi: 9.0.2
-      ws: 8.18.3
-      yoga-layout: 3.2.1
-    optionalDependencies:
-      '@types/react': 19.2.18
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   install-artifact-from-github@1.7.0: {}
 

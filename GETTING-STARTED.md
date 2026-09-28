@@ -176,7 +176,7 @@ open http://localhost:4321
 
 ```bash
 # 添加新图片/文章后，先本地运行：
-pnpm koharu generate all
+pnpm generate:all
 
 # 然后提交更改
 git add src/assets/*.json
@@ -255,130 +255,43 @@ bgm:
 
 ### 内容生成（可选）
 
-使用 Koharu CLI 生成内容资产：
+按需运行内容资产生成任务：
 
 ```bash
-# 交互式选择生成类型
-pnpm koharu generate
-
-# 或直接指定类型
-pnpm koharu generate lqips        # 生成 LQIP 图片占位符，提升加载体验
-pnpm koharu generate similarities # 生成语义相似度向量，推荐相关文章
-pnpm koharu generate summaries    # 生成 AI 摘要
-pnpm koharu generate all          # 生成全部
+pnpm generate:lqips         # 生成 LQIP 图片占位符
+pnpm generate:similarities  # 生成相关文章所需的相似度数据
+pnpm generate:summaries     # 生成 AI 摘要
+pnpm generate:all           # 依次执行以上全部任务
 ```
 
 ## 常用命令
 
-| 命令                   | 说明                                      |
-| ---------------------- | ----------------------------------------- |
-| `pnpm dev`             | 启动开发服务器                            |
-| `pnpm build`           | 构建生产版本                              |
-| `pnpm preview`         | 预览生产构建                              |
-| `pnpm lint`            | 代码检查                                  |
-| `pnpm koharu`          | 交互式 CLI 菜单                           |
-| `pnpm koharu backup`   | 备份博客内容（--full 完整备份）           |
-| `pnpm koharu restore`  | 从备份恢复（--latest 还原最新）           |
-| `pnpm koharu update`   | 更新主题（--check, --clean, --rebase 等） |
-| `pnpm koharu generate` | 生成内容资产                              |
-| `pnpm koharu clean`    | 清理旧备份（--keep N 保留 N 个）          |
-| `pnpm koharu list`     | 查看所有备份                              |
+| 命令 | 说明 |
+| --- | --- |
+| `pnpm dev` | 启动开发服务器 |
+| `pnpm build` | 构建生产版本 |
+| `pnpm preview` | 预览生产构建 |
+| `pnpm lint` | 代码检查 |
+| `pnpm generate:all` | 生成全部内容资产 |
 
 ## 7. 更新主题
 
-当主题发布新版本时，你可以按以下步骤更新，同时保留你的个人内容。
-
-### 使用 CLI 更新（推荐）
-
-使用 Koharu CLI 一键更新主题，自动完成备份 → 拉取 → 合并 → 安装依赖的全流程：
+更新前先提交或备份个人文章、配置和上传文件，再通过 Git 合并上游版本。合并冲突需要按文件检查并解决，尤其注意自己的内容和配置。
 
 ```bash
-# 完整更新流程（默认会先备份）
-pnpm koharu update
-
-# 仅检查是否有更新
-pnpm koharu update --check
-
-# 跳过备份直接更新
-pnpm koharu update --skip-backup
-
-# clean 模式（零冲突，适合首次迁移或冲突较多时）
-pnpm koharu update --clean
-
-# rebase 模式（重写历史，适合熟悉 git 的用户）
-pnpm koharu update --rebase
-
-# 预览操作（不实际执行）
-pnpm koharu update --dry-run
-
-# 更新到指定版本
-pnpm koharu update --tag v2.1.0
-```
-
-**三种更新模式：**
-
-| 模式       | 命令                          | 适合场景           | 备份 |
-| ---------- | ----------------------------- | ------------------ | ---- |
-| **默认**   | `pnpm koharu update`          | 日常更新           | 可选 |
-| **Clean**  | `pnpm koharu update --clean`  | 首次迁移、冲突较多 | 强制 |
-| **Rebase** | `pnpm koharu update --rebase` | 熟悉 git 的用户    | 强制 |
-
-- **默认模式**：使用 `git merge` 合并上游更新。用户内容（博客文章、配置等）冲突会自动保留本地版本，仅主题文件冲突需手动解决。
-- **Clean 模式**：用上游最新版本替换所有主题文件，再从备份还原你的用户内容，实现零冲突。**注意：你对主题文件的自定义修改不会被保留。**
-- **Rebase 模式**：将你的本地提交重放到上游之上，重写提交历史。适合对 git 有一定了解的用户。
-
-> **💡 给熟悉 git 的用户：** CLI 更新命令是对 git 操作的封装便利工具。如果你对 git 比较熟悉，完全可以直接使用 `git fetch upstream && git rebase upstream/main`（或 `git merge`）手动操作，这样能更精确地控制合并过程。
-
-更新过程中会自动：
-
-1. 检查工作区状态
-2. 备份你的个人内容（可选，clean/rebase 模式强制备份）
-3. 设置 upstream remote（如果没有）
-4. 获取最新代码
-5. 显示新提交列表和更新日志
-6. 合并更新（根据所选模式）
-7. 安装依赖
-
-如果遇到合并冲突，CLI 会显示冲突文件列表并提供解决指引。用户内容的冲突会被自动解决（保留本地版本）。
-
-### 手动更新
-
-如果你更喜欢手动操作：
-
-```bash
-# 1. 先备份你的个人内容
-pnpm koharu backup --full
-
-# 2. 添加上游仓库（只需执行一次）
+# 首次更新时添加上游仓库
 git remote add upstream https://github.com/cosZone/astro-koharu.git
 
-# 3. 获取最新代码
+# 获取并合并上游更新
 git fetch upstream
-
-# 4. 合并更新到你的分支
 git merge upstream/main
 
-# 5. 解决可能的冲突，然后安装依赖
+# 更新依赖并验证
 pnpm install
-
-# 6. 测试是否正常
-pnpm dev
+pnpm build
 ```
 
-### 还原备份
-
-如果更新后需要还原备份：
-
-```bash
-# 查看所有备份
-pnpm koharu list
-
-# 预览将要还原的文件
-pnpm koharu restore --dry-run
-
-# 还原最新备份
-pnpm koharu restore --latest
-```
+已有 `upstream` 远程仓库时跳过第一条命令。需要恢复内容时，使用更新前自行创建的备份或 Git 提交。
 
 ### 更新后检查
 
