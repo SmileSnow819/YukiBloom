@@ -1,0 +1,80 @@
+{
+  "document": "全部",
+  "method": "PUT",
+  "operation": {
+    "consumes": ["application/json"],
+    "description": "需要登录和 CSRF 令牌；请求会替换全部地点、停留记录和路线。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "完整足迹数据",
+        "in": "body",
+        "name": "footprints",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/personal.Footprints"
+        }
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "保存后的足迹数据",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/personal.Footprints"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，足迹数据无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，足迹版本冲突",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，保存失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "整体保存足迹",
+    "tags": ["管理个人内容"]
+  },
+  "path": "/api/v1/admin/footprints"
+}

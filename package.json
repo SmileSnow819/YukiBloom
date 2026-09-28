@@ -3,6 +3,9 @@
   "type": "module",
   "version": "3.3.1",
   "scripts": {
+    "api:update": "node tools/api-cache.mjs update",
+    "api:check": "node tools/api-cache.mjs check",
+    "api:test": "node --test tools/api-cache.test.mjs",
     "dev": "astro dev",
     "generate:lqips": "npx tsx src/scripts/generateLqips.ts",
     "generate:similarities": "npx tsx src/scripts/generateSimilarities.ts",

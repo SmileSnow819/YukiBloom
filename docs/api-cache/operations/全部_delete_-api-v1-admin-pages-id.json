@@ -1,0 +1,65 @@
+{
+  "document": "全部",
+  "method": "DELETE",
+  "operation": {
+    "description": "需要登录和 CSRF 令牌。",
+    "parameters": [
+      {
+        "description": "页面 UUID",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "删除成功，data 为 null",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "400": {
+        "description": "code=10001，页面 ID 格式错误",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，页面不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，删除失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "删除页面",
+    "tags": ["管理页面"]
+  },
+  "path": "/api/v1/admin/pages/{id}"
+}

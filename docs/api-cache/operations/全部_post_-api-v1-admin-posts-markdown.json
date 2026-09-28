@@ -1,0 +1,90 @@
+{
+  "document": "全部",
+  "method": "POST",
+  "operation": {
+    "consumes": ["multipart/form-data"],
+    "description": "需要登录和 CSRF 令牌。若 Markdown 含封面，先上传图片并传入 coverMediaId。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "Markdown 文件，最大 2 MiB",
+        "in": "formData",
+        "name": "file",
+        "required": true,
+        "type": "file"
+      },
+      {
+        "description": "语言代码，默认 zh-CN",
+        "in": "formData",
+        "name": "locale",
+        "type": "string"
+      },
+      {
+        "description": "已上传封面图片的 ID",
+        "in": "formData",
+        "name": "coverMediaId",
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "201": {
+        "description": "新建文章草稿",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/posts.Post"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，Markdown 或封面信息无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，文章链接标识已被占用",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "413": {
+        "description": "code=10006，文件超过 2 MiB",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "上传 Markdown 并保存为草稿",
+    "tags": ["Markdown 导入"]
+  },
+  "path": "/api/v1/admin/posts/markdown"
+}

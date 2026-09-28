@@ -1,0 +1,43 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "需要先通过管理员登录接口登录；响应包含未公开条目和 version。",
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "完整站点内容",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Content"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询后台站点内容",
+    "tags": ["管理站点内容"]
+  },
+  "path": "/api/v1/admin/site-content"
+}

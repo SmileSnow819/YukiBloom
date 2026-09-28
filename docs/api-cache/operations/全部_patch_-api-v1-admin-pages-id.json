@@ -1,0 +1,93 @@
+{
+  "document": "全部",
+  "method": "PATCH",
+  "operation": {
+    "consumes": ["application/json"],
+    "description": "需要登录和 CSRF 令牌。请求中的 version 必须与查询页面时一致，否则返回冲突。",
+    "parameters": [
+      {
+        "description": "页面 UUID",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "页面新内容及当前 version",
+        "in": "body",
+        "name": "page",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/sitecontent.Page"
+        }
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "更新后的页面",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Page"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，页面内容、ID 或版本无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，页面不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，页面版本或链接标识冲突",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，保存失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "更新页面草稿",
+    "tags": ["管理页面"]
+  },
+  "path": "/api/v1/admin/pages/{id}"
+}

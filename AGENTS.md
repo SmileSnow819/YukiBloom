@@ -138,6 +138,8 @@ pages/ → components/ → hooks/ → lib/ → constants/
 
 **Bangumi Page**: Optional media tracking page integrating [Bangumi API](https://api.bgm.tv). Configured via `bangumi` section in `config/site.yaml` — comment out to disable (page + navigation auto-hidden). Data fetched client-side in React (`BangumiCollection` component with `client:load`). Types in `src/types/bangumi.ts`, API client in `src/lib/bangumi/`, data hook in `src/hooks/useBangumiData.ts`. Navigation item auto-injected via `routers` in `src/constants/site-config.ts`.
 
+**Backend API Docs Cache**: `tools/api-cache.mjs` reads the sibling backend's Swagger 2 document from `API_CACHE_SOURCE_FILE` (see `.env.example`) and writes `docs/api-cache/summary.md`, the full document, and per-operation JSON files. Run `pnpm api:update` after backend API changes and `pnpm api:check` to detect stale cached contracts. Use the cache as the source for frontend API integration; do not invent endpoints or fields.
+
 **Theme System**: Dark/light toggle with localStorage, inline check in `<head>` prevents FOUC.
 
 **i18n System**: Two-layer translation architecture with locale-aware routing.
@@ -375,6 +377,7 @@ Keep business logic pure, framework calls at boundaries.
 
 ### Internal References
 - Core utilities: `src/lib/content/`, `src/lib/utils.ts`
+- Backend API contracts: `docs/api-cache/summary.md`, `docs/api-cache/operations/`
 - Reusable hooks: `src/hooks/`
 - Animation presets: `src/constants/anim/`
 - Site configuration: `src/constants/site-config.ts`

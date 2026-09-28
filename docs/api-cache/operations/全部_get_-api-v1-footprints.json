@@ -1,0 +1,36 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "地点、停留记录和路线",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/personal.Footprints"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询公开足迹",
+    "tags": ["个人内容"]
+  },
+  "path": "/api/v1/footprints"
+}

@@ -1,0 +1,64 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "parameters": [
+      {
+        "description": "文章链接标识",
+        "in": "path",
+        "name": "slug",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "语言代码，例如 zh-CN",
+        "in": "query",
+        "name": "locale",
+        "required": true,
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "文章详情",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/posts.Post"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，语言代码无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，文章不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "按链接标识查询公开文章",
+    "tags": ["文章"]
+  },
+  "path": "/api/v1/posts/{slug}"
+}

@@ -105,7 +105,7 @@ pnpm dev
 - [可开关] 圣诞特辑：包含雪花飘落、圣诞配色、圣诞帽装饰、灯串装饰等节日氛围效果
 - 无后端站点公告系统：可通过配置文件管理公告，支持时间控制、多条公告堆叠、自定义颜色、hover 已读
 - 有样式的 [RSS](https://blog.cosine.ren/rss.xml) 订阅源链接
-- **本地轻 CMS 应用**：运行 `pnpm cms` 启动独立的 CMS 管理界面，支持文章管理、浏览器内编辑、Markdown 预览等功能。文章页的编辑按钮支持一键跳转到本地编辑器（VS Code / Cursor / Zed），配置见 `config/site.yaml` 的 `dev` 部分。(后期会考虑做个有后端的版本，这期先静态)
+- **本地轻 CMS 应用**：运行 `pnpm cms` 启动独立的 CMS 管理界面，支持文章管理、浏览器内编辑、Markdown 预览等功能。文章页的编辑按钮支持一键跳转到本地编辑器（VS Code / Cursor / Zed），配置见 `config/site.yaml` 的 `dev` 部分。（后期会考虑做个有后端的版本，这期先静态）
 
 ## 内容资产生成
 
@@ -119,6 +119,12 @@ pnpm generate:all           # 依次执行全部生成任务
 ```
 
 文章内容和友链在对应内容文件与 `config/site.yaml` 中管理；主题更新使用 Git，更新前请自行备份个人内容。
+
+### 后端 API 文档缓存
+
+将 `.env.example` 中的 `API_CACHE_SOURCE_FILE` 配置复制到本地 `.env`，指向后端的 `api-docs/swagger.json`。运行 `pnpm api:update` 后，`docs/api-cache/` 会生成完整 Swagger 文档、按接口拆分的 JSON、清单和摘要；运行 `pnpm api:check` 可检查缓存是否与源文件一致。缓存不会记录源文件的绝对路径。工具只依赖 Node.js 22 或更新版本，其他项目可以复制 `tools/api-cache.mjs` 并配置 `API_CACHE_SOURCE_FILE`、`API_CACHE_OUTPUT_DIR` 复用。
+
+若改用远端 Springdoc，可改配 `API_CACHE_SOURCE_URL`，并按需设置 `API_CACHE_TOKEN`。两种来源配置只选一种。生成的 Swagger 内容可能包含上游写入的内部信息，提交缓存前仍需检查。
 
 ## 构建缓存
 

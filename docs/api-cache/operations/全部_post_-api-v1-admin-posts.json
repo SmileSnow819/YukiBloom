@@ -1,0 +1,80 @@
+{
+  "document": "全部",
+  "method": "POST",
+  "operation": {
+    "consumes": ["application/json"],
+    "description": "需要登录；写请求需在 X-CSRF-Token 请求头传入登录响应中的 csrfToken。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "文章内容",
+        "in": "body",
+        "name": "post",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/posts.PostInput"
+        }
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "201": {
+        "description": "创建后的草稿",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/posts.Post"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，请求内容无效或封面图片不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，语言和链接标识已被占用",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，保存失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "创建文章草稿",
+    "tags": ["管理文章"]
+  },
+  "path": "/api/v1/admin/posts"
+}

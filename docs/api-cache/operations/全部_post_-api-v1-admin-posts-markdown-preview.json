@@ -1,0 +1,79 @@
+{
+  "document": "全部",
+  "method": "POST",
+  "operation": {
+    "consumes": ["multipart/form-data"],
+    "description": "需要登录和 CSRF 令牌。上传 Markdown 文件并解析 frontmatter，不保存文章。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "Markdown 文件，最大 2 MiB",
+        "in": "formData",
+        "name": "file",
+        "required": true,
+        "type": "file"
+      },
+      {
+        "description": "语言代码，默认 zh-CN",
+        "in": "formData",
+        "name": "locale",
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "文章预览及封面路径",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，Markdown 格式无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "413": {
+        "description": "code=10006，文件超过 2 MiB",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "预览 Markdown 文章",
+    "tags": ["Markdown 导入"]
+  },
+  "path": "/api/v1/admin/posts/markdown/preview"
+}

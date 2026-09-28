@@ -1,0 +1,44 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "需要先通过管理员登录接口登录，结果包含草稿和已发布页面。",
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "页面列表",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询后台页面列表",
+    "tags": ["管理页面"]
+  },
+  "path": "/api/v1/admin/pages"
+}

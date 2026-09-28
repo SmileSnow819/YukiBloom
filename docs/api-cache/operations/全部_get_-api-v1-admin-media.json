@@ -1,0 +1,66 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "需要先通过管理员登录接口登录。",
+    "parameters": [
+      {
+        "default": 1,
+        "description": "页码，默认 1",
+        "in": "query",
+        "name": "page",
+        "type": "integer"
+      },
+      {
+        "default": 20,
+        "description": "每页数量，默认 20，最大 100",
+        "in": "query",
+        "name": "limit",
+        "type": "integer"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "包含 items、page、limit、total 的分页结果",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，分页参数无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询图片库",
+    "tags": ["管理图片"]
+  },
+  "path": "/api/v1/admin/media"
+}

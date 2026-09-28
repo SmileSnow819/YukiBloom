@@ -1,0 +1,33 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "服务正常",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      }
+    },
+    "summary": "检查 API 服务状态",
+    "tags": ["服务状态"]
+  },
+  "path": "/api/v1/health"
+}

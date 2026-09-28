@@ -1,0 +1,81 @@
+{
+  "document": "全部",
+  "method": "PUT",
+  "operation": {
+    "consumes": ["application/json"],
+    "description": "需要登录和 CSRF 令牌；请求会替换全部经历条目。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "包含 items 实习经历数组",
+        "in": "body",
+        "name": "timeline",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/personal.TimelineInput"
+        }
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "保存后的时间线",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，时间线数据无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，实习经历版本冲突",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，保存失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "整体保存实习经历",
+    "tags": ["管理个人内容"]
+  },
+  "path": "/api/v1/admin/timeline"
+}

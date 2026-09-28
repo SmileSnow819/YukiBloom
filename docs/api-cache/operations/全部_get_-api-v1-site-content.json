@@ -1,0 +1,37 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "返回公开站点资料、导航、精选内容、公告、已审核友链及音乐信息。",
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "公开站点内容",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Content"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询公开站点内容",
+    "tags": ["站点内容"]
+  },
+  "path": "/api/v1/site-content"
+}

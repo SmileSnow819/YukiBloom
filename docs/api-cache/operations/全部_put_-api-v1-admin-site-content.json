@@ -1,0 +1,80 @@
+{
+  "document": "全部",
+  "method": "PUT",
+  "operation": {
+    "consumes": ["application/json"],
+    "description": "需要登录和 CSRF 令牌。必须提交查询时取得的 version，旧版本会返回冲突。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "完整站点内容及当前 version",
+        "in": "body",
+        "name": "content",
+        "required": true,
+        "schema": {
+          "$ref": "#/definitions/sitecontent.Content"
+        }
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "保存后的站点内容",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Content"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，站点内容无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "409": {
+        "description": "code=10005，版本冲突或内容标识重复",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，保存失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "整体保存站点内容",
+    "tags": ["管理站点内容"]
+  },
+  "path": "/api/v1/admin/site-content"
+}

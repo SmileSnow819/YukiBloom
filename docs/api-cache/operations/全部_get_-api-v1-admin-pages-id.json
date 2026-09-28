@@ -1,0 +1,64 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "需要先通过管理员登录接口登录。",
+    "parameters": [
+      {
+        "description": "页面 UUID",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "页面详情",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Page"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，页面 ID 格式错误",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，页面不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询后台页面详情",
+    "tags": ["管理页面"]
+  },
+  "path": "/api/v1/admin/pages/{id}"
+}

@@ -1,0 +1,64 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "parameters": [
+      {
+        "description": "页面链接标识",
+        "in": "path",
+        "name": "slug",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "语言代码，例如 zh-CN",
+        "in": "query",
+        "name": "locale",
+        "required": true,
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "页面内容",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/sitecontent.Page"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，语言代码无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，页面不存在或尚未发布",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询公开独立页面",
+    "tags": ["页面"]
+  },
+  "path": "/api/v1/pages/{slug}"
+}

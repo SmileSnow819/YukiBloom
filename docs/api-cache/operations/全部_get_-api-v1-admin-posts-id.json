@@ -1,0 +1,64 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "需要先通过管理员登录接口登录。",
+    "parameters": [
+      {
+        "description": "文章 UUID",
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "type": "string"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "文章详情，包含草稿正文和版本号",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/posts.Post"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，文章 ID 格式错误",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "404": {
+        "description": "code=10004，文章不存在",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，查询失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询后台文章详情",
+    "tags": ["管理文章"]
+  },
+  "path": "/api/v1/admin/posts/{id}"
+}

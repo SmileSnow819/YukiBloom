@@ -1,0 +1,356 @@
+{
+  "version": 2,
+  "generatedAt": "2026-09-28T16:39:43.770Z",
+  "documents": [
+    {
+      "name": "全部",
+      "slug": "全部",
+      "file": "openapi/全部.json",
+      "sha256": "1eea6befbd039af305da8e14ca09394a802db7bf90b99a7e3701b4a8f64d46c5",
+      "pathCount": 26,
+      "operationCount": 34
+    }
+  ],
+  "operations": [
+    {
+      "id": "全部_put_-api-v1-admin-footprints",
+      "document": "全部",
+      "method": "PUT",
+      "path": "/api/v1/admin/footprints",
+      "summary": "整体保存足迹",
+      "tags": ["管理个人内容"],
+      "file": "operations/全部_put_-api-v1-admin-footprints.json",
+      "sha256": "4bbeb29451bd29c035231f3dba4824296aff4fd8c4a4a0febaae0e76712d9633"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-login",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/login",
+      "summary": "管理员登录",
+      "tags": ["管理员会话"],
+      "file": "operations/全部_post_-api-v1-admin-login.json",
+      "sha256": "279aec0213df2bd18032b5906c1455c22a33e264f6c084dee5c84f4d98f0ada0"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-logout",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/logout",
+      "summary": "管理员退出",
+      "tags": ["管理员会话"],
+      "file": "operations/全部_post_-api-v1-admin-logout.json",
+      "sha256": "80c7ce2724e59e5be9baabe308c24d8c1afb340930253fc907ce7ad4203d31af"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-media",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/media",
+      "summary": "查询图片库",
+      "tags": ["管理图片"],
+      "file": "operations/全部_get_-api-v1-admin-media.json",
+      "sha256": "19221ba5821e70db287e505059368c41c0d54aa96ffebd6bf83f7d9a22fdd257"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-media",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/media",
+      "summary": "上传图片",
+      "tags": ["管理图片"],
+      "file": "operations/全部_post_-api-v1-admin-media.json",
+      "sha256": "50e77801258474af4cb23ba73d58b7175a46bf1562869055489617a90b1791f8"
+    },
+    {
+      "id": "全部_delete_-api-v1-admin-media-id",
+      "document": "全部",
+      "method": "DELETE",
+      "path": "/api/v1/admin/media/{id}",
+      "summary": "删除未引用图片",
+      "tags": ["管理图片"],
+      "file": "operations/全部_delete_-api-v1-admin-media-id.json",
+      "sha256": "73cbb710bad11366ed3245fdd221112da9cdf83f1676ffcf532c6c23a4b399ff"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-pages",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/pages",
+      "summary": "查询后台页面列表",
+      "tags": ["管理页面"],
+      "file": "operations/全部_get_-api-v1-admin-pages.json",
+      "sha256": "c3b44bace83337291f94462faf857d848ee7ba8c438dff2e9110e5aec083b752"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-pages",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/pages",
+      "summary": "创建页面草稿",
+      "tags": ["管理页面"],
+      "file": "operations/全部_post_-api-v1-admin-pages.json",
+      "sha256": "02ac20aba63676d4cac61d5612c41c29a09407ea862e5c43c16b88986d4154d9"
+    },
+    {
+      "id": "全部_delete_-api-v1-admin-pages-id",
+      "document": "全部",
+      "method": "DELETE",
+      "path": "/api/v1/admin/pages/{id}",
+      "summary": "删除页面",
+      "tags": ["管理页面"],
+      "file": "operations/全部_delete_-api-v1-admin-pages-id.json",
+      "sha256": "179dda63666c42f35cce43830487f596058edb87d8ae2e61cd88dc8219baf434"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-pages-id",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/pages/{id}",
+      "summary": "查询后台页面详情",
+      "tags": ["管理页面"],
+      "file": "operations/全部_get_-api-v1-admin-pages-id.json",
+      "sha256": "e2a7aec5e74f4171a0c510d068862cdd83c943fc6e307ec5bcd028a96da3879c"
+    },
+    {
+      "id": "全部_patch_-api-v1-admin-pages-id",
+      "document": "全部",
+      "method": "PATCH",
+      "path": "/api/v1/admin/pages/{id}",
+      "summary": "更新页面草稿",
+      "tags": ["管理页面"],
+      "file": "operations/全部_patch_-api-v1-admin-pages-id.json",
+      "sha256": "9992cb6695139ff866dfd6a32b56aa690de5bc9f47ce9dc4cec026f2ed074d9b"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-pages-id-publish",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/pages/{id}/publish",
+      "summary": "发布页面",
+      "tags": ["管理页面"],
+      "file": "operations/全部_post_-api-v1-admin-pages-id-publish.json",
+      "sha256": "376103d8813af5f080b61311893b0ec678e2ee593118ff0f0d87275444bfb3ed"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-pages-id-unpublish",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/pages/{id}/unpublish",
+      "summary": "撤回页面",
+      "tags": ["管理页面"],
+      "file": "operations/全部_post_-api-v1-admin-pages-id-unpublish.json",
+      "sha256": "40597b32e169ecfa3b950cb12a2a42bec2d2289a9dbcdd4ddaab1f26744b7590"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-posts",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/posts",
+      "summary": "查询后台文章列表",
+      "tags": ["管理文章"],
+      "file": "operations/全部_get_-api-v1-admin-posts.json",
+      "sha256": "e09d3ecc5fd7aa511184733d26b41527453a2bda2deea0ee4b0ce6026b9b8d9d"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-posts",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/posts",
+      "summary": "创建文章草稿",
+      "tags": ["管理文章"],
+      "file": "operations/全部_post_-api-v1-admin-posts.json",
+      "sha256": "235143e6bf240a9867c50990702530a4886856749ccae9c486c53f036344501b"
+    },
+    {
+      "id": "全部_delete_-api-v1-admin-posts-id",
+      "document": "全部",
+      "method": "DELETE",
+      "path": "/api/v1/admin/posts/{id}",
+      "summary": "删除文章",
+      "tags": ["管理文章"],
+      "file": "operations/全部_delete_-api-v1-admin-posts-id.json",
+      "sha256": "30a69698cd1923f38d903571dbb93e9e4eff9ae36b9ab492e19552b02b450343"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-posts-id",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/posts/{id}",
+      "summary": "查询后台文章详情",
+      "tags": ["管理文章"],
+      "file": "operations/全部_get_-api-v1-admin-posts-id.json",
+      "sha256": "bc0155b4333d8ba76c4360d3043b9302ae09d180c18eea71e3aefede1b03e9bf"
+    },
+    {
+      "id": "全部_patch_-api-v1-admin-posts-id",
+      "document": "全部",
+      "method": "PATCH",
+      "path": "/api/v1/admin/posts/{id}",
+      "summary": "修改文章",
+      "tags": ["管理文章"],
+      "file": "operations/全部_patch_-api-v1-admin-posts-id.json",
+      "sha256": "8a64e22c4292acfb5c377dbcc75a340468af57de2e0f073d9c8732c53159af12"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-posts-id-publish",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/posts/{id}/publish",
+      "summary": "发布文章",
+      "tags": ["管理文章"],
+      "file": "operations/全部_post_-api-v1-admin-posts-id-publish.json",
+      "sha256": "7847a0c641274ddae7043ea15b5bd31bb225f8583e007a776b2d67bf8a2ad85f"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-posts-id-unpublish",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/posts/{id}/unpublish",
+      "summary": "撤回文章",
+      "tags": ["管理文章"],
+      "file": "operations/全部_post_-api-v1-admin-posts-id-unpublish.json",
+      "sha256": "96930763986a76166a36da9d491f1f240b1a829e7ce8bd4fb5fbfa36d3d4c00b"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-posts-markdown",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/posts/markdown",
+      "summary": "上传 Markdown 并保存为草稿",
+      "tags": ["Markdown 导入"],
+      "file": "operations/全部_post_-api-v1-admin-posts-markdown.json",
+      "sha256": "05808a80e94d87d09399aa278a2b1c888b5943216e7cc531548415787b10548b"
+    },
+    {
+      "id": "全部_post_-api-v1-admin-posts-markdown-preview",
+      "document": "全部",
+      "method": "POST",
+      "path": "/api/v1/admin/posts/markdown/preview",
+      "summary": "预览 Markdown 文章",
+      "tags": ["Markdown 导入"],
+      "file": "operations/全部_post_-api-v1-admin-posts-markdown-preview.json",
+      "sha256": "c4bc2702fb16aae36135a9bd4719c1bd7a0ce886fa4b0b793eb64cc9fa823039"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-session",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/session",
+      "summary": "查询管理员会话",
+      "tags": ["管理员会话"],
+      "file": "operations/全部_get_-api-v1-admin-session.json",
+      "sha256": "c5f49db75dda5e92bd6b08ca8c459a283fe5ea8a2c93c8a583624abb6aa2b469"
+    },
+    {
+      "id": "全部_get_-api-v1-admin-site-content",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/admin/site-content",
+      "summary": "查询后台站点内容",
+      "tags": ["管理站点内容"],
+      "file": "operations/全部_get_-api-v1-admin-site-content.json",
+      "sha256": "5671283137a49801f5ad4a98ea962dbd15d5426aca44da38eb327c80c0f90822"
+    },
+    {
+      "id": "全部_put_-api-v1-admin-site-content",
+      "document": "全部",
+      "method": "PUT",
+      "path": "/api/v1/admin/site-content",
+      "summary": "整体保存站点内容",
+      "tags": ["管理站点内容"],
+      "file": "operations/全部_put_-api-v1-admin-site-content.json",
+      "sha256": "1f0110ec546074a4f1966bb7aa8ae1fb5001cb22d67014c02f1d3333801e6528"
+    },
+    {
+      "id": "全部_put_-api-v1-admin-timeline",
+      "document": "全部",
+      "method": "PUT",
+      "path": "/api/v1/admin/timeline",
+      "summary": "整体保存实习经历",
+      "tags": ["管理个人内容"],
+      "file": "operations/全部_put_-api-v1-admin-timeline.json",
+      "sha256": "af001618327483d3dade870f2cc6237702c146ab5ed226d0f8b49dcf31cc09f6"
+    },
+    {
+      "id": "全部_get_-api-v1-footprints",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/footprints",
+      "summary": "查询公开足迹",
+      "tags": ["个人内容"],
+      "file": "operations/全部_get_-api-v1-footprints.json",
+      "sha256": "8c5b667b51808391c816721fe4e8ac384932daa639416f22238a319ea8428ab0"
+    },
+    {
+      "id": "全部_get_-api-v1-health",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/health",
+      "summary": "检查 API 服务状态",
+      "tags": ["服务状态"],
+      "file": "operations/全部_get_-api-v1-health.json",
+      "sha256": "bf0383e48398e52b48a92c4d66793e9088ad087c27522b465d9dc0163926675d"
+    },
+    {
+      "id": "全部_get_-api-v1-pages-slug",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/pages/{slug}",
+      "summary": "查询公开独立页面",
+      "tags": ["页面"],
+      "file": "operations/全部_get_-api-v1-pages-slug.json",
+      "sha256": "194f41ebcf48d6372cc296cd6ff79947ecc4e49aa3ca2aff3ae450a90de4ce8d"
+    },
+    {
+      "id": "全部_get_-api-v1-posts",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/posts",
+      "summary": "查询公开文章列表",
+      "tags": ["文章"],
+      "file": "operations/全部_get_-api-v1-posts.json",
+      "sha256": "21967c7c011d2ebcf54171f3a2da45f98b88838d1ef528c5ed8113f1ee1d9cdb"
+    },
+    {
+      "id": "全部_get_-api-v1-posts-slug",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/posts/{slug}",
+      "summary": "按链接标识查询公开文章",
+      "tags": ["文章"],
+      "file": "operations/全部_get_-api-v1-posts-slug.json",
+      "sha256": "df60e7214428f926e441b23da2b1af4c940107684163fe274405129793d49e32"
+    },
+    {
+      "id": "全部_get_-api-v1-site-content",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/site-content",
+      "summary": "查询公开站点内容",
+      "tags": ["站点内容"],
+      "file": "operations/全部_get_-api-v1-site-content.json",
+      "sha256": "900f6957baab5d11e0e3253c17021cca8d113d690b98d063334b4d82fe5f4323"
+    },
+    {
+      "id": "全部_get_-api-v1-timeline",
+      "document": "全部",
+      "method": "GET",
+      "path": "/api/v1/timeline",
+      "summary": "查询公开实习经历",
+      "tags": ["个人内容"],
+      "file": "operations/全部_get_-api-v1-timeline.json",
+      "sha256": "d68591b1030c66b1ebf9fb68e08f142cc21dba9afd1ef398f074412cd5970f15"
+    },
+    {
+      "id": "全部_get_-uploads-key",
+      "document": "全部",
+      "method": "GET",
+      "path": "/uploads/{key}",
+      "summary": "获取公开图片文件",
+      "tags": ["图片"],
+      "file": "operations/全部_get_-uploads-key.json",
+      "sha256": "e9c15bb34059696656255e86459c78b02fee6ead271258a2d81eb82c2f69cf5b"
+    }
+  ]
+}

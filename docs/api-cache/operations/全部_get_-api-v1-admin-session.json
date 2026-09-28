@@ -1,0 +1,40 @@
+{
+  "document": "全部",
+  "method": "GET",
+  "operation": {
+    "description": "浏览器需携带登录接口设置的 yb_session Cookie。",
+    "produces": ["application/json"],
+    "responses": {
+      "200": {
+        "description": "当前会话已认证",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "additionalProperties": {
+                    "type": "boolean"
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录或会话已过期",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "查询管理员会话",
+    "tags": ["管理员会话"]
+  },
+  "path": "/api/v1/admin/session"
+}

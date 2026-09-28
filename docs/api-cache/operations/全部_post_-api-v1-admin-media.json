@@ -1,0 +1,78 @@
+{
+  "document": "全部",
+  "method": "POST",
+  "operation": {
+    "consumes": ["multipart/form-data"],
+    "description": "需要登录和 CSRF 令牌。表单字段 file 接受 JPEG、PNG 或 WebP，文件最大 10 MiB。",
+    "parameters": [
+      {
+        "description": "登录接口返回的 csrfToken",
+        "in": "header",
+        "name": "X-CSRF-Token",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "description": "图片文件",
+        "in": "formData",
+        "name": "file",
+        "required": true,
+        "type": "file"
+      }
+    ],
+    "produces": ["application/json"],
+    "responses": {
+      "201": {
+        "description": "图片记录",
+        "schema": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/apiresponse.Envelope"
+            },
+            {
+              "properties": {
+                "data": {
+                  "$ref": "#/definitions/media.Item"
+                }
+              },
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "400": {
+        "description": "code=10001，图片格式或请求无效",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "401": {
+        "description": "code=10002，尚未登录",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "403": {
+        "description": "code=10003，CSRF 校验失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "413": {
+        "description": "code=10006，图片超过大小限制",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      },
+      "500": {
+        "description": "code=50000，上传失败",
+        "schema": {
+          "$ref": "#/definitions/apiresponse.Envelope"
+        }
+      }
+    },
+    "summary": "上传图片",
+    "tags": ["管理图片"]
+  },
+  "path": "/api/v1/admin/media"
+}
