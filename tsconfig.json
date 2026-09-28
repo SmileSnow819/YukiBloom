@@ -18,7 +18,8 @@
       "@constants/*": ["constants/*"],
       "@hooks/*": ["hooks/*"],
       "@store/*": ["store/*"],
-      "@types/*": ["types/*"]
+      "@types/*": ["types/*"],
+      "@admin-ui/*": ["components/admin/cms-ui/*"]
     }
   }
 }

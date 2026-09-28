@@ -219,6 +219,11 @@ export default defineConfig({
     enabled: true,
   },
   vite: {
+    resolve: {
+      alias: {
+        '@admin-ui': path.resolve(process.cwd(), 'src/components/admin/cms-ui'),
+      },
+    },
     // Keep the development dependency optimizer separate from production builds.
     cacheDir: process.argv.includes('build') ? './node_modules/.vite-build' : './node_modules/.vite-dev',
     server: {

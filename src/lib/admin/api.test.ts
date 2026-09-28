@@ -3,9 +3,39 @@ import { afterEach, test } from 'node:test';
 import { adminRequest, setCsrfToken } from './api';
 
 const originalFetch = globalThis.fetch;
+const originalLocalStorage = globalThis.localStorage;
+const originalSessionStorage = globalThis.sessionStorage;
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: originalLocalStorage });
+  Object.defineProperty(globalThis, 'sessionStorage', { configurable: true, value: originalSessionStorage });
   setCsrfToken('');
+});
+
+test('CSRF token is stored where other same-origin tabs can read it', () => {
+  const values = new Map<string, string>();
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+    },
+  });
+  Object.defineProperty(globalThis, 'sessionStorage', {
+    configurable: true,
+    value: {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+    },
+  });
+
+  setCsrfToken('shared-csrf');
+  assert.equal(values.get('yb-admin-csrf'), 'shared-csrf');
+  setCsrfToken('');
+
+  assert.equal(values.has('yb-admin-csrf'), false);
 });
 
 test('adminRequest unwraps the API envelope and sends cookie plus CSRF on writes', async () => {

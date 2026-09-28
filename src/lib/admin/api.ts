@@ -14,14 +14,22 @@ let csrfToken = '';
 
 export function setCsrfToken(token: string) {
   csrfToken = token;
+  if (typeof localStorage !== 'undefined') {
+    if (token) localStorage.setItem('yb-admin-csrf', token);
+    else localStorage.removeItem('yb-admin-csrf');
+  }
   if (typeof sessionStorage !== 'undefined') {
-    if (token) sessionStorage.setItem('yb-admin-csrf', token);
-    else sessionStorage.removeItem('yb-admin-csrf');
+    sessionStorage.removeItem('yb-admin-csrf');
   }
 }
 
 export function getCsrfToken() {
-  if (!csrfToken && typeof sessionStorage !== 'undefined') csrfToken = sessionStorage.getItem('yb-admin-csrf') || '';
+  if (!csrfToken && typeof localStorage !== 'undefined') csrfToken = localStorage.getItem('yb-admin-csrf') || '';
+  if (!csrfToken && typeof sessionStorage !== 'undefined') {
+    csrfToken = sessionStorage.getItem('yb-admin-csrf') || '';
+    if (csrfToken && typeof localStorage !== 'undefined') localStorage.setItem('yb-admin-csrf', csrfToken);
+    sessionStorage.removeItem('yb-admin-csrf');
+  }
   return csrfToken;
 }
 
