@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@antv/infographic": "^0.2.4",
+    "@astrojs/markdown-remark": "^6.3.10",
     "@astrojs/netlify": "^6.6.4",
     "@astrojs/node": "^9.5.2",
     "@astrojs/react": "^4.4.2",

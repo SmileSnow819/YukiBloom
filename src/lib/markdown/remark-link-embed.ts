@@ -142,6 +142,8 @@ interface RemarkLinkEmbedOptions {
   enableTweetEmbed?: boolean;
   enableCodePenEmbed?: boolean;
   enableOGPreview?: boolean;
+  /** Disable external fetches for request-time rendering while retaining existing cached previews. */
+  fetchOGPreview?: boolean;
 }
 
 // Initialize metascraper with plugins
@@ -382,7 +384,7 @@ function generateCodePenEmbedHTML(user: string, penId: string, url: string): str
  * This version uses metascraper to fetch OG data at build time
  */
 export function remarkLinkEmbed(options: RemarkLinkEmbedOptions = {}) {
-  const { enableTweetEmbed = true, enableCodePenEmbed = true, enableOGPreview = true } = options;
+  const { enableTweetEmbed = true, enableCodePenEmbed = true, enableOGPreview = true, fetchOGPreview = true } = options;
 
   return async (tree: Root) => {
     const nodesToReplace: Array<{
@@ -445,6 +447,10 @@ export function remarkLinkEmbed(options: RemarkLinkEmbedOptions = {}) {
           };
         }
 
+        // Request-time rendering may run on untrusted URLs and has a user-facing latency budget.
+        // Keep uncached URLs as normal links instead of fetching or mutating the disk cache.
+        if (!fetchOGPreview) return null;
+
         // Fetch and cache
         console.log(`[Link Embed] Fetching OG data for: ${url}`);
         const ogData = await fetchOGData(url);
@@ -462,7 +468,7 @@ export function remarkLinkEmbed(options: RemarkLinkEmbedOptions = {}) {
     const embedNodes = await Promise.all(fetchPromises);
 
     // Flush cache to disk once per markdown file (instead of per-URL)
-    flushCache();
+    if (fetchOGPreview) flushCache();
 
     // Replace nodes with their embed counterparts
     nodesToReplace.forEach(({ index, parent }, i) => {
