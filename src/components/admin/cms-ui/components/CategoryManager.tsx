@@ -20,7 +20,11 @@ import { getManagedCategoryNames, upsertCategoryMapping } from '@/lib/admin/cate
 import { type AdminSiteContent, getAdminSiteContent, saveAdminSiteContent } from '@/lib/admin/site-content';
 import type { PublicFeaturedCategory } from '@/lib/public-api/types';
 
-type CategoryEditor = { index: number | null; order: number; item: PublicFeaturedCategory };
+type CategoryEditor = {
+  index: number | null;
+  order: number;
+  item: PublicFeaturedCategory;
+};
 
 const emptyFeaturedCategory = (): PublicFeaturedCategory => ({
   label: '',
@@ -92,7 +96,10 @@ export function CategoryManager({
 
   function removeFeatured(index: number) {
     if (!content || !window.confirm(`确定删除精选分类“${content.featuredCategories[index].label}”吗？`)) return;
-    setContent({ ...content, featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index) });
+    setContent({
+      ...content,
+      featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index),
+    });
     setDirty(true);
   }
 
@@ -168,7 +175,11 @@ export function CategoryManager({
           variant="outline"
           size="sm"
           onClick={() =>
-            setEditor({ index: null, order: content.featuredCategories.length + 1, item: emptyFeaturedCategory() })
+            setEditor({
+              index: null,
+              order: content.featuredCategories.length + 1,
+              item: emptyFeaturedCategory(),
+            })
           }
         >
           <Icon icon="ri:add-line" className="mr-1 size-4" />
@@ -194,14 +205,16 @@ export function CategoryManager({
           <h4 className="font-semibold">
             首页精选分类 <span className="font-normal text-muted-foreground">({content.featuredCategories.length})</span>
           </h4>
-          <p className="mt-1 text-muted-foreground text-sm">这些卡片展示在首页精选分类区域。</p>
         </div>
         <ManagerTable
           items={content.featuredCategories}
           getKey={(item, index) => `${item.label}-${index}`}
           emptyMessage="暂无精选分类"
           columns={[
-            { label: '显示位置', render: (_, index) => <span className="text-muted-foreground">{index + 1}</span> },
+            {
+              label: '显示位置',
+              render: (_, index) => <span className="text-muted-foreground">{index + 1}</span>,
+            },
             {
               label: '封面',
               render: (item) =>
@@ -247,9 +260,6 @@ export function CategoryManager({
           <h4 className="font-semibold">
             文章分类 <span className="font-normal text-muted-foreground">({categoryNames.length})</span>
           </h4>
-          <p className="mt-1 text-muted-foreground text-sm">
-            分类名称来自文章；可直接编辑链接标识。新增分类请先在文章编辑器中使用。
-          </p>
         </div>
         <ManagerTable
           items={categoryNames.map((name) => ({
@@ -259,7 +269,10 @@ export function CategoryManager({
           getKey={(item) => item.name}
           emptyMessage="还没有文章分类"
           columns={[
-            { label: '名称', render: (item) => <span className="font-medium">{item.name}</span> },
+            {
+              label: '名称',
+              render: (item) => <span className="font-medium">{item.name}</span>,
+            },
             {
               label: '链接标识',
               render: (item) => (
@@ -337,14 +350,24 @@ export function CategoryManager({
                 <input
                   type="checkbox"
                   checked={editor.item.enabled}
-                  onChange={(event) => setEditor({ ...editor, item: { ...editor.item, enabled: event.target.checked } })}
+                  onChange={(event) =>
+                    setEditor({
+                      ...editor,
+                      item: { ...editor.item, enabled: event.target.checked },
+                    })
+                  }
                 />
                 在首页展示
               </label>
               <TextArea
                 label="简介"
                 value={editor.item.description}
-                onChange={(description) => setEditor({ ...editor, item: { ...editor.item, description } })}
+                onChange={(description) =>
+                  setEditor({
+                    ...editor,
+                    item: { ...editor.item, description },
+                  })
+                }
               />
               {editor.item.image && (
                 <img

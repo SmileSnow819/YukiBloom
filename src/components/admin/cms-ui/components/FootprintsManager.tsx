@@ -147,7 +147,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
       });
     } else if (kind === 'stays') {
       if (!window.confirm(`确定删除停留记录“${footprints.stays[index].title}”吗？`)) return;
-      setFootprints({ ...footprints, stays: sortBySortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)) });
+      setFootprints({
+        ...footprints,
+        stays: sortBySortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)),
+      });
     } else {
       if (!window.confirm(`确定删除路线“${footprints.routes[index].from} → ${footprints.routes[index].to}”吗？`)) return;
       setFootprints({
@@ -204,7 +207,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
             setEditor({
               kind: 'location',
               index: null,
-              item: { ...emptyLocation(), sortOrder: getNextSortOrder(footprints.locations) },
+              item: {
+                ...emptyLocation(),
+                sortOrder: getNextSortOrder(footprints.locations),
+              },
             })
           }
         >
@@ -218,7 +224,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
             setEditor({
               kind: 'stay',
               index: null,
-              item: { ...emptyStay(footprints.locations[0]?.id), sortOrder: getNextSortOrder(footprints.stays) },
+              item: {
+                ...emptyStay(footprints.locations[0]?.id),
+                sortOrder: getNextSortOrder(footprints.stays),
+              },
             })
           }
         >
@@ -232,7 +241,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
             setEditor({
               kind: 'route',
               index: null,
-              item: { ...emptyRoute(), sortOrder: getNextSortOrder(footprints.routes) },
+              item: {
+                ...emptyRoute(),
+                sortOrder: getNextSortOrder(footprints.routes),
+              },
             })
           }
         >
@@ -254,8 +266,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
 
   return (
     <section className="space-y-8" aria-label="足迹管理">
-      <p className="text-muted-foreground text-sm">排序值越小越靠前；新增项默认排在末尾。</p>
-
       <ListSection title="地点" count={footprints.locations.length}>
         <ManagerTable
           items={footprints.locations}
@@ -263,7 +273,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           emptyMessage="暂无地点"
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            { label: '排序', render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span> },
+            {
+              label: '排序',
+              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
+            },
             {
               label: '图标',
               render: (item) => (
@@ -303,7 +316,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           emptyMessage="暂无停留记录"
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            { label: '排序', render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span> },
+            {
+              label: '排序',
+              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
+            },
             {
               label: '标题 / 地点',
               render: (item) => (
@@ -323,7 +339,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
                 </span>
               ),
             },
-            { label: '类型', render: (item) => <span className="text-muted-foreground">{item.type || '—'}</span> },
+            {
+              label: '类型',
+              render: (item) => <span className="text-muted-foreground">{item.type || '—'}</span>,
+            },
           ]}
           onEdit={(item, index) => setEditor({ kind: 'stay', index, item: { ...item } })}
           onDelete={(_, index) => removeItem('stays', index)}
@@ -337,7 +356,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           emptyMessage="暂无路线"
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            { label: '排序', render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span> },
+            {
+              label: '排序',
+              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
+            },
             {
               label: '路线',
               render: (item) => (
@@ -349,7 +371,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
                 </>
               ),
             },
-            { label: '日期', render: (item) => <span className="text-muted-foreground">{item.date || '—'}</span> },
+            {
+              label: '日期',
+              render: (item) => <span className="text-muted-foreground">{item.date || '—'}</span>,
+            },
             {
               label: '交通 / 图片',
               render: (item) => (
@@ -359,7 +384,13 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
               ),
             },
           ]}
-          onEdit={(item, index) => setEditor({ kind: 'route', index, item: { ...item, images: [...item.images] } })}
+          onEdit={(item, index) =>
+            setEditor({
+              kind: 'route',
+              index,
+              item: { ...item, images: [...item.images] },
+            })
+          }
           onDelete={(_, index) => removeItem('routes', index)}
         />
       </ListSection>
@@ -448,7 +479,12 @@ function EditorFields({
           <span className="font-medium">所属地点</span>
           <select
             value={editor.item.locationId}
-            onChange={(event) => onChange({ ...editor, item: { ...editor.item, locationId: event.target.value } })}
+            onChange={(event) =>
+              onChange({
+                ...editor,
+                item: { ...editor.item, locationId: event.target.value },
+              })
+            }
             className="w-full rounded-lg border border-input bg-background px-3 py-2"
           >
             <option value="">选择地点</option>
