@@ -71,7 +71,7 @@ export interface PostCardData {
   tags?: string[];
   categories?: string[] | string[][];
   draft?: boolean;
-  wordCount: number; // 预计算的字数
-  readingTime: string; // 预计算的阅读时间
+  wordCount?: number; // API 列表不包含正文时不可用
+  readingTime?: string; // API 列表不包含正文时不可用
   postLocale?: string; // 文章的原始语言代码（用于 fallback 标记）
 }

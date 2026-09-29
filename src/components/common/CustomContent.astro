@@ -8,10 +8,11 @@ import { christmasConfig } from '@/constants/site-config';
 
 interface Props {
   Content?: AstroComponentFactory;
+  html?: string;
   config?: Partial<ContentConfig>;
 }
 
-const { Content, config = {} } = Astro.props;
+const { Content, html, config = {} } = Astro.props;
 const finalConfig = { ...defaultContentConfig, ...config };
 ---
 
@@ -19,7 +20,7 @@ const finalConfig = { ...defaultContentConfig, ...config };
   class:list={['custom-content', { 'relative z-5': christmasConfig.enabled && christmasConfig.features.snowfall }]}
   data-config={JSON.stringify(finalConfig)}
 >
-  {Content ? <Content /> : <slot />}
+  {html !== undefined ? <Fragment set:html={html} /> : Content ? <Content /> : <slot />}
 </div>
 
 {/* React-based content enhancement (code blocks, mermaid, infographic toolbars) */}

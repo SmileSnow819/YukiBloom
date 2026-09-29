@@ -65,7 +65,7 @@ export function useSearchKeyboardNav(isOpen: boolean) {
         items[newIndex].setAttribute('data-selected', 'true');
         items[newIndex].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       } else {
-        const searchInput = document.querySelector('.pagefind-ui__search-input') as HTMLInputElement;
+        const searchInput = document.querySelector('.public-search-input') as HTMLInputElement;
         searchInput?.focus();
       }
     };

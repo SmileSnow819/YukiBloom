@@ -5,32 +5,22 @@ import { CONTENT_PADDING } from '@constants/layout';
 import { siteConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getPostLastCategory, getPostSlug, getSortedPosts, normalizeTag, translateCategoryName } from '@lib/content';
+import { buildCategoryPath } from '@lib/content/category-path';
+import { translateCategoryName } from '@lib/content/category-translate';
 import { displayDate } from '@lib/date';
 import { encodeSlug } from '@lib/route';
-import { defaultLocale, getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getPublicTaxonomy } from '@/lib/public-api';
 
-export async function getStaticPaths() {
-  const posts = await getSortedPosts(defaultLocale);
-  const tags = new Set<string>();
+export const prerender = false;
 
-  for (const post of posts) {
-    const postTags = post.data.tags || [];
-    for (const tag of postTags) {
-      tags.add(normalizeTag(tag));
-    }
-  }
-
-  return Array.from(tags).map((tag) => ({
-    params: { tag: normalizeTag(tag).replace(/\//g, '-') },
-    props: { tag },
-  }));
-}
-
-const { tag } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const allPosts = await getSortedPosts(locale);
-const posts = allPosts.filter((post) => post.data.tags?.some((tg) => normalizeTag(tg) === tag));
+const tagSegment = Astro.params.tag ?? '';
+const { posts: allPosts } = await getPublicTaxonomy(locale);
+const matchingTag = allPosts.flatMap((post) => post.tags).find((value) => value.replace(/\//g, '-') === tagSegment);
+const tag = matchingTag ?? tagSegment;
+const posts = matchingTag ? allPosts.filter((post) => post.tags.includes(matchingTag)) : [];
+if (!matchingTag) Astro.response.status = 404;
 ---
 
 <Layout title={`${t(locale, 'tag.postsWithTag', { name: tag })} | ${siteConfig.title}`} description={t(locale, 'tag.postsWithTag', { name: tag })}>
@@ -51,11 +41,12 @@ const posts = allPosts.filter((post) => post.data.tags?.some((tg) => normalizeTa
         posts?.length && (
           <div class="category-second-level-container flex flex-col">
             {posts.map((post) => {
-              const { link, name } = getPostLastCategory(post);
+              const name = post.categoryNames.at(-1) ?? '';
+              const link = post.categoryNames.length ? buildCategoryPath(post.categoryNames) : '';
               return (
                 <p class="shoka-decoration-circle group text-primary relative px-6 py-2 text-base/9 md:overflow-visible">
                   <span class="text-muted-foreground inline-block w-15 text-xs md:relative md:-top-1">
-                    {displayDate.shortDate(post.data.date)}
+                    {displayDate.shortDate(post.date)}
                   </span>
                   <a
                     href={localizedPath(link, locale)}
@@ -63,8 +54,8 @@ const posts = allPosts.filter((post) => post.data.tags?.some((tg) => normalizeTa
                   >
                     {translateCategoryName(name, locale)}
                   </a>
-                  <a href={localizedPath(`/post/${encodeSlug(getPostSlug(post))}`, locale)} class="dashed-border md:absolute md:top-7 md:left-7">
-                    {post?.data?.title}
+                    <a href={localizedPath(`/post/${encodeSlug(post.slug)}`, locale)} class="dashed-border md:absolute md:top-7 md:left-7">
+                    {post.title}
                   </a>
                 </p>
               );

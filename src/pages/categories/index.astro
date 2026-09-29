@@ -5,12 +5,14 @@ import Cover from '@components/ui/cover/Cover.astro';
 import { seoConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getCategoryLinks, getCategoryList } from '@lib/content';
 import { getLocaleFromUrl, t } from '@/i18n';
+import { getPublicCategoryLinks, getPublicTaxonomy } from '@/lib/public-api';
+
+export const prerender = false;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const { categories, countMap } = await getCategoryList(locale);
-const links = getCategoryLinks(categories, '');
+const { categories, countMap } = await getPublicTaxonomy(locale);
+const links = getPublicCategoryLinks(categories);
 ---
 
 <Layout title={`${t(locale, 'category.allCategories')} | ${seoConfig.title}`}>

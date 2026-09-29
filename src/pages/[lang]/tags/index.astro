@@ -1,6 +1,7 @@
 ---
-import { getLocaleStaticPaths } from '../../_shared/utils';
 import TagsPage from '../../tags/index.astro';
-export const getStaticPaths = getLocaleStaticPaths;
+
+export const prerender = false;
 ---
+
 <TagsPage />

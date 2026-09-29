@@ -7,12 +7,14 @@ import { CONTENT_PADDING } from '@constants/layout';
 import { siteConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getAllTags, getSortedPosts } from '@lib/content';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getPublicTagCounts, getPublicTaxonomy } from '@/lib/public-api';
+
+export const prerender = false;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const posts = await getSortedPosts(locale);
-const tags = getAllTags(posts);
+const { posts } = await getPublicTaxonomy(locale);
+const tags = getPublicTagCounts(posts);
 const sortedTags = Object.entries(tags)
   .sort(([, a], [, b]) => b - a)
   .map(([tag, count], index) => ({ tag, count, colorIndex: index % 4 }));

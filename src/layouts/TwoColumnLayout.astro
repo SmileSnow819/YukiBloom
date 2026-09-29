@@ -4,10 +4,11 @@ import { cn } from '@lib/utils';
 import type { BlogPost } from 'types/blog';
 import Footer from '@/components/layout/Footer.astro';
 import PostFooter from '@/components/post/PostFooter.astro';
+import type { PublicPostPageModel } from '@/lib/public-api';
 
 interface Props {
   className?: string;
-  post?: BlogPost;
+  post?: BlogPost | PublicPostPageModel;
 }
 
 const { className, post } = Astro.props;

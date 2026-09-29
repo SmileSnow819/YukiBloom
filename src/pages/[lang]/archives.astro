@@ -1,6 +1,7 @@
 ---
-import { getLocaleStaticPaths } from '../_shared/utils';
 import ArchivesPage from '../archives.astro';
-export const getStaticPaths = getLocaleStaticPaths;
+
+export const prerender = false;
 ---
+
 <ArchivesPage />

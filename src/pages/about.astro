@@ -1,54 +1,7 @@
 ---
-import TimelineWrapper from '../components/timeline/TimelineWrapper.astro';
-import PageLayout from '../layouts/PageLayout.astro';
+import PublicContentPage from '@components/pages/PublicContentPage.astro';
 
-const frontmatter = {
-  title: 'About',
-  coverTitle: '关于我',
-  date: '2025-01-03 01:01:33',
-  description: '关于我？',
-};
+export const prerender = false;
 ---
 
-<PageLayout frontmatter={frontmatter}>
-  <h2>你好呀！这里是smile丶snow</h2>
-
-
-  <blockquote>
-    <p>
-    生活或许有不如意，但温柔与善意能治愈一切。<br />
-    祝你在这个世界上被温柔以待<br />
-    也能成为温暖别人的小太阳。
-    </p>
-  </blockquote>
-
-  <h3>自我介绍</h3>
-  <p>目前是大三，之前在快手实习,喜欢二次元，百合赛高，欢迎交流呀！</p>
-  <p>在夢怜龍華组，做嵌字，翻译，校对～<strong style="color:pink">兼网站开发</strong></p>
-  <p>以下是我们组开发的<strong style="color:pink">moelian</strong>网站</p>
-  <p><a href="https://moelian.neo.longlian.online/manga">https://moelian.neo.longlian.online/manga</a></p>
-  <p>制作的2048小游戏</p>
-  <p><a href="https://smilesnow819.github.io/2048game/">https://smilesnow819.github.io/2048game/</a></p>
-  <p>sakura-offer - 汇总了一些校招官网和求职工具</p>
-  <p><a href="https://smilesnow819.github.io/sakura-job-offer/">https://smilesnow819.github.io/sakura-job-offer/</a></p>
-
-  <p>什么时候37才能狂想(╥_╥),制作的关于37的动态壁纸</p>
-  <p><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3534990159">https://steamcommunity.com/sharedfiles/filedetails/?id=3534990159</a></p>
-  <h3>实习经历</h3>
-
-  <TimelineWrapper />
-
-  <h3>找到我</h3>
-
-  <p>个人Github</p>
-
-  <p><a href="https://github.com/SmileSnow819">https://github.com/SmileSnow819</a></p>
-  <p>QQ: 2465225759</p>
-
-  <p>
-    <a href="https://github.com/SmileSnow819/github-readme-stats">
-      <img src="https://my-projcet-five.vercel.app/api?username=SmileSnow819&count_private=true&show_icons=true&theme=gruvbox" alt="GitHub State" />
-    </a>
-  </p>
-
-</PageLayout>
+<PublicContentPage slug="about" showTimeline={true} />

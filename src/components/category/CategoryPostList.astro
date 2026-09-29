@@ -1,8 +1,10 @@
 ---
 import { CONTENT_PADDING } from '@constants/layout';
-import { type Category, getPostsByCategory, translateCategoryName } from '@lib/content';
+import { translateCategoryName } from '@lib/content/category-translate';
 import { cn } from '@lib/utils';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import type { Category } from '@/lib/content/types';
+import { getLocalizedPublicPosts, getPostCategoryNames, getPublicPostDate } from '@/lib/public-api';
 import PostTimelineList from '../post/PostTimelineList.astro';
 import SubCategory from './SubCategory.astro';
 
@@ -13,7 +15,17 @@ interface Props {
 }
 const { categories, countMap, rootCategory } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const posts = await getPostsByCategory(rootCategory?.name ?? '', locale);
+const posts = rootCategory
+  ? (await getLocalizedPublicPosts(locale))
+      .filter((post) => getPostCategoryNames(post).includes(rootCategory.name))
+      .map((post) => ({
+        slug: post.slug,
+        title: post.title,
+        date: getPublicPostDate(post),
+        categoryNames: getPostCategoryNames(post),
+        tags: post.tags,
+      }))
+  : [];
 ---
 
 <div class={`shadow-box mx-0 flex w-full flex-col bg-gradient-start ${CONTENT_PADDING.normal}`}>

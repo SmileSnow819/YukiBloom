@@ -1,0 +1,47 @@
+---
+import CustomContent from '@components/common/CustomContent.astro';
+import HomeSider from '@components/layout/HomeSider.astro';
+import TimelineWrapper from '@components/timeline/TimelineWrapper.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { siteConfig } from '@constants/site-config';
+import { renderMarkdown } from '@lib/markdown/render-markdown';
+import { getLocaleFromUrl, t } from '@/i18n';
+import type { PublicPage } from '@/lib/public-api';
+import { getLocalizedPublicPage } from '@/lib/public-api';
+import Layout from '../../layouts/Layout.astro';
+import TwoColumnLayout from '../../layouts/TwoColumnLayout.astro';
+import { Comment } from '../comment';
+
+interface Props {
+  slug: string;
+  showTimeline?: boolean;
+}
+
+const { slug, showTimeline = false } = Astro.props;
+const locale = getLocaleFromUrl(Astro.url.pathname);
+const page: PublicPage | undefined = await getLocalizedPublicPage(slug, locale);
+if (!page) Astro.response.status = 404;
+const title = page?.title ?? t(locale, 'post.noPostsFound');
+const html = page ? await renderMarkdown(page.bodyMarkdown, { title: page.title, description: page.description }) : '';
+---
+
+<Layout title={`${title} | ${siteConfig.title}`} description={page?.description}>
+  {
+    page ? (
+      <TwoColumnLayout>
+        <Cover slot="cover" title={title} />
+        <HomeSider slot="sider" />
+        <div class={`shadow-box bg-gradient-start mx-0 flex w-full flex-col gap-8 ${CONTENT_PADDING.standard}`}>
+          <div class="prose md:prose-sm dark:prose-invert" data-pagefind-body>
+            <CustomContent html={html} />
+          </div>
+          {showTimeline && <TimelineWrapper />}
+          <Comment />
+        </div>
+      </TwoColumnLayout>
+    ) : (
+      <main class="mx-auto w-full max-w-3xl px-6 py-16 text-center">{t(locale, 'post.noPostsFound')}</main>
+    )
+  }
+</Layout>

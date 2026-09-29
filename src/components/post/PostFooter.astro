@@ -1,15 +1,13 @@
 ---
-import { getSortedPosts } from '@lib/content';
-import { getRelatedPosts, hasSimilarityData } from '@lib/content/similarities';
-import { toPostRefWithCategory } from '@lib/content/transforms';
-import type { BlogPost } from 'types/blog';
+import { getRelatedPostSlugs, hasSimilarityData } from '@lib/content/similarities';
 import { getLocaleFromUrl } from '@/i18n';
+import { getLocalizedPublicPosts, toPublicPostRefWithCategory } from '@/lib/public-api';
 import PostFooterLists from './PostFooterLists';
 import RandomPostList from './RandomPostList';
 import RelatedPostList from './RelatedPostList';
 
 interface Props {
-  post?: BlogPost;
+  post?: { slug: string };
 }
 
 const { post } = Astro.props;
@@ -19,7 +17,7 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
 const hasData = hasSimilarityData();
 
 // Get all posts
-const allPosts = await getSortedPosts(locale);
+const allPosts = await getLocalizedPublicPosts(locale);
 const totalPosts = allPosts.length;
 
 // Calculate how many posts to show on each side
@@ -29,12 +27,13 @@ const leftCount = totalPosts <= 10 ? Math.ceil(totalPosts / 2) : 5;
 const rightCount = totalPosts <= 10 ? Math.floor(totalPosts / 2) : 5;
 
 // Prepare post pools for client-side randomization
-const allPostItems = allPosts.map(toPostRefWithCategory);
+const allPostItems = allPosts.map(toPublicPostRefWithCategory);
 const leftPool = totalPosts <= 10 ? allPostItems : allPostItems.slice(0, Math.floor(totalPosts / 2));
 const rightPool = totalPosts <= 10 ? allPostItems : allPostItems.slice(Math.floor(totalPosts / 2));
 
 // Get related posts if current post is provided and similarity data exists
-const relatedPosts = hasData && post ? getRelatedPosts(post, allPosts, 5).map(toPostRefWithCategory) : [];
+const relatedSlugs = hasData && post ? new Set(getRelatedPostSlugs(post.slug, 5).map(({ slug }) => slug)) : new Set<string>();
+const relatedPosts = allPostItems.filter((item) => relatedSlugs.has(item.slug)).slice(0, 5);
 ---
 
 <div class="tablet:grid-cols-1 grid grid-cols-2 gap-4 px-10 md:px-6">

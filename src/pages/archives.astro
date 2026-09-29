@@ -4,19 +4,20 @@ import Cover from '@components/ui/cover/Cover.astro';
 import { CONTENT_PADDING } from '@constants/layout';
 import { siteConfig } from '@constants/site-config';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getPostSlug, getSortedPosts } from '@lib/content';
 import { displayDate } from '@lib/date';
 import { encodeSlug } from '@lib/route';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getLocalizedPublicPosts, getPublicPostDate } from '@/lib/public-api';
 import Layout from '../layouts/Layout.astro';
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const posts = await getSortedPosts(locale);
+export const prerender = false;
+const posts = await getLocalizedPublicPosts(locale);
 
 // 按年份对文章进行分组
 const postsByYear = posts.reduce(
   (acc, post) => {
-    const year = new Date(post.data.date).getFullYear();
+    const year = getPublicPostDate(post).getFullYear();
     if (!acc[year]) {
       acc[year] = [];
     }
@@ -51,13 +52,13 @@ const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
                 {postsByYear[Number(year)].map((post) => (
                   <p class="shoka-decoration-circle group text-primary hover:text-blue relative px-6 py-2 text-base/9 md:flex md:flex-col md:items-stretch md:text-sm/9">
                     <span class="text-muted-foreground mr-2 text-xs">
-                      {displayDate.date(post.data.date)}
+                      {displayDate.date(getPublicPostDate(post))}
                     </span>
                     <a
-                      href={localizedPath(`/post/${encodeSlug(getPostSlug(post))}`, locale)}
+                      href={localizedPath(`/post/${encodeSlug(post.slug)}`, locale)}
                       class="dashed-border text-primary hover:text-blue truncate transition-colors"
                     >
-                      {post.data.title}
+                      {post.title}
                     </a>
                   </p>
                 ))}

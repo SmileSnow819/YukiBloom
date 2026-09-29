@@ -4,7 +4,9 @@ import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
 import { Routes } from '@constants/router';
 import { defaultCoverList } from '@constants/site-config';
-import { buildCategoryPath, buildTagPath, getCategoryArr, translateCategoryName } from '@lib/content';
+import { buildCategoryPath, getCategoryArr } from '@lib/content/category-path';
+import { translateCategoryName } from '@lib/content/category-translate';
+import { buildTagPath } from '@lib/content/tags';
 import { displayDate } from '@lib/date';
 import { getLqipProps } from '@lib/lqip';
 import { routeBuilder } from '@lib/route';
@@ -127,18 +129,22 @@ function getStaggerPadding(rowIndex: number): string {
             </p>
           ) : null
         }
-        <p class="flex-center gap-1">
-          <Icon name="fa6-solid:pen-nib" />
-          {t(locale, 'post.wordCount', { count: wordCount })}
-        </p>
-        <button
-          class="flex-center gap-1 md:hidden"
-          title={t(locale, 'post.readingTimeTooltip', { time: readingTime })}
-          data-tooltip-placement="top"
-        >
-          <Icon name="fa6-solid:clock" />
-          {readingTime}
-        </button>
+        {wordCount !== undefined && (
+          <p class="flex-center gap-1">
+            <Icon name="fa6-solid:pen-nib" />
+            {t(locale, 'post.wordCount', { count: wordCount })}
+          </p>
+        )}
+        {readingTime && (
+          <button
+            class="flex-center gap-1 md:hidden"
+            title={t(locale, 'post.readingTimeTooltip', { time: readingTime })}
+            data-tooltip-placement="top"
+          >
+            <Icon name="fa6-solid:clock" />
+            {readingTime}
+          </button>
+        )}
       </div>
     </div>
     <div class={cn('mt-1 flex flex-col space-y-1.5 p-0', getStaggerPadding(1), 'md:pl-0 md:pr-0')}>

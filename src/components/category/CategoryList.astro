@@ -1,7 +1,9 @@
 ---
 import { CONTENT_PADDING } from '@constants/layout';
-import { buildCategoryPath, type Category, translateCategoryName } from '@lib/content';
+import { buildCategoryPath } from '@lib/content/category-path';
+import { translateCategoryName } from '@lib/content/category-translate';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import type { Category } from '@/lib/content/types';
 import CategoryTitle from './CategoryTitle.astro';
 import SubCategory from './SubCategory.astro';
 

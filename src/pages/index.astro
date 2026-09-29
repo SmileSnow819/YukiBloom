@@ -6,45 +6,39 @@ import { CONTENT_PADDING, PAGINATION } from '@constants/layout';
 import { seoConfig, siteConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getHomePagePosts } from '@lib/content';
-import { toPostCardDataList } from '@lib/content/transforms';
-import type { Page } from 'astro';
-import type { BlogPost } from 'types/blog';
 import CategoryCards from '@/components/post/CategoryCards.astro';
 import Divider from '@/components/ui/divider';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getExtraBoolean, getLocalizedPublicPosts, getPostCategoryNames, toPublicPostCardData } from '@/lib/public-api';
+
+export const prerender = false;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
+const allPosts = await getLocalizedPublicPosts(locale);
+const enabledSeries = siteConfig.featuredSeries.filter((series) => series.enabled !== false);
+const featuredCategoryNames = new Set(enabledSeries.map((series) => series.categoryName));
+const getMatchingCategory = (post: (typeof allPosts)[number], name: string) => getPostCategoryNames(post).includes(name);
 
-// 使用优化的单次查询获取所有首页数据
-const { highlightedPosts, stickyPosts: normalStickyPosts, regularPosts } = await getHomePagePosts(locale);
+const highlightedPosts = enabledSeries
+  .filter((series) => series.highlightOnHome !== false)
+  .map((series) => allPosts.find((post) => getMatchingCategory(post, series.categoryName)))
+  .filter((post): post is NonNullable<typeof post> => post !== undefined);
+const featuredPosts = allPosts.filter((post) => getPostCategoryNames(post).some((name) => featuredCategoryNames.has(name)));
+const stickyPosts = allPosts.filter((post) => !featuredPosts.includes(post) && getExtraBoolean(post, 'sticky'));
+const regularPosts = allPosts.filter((post) => !featuredPosts.includes(post) && !getExtraBoolean(post, 'sticky'));
 
-// 将高亮系列文章放在置顶列表开头（转换为卡片数据）
-const stickyPosts = toPostCardDataList([...highlightedPosts, ...normalStickyPosts], locale);
-
-// 首页显示前N篇普通文章（不含系列文章）
+const stickyCards = [...highlightedPosts, ...stickyPosts].map(toPublicPostCardData);
 const { pageSize } = PAGINATION;
 const regularPostsSlice = regularPosts.slice(0, pageSize);
-const posts = toPostCardDataList(regularPostsSlice, locale);
-const totalRegularPosts = regularPosts.length;
-
-const homeUrl = localizedPath('/', locale);
+const posts = regularPostsSlice.map(toPublicPostCardData);
+const lastPage = Math.max(1, Math.ceil(regularPosts.length / pageSize));
 const postsBaseUrl = localizedPath('/posts', locale);
-
-const page: Page<BlogPost> = {
-  data: regularPostsSlice,
-  start: 0,
-  end: Math.min(pageSize - 1, regularPostsSlice.length - 1),
-  size: pageSize,
-  total: totalRegularPosts,
+const page = {
   currentPage: 1,
-  lastPage: Math.ceil(totalRegularPosts / pageSize),
+  lastPage,
   url: {
-    current: homeUrl,
     prev: undefined,
-    next: totalRegularPosts > pageSize ? `${postsBaseUrl}/2` : undefined,
-    first: homeUrl,
-    last: `${postsBaseUrl}/${Math.ceil(totalRegularPosts / pageSize)}`,
+    next: regularPosts.length > pageSize ? `${postsBaseUrl}/2` : undefined,
   },
 };
 ---
@@ -56,10 +50,10 @@ const page: Page<BlogPost> = {
     <div
       class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col gap-4 overflow-hidden  ${CONTENT_PADDING.standard}`}
     >
-      {stickyPosts.length > 0 && (
+      {stickyCards.length > 0 && (
         <>
           <Divider>{t(locale, 'post.stickyPosts')}</Divider>
-          <PostList posts={stickyPosts} showPaginator={false} />
+          <PostList posts={stickyCards} showPaginator={false} />
         </>
       )}
       <Divider>{t(locale, 'post.postList')}</Divider>

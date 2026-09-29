@@ -5,11 +5,11 @@ import TimelineWrapper from '@components/timeline/TimelineWrapper.astro';
 import type { HomeSiderType } from '@constants/enum';
 import { RESERVED_ROUTES } from '@constants/router';
 import { christmasConfig, configuredSeriesSlugs, enabledSeriesSlugs, routers, siteConfig } from '@constants/site-config';
-import { getAllTags, getCategoryList, getPostCount, getSortedPosts } from '@lib/content';
 import { getLqipStyle } from '@lib/lqip';
 import { cn, filterNavItems } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 import { getLocaleFromUrl, localizedPath, resolveNavName, stripLocaleFromPath, t } from '@/i18n';
+import { getPublicTagCounts, getPublicTaxonomy } from '@/lib/public-api';
 import type { BlogSchema } from '@/types/blog';
 import Social from './Social.astro';
 
@@ -21,11 +21,10 @@ interface Props {
 }
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const postCount = await getPostCount(locale);
-const { countMap } = await getCategoryList(locale);
-const posts = await getSortedPosts(locale);
-const tags = getAllTags(posts);
-
+const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
+const { countMap, posts } = isNotFoundPage ? { countMap: {}, posts: [] } : await getPublicTaxonomy(locale);
+const postCount = posts.length;
+const tags = getPublicTagCounts(posts);
 const allTags = Object.entries(tags).map(([tag, count]) => ({ tag, count }));
 
 // 生成唯一 ID 前缀
@@ -69,7 +68,7 @@ const strippedPath = stripLocaleFromPath(Astro.url.pathname);
     </a>
     <div class="bg-muted-foreground mx-3 w-px"></div>
     <a href={localizedPath('/tags', locale)} class="hover:text-blue flex cursor-pointer flex-col gap-2 p-1 transition">
-      <span class="text-lg/5 font-bold">{allTags?.length ?? 0}</span>
+        <span class="text-lg/5 font-bold">{allTags?.length ?? 0}</span>
       {t(locale, 'homeInfo.tags')}
     </a>
   </div>

@@ -3,23 +3,39 @@ import HomeSider from '@components/layout/HomeSider.astro';
 import PostList from '@components/post/PostList.astro';
 import Cover from '@components/ui/cover/Cover.astro';
 import { CONTENT_PADDING, PAGINATION } from '@constants/layout';
-import { seoConfig } from '@constants/site-config';
+import { seoConfig, siteConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import { getNonFeaturedPosts } from '@lib/content';
-import { toPostCardDataList } from '@lib/content/transforms';
-import type { PaginateFunction } from 'astro';
 import Divider from '@/components/ui/divider';
-import { defaultLocale, getLocaleFromUrl, t } from '@/i18n';
+import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import { getLocalizedPublicPosts, getPostCategoryNames, toPublicPostCardData } from '@/lib/public-api';
 
-export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
-  const postCollections = await getNonFeaturedPosts(defaultLocale);
-  return paginate(postCollections, { pageSize: PAGINATION.pageSize });
-}
+export const prerender = false;
 
-const { page } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const postCardData = toPostCardDataList(page.data, locale);
+const pageSegment = Astro.params.page ?? '1';
+if (!/^\d+$/.test(pageSegment)) Astro.response.status = 404;
+const currentPage = Math.max(1, Number.parseInt(pageSegment, 10) || 1);
+const featuredCategoryNames = new Set(
+  siteConfig.featuredSeries.filter((series) => series.enabled !== false).map((series) => series.categoryName),
+);
+const posts = (await getLocalizedPublicPosts(locale)).filter(
+  (post) => !getPostCategoryNames(post).some((name) => featuredCategoryNames.has(name)),
+);
+const { pageSize } = PAGINATION;
+const lastPage = Math.max(1, Math.ceil(posts.length / pageSize));
+if (currentPage > lastPage) Astro.response.status = 404;
+const offset = (currentPage - 1) * pageSize;
+const postCards = posts.slice(offset, offset + pageSize).map(toPublicPostCardData);
+const baseUrl = localizedPath('/posts', locale);
+const pageNavigation = {
+  currentPage,
+  lastPage,
+  url: {
+    prev: currentPage > 1 ? (currentPage === 2 ? baseUrl : `${baseUrl}/${currentPage - 1}`) : undefined,
+    next: currentPage < lastPage ? `${baseUrl}/${currentPage + 1}` : undefined,
+  },
+};
 ---
 
 <Layout title={seoConfig.title}>
@@ -30,7 +46,7 @@ const postCardData = toPostCardDataList(page.data, locale);
       class={`shadow-box bg-gradient-start tablet:shadow-none flex flex-col gap-4 overflow-hidden ${CONTENT_PADDING.standard}`}
     >
       <Divider>{t(locale, 'post.postList')}</Divider>
-      <PostList posts={postCardData} page={page} />
+      <PostList posts={postCards} page={pageNavigation} baseUrl={baseUrl} />
     </div>
   </TwoColumnLayout>
 </Layout>

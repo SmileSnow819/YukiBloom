@@ -2,7 +2,7 @@
  * SearchDialog Component
  *
  * A search dialog with keyboard navigation for searching blog posts.
- * Integrates with Pagefind for static site search.
+ * Uses the public content API for live article search.
  */
 
 import { Dialog, DialogPortal } from '@components/ui/dialog';
@@ -58,7 +58,7 @@ export default function SearchDialog() {
       window.dispatchEvent(new CustomEvent('search-dialog-open'));
       // Focus search input after animation
       setTimeout(() => {
-        const searchInput = document.querySelector('.pagefind-ui__search-input') as HTMLInputElement;
+        const searchInput = document.querySelector('.public-search-input') as HTMLInputElement;
         searchInput?.focus();
       }, 150);
     } else {

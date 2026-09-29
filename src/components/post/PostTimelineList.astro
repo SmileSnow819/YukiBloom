@@ -1,12 +1,11 @@
 ---
-import { getPostSlug } from '@lib/content';
 import { displayDate } from '@lib/date';
 import { encodeSlug } from '@lib/route';
-import type { BlogPost } from 'types/blog';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import type { PublicTimelinePost } from '@/lib/public-api';
 
 interface Props {
-  posts: BlogPost[];
+  posts: PublicTimelinePost[];
 }
 
 const { posts } = Astro.props;
@@ -23,9 +22,9 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
     <div class="category-second-level-container flex flex-col">
       {posts.map((post, index) => (
         <p class="shoka-decoration-circle group text-primary hover:text-blue relative px-6 py-2 text-base/9" style={`--timeline-index: ${index}`}>
-          <span class="text-muted-foreground mr-2 text-xs">{displayDate.shortDate(post.data.date)}</span>
-          <a href={localizedPath(`/post/${encodeSlug(getPostSlug(post))}`, locale)} class="dashed-border">
-            {post?.data?.title}
+          <span class="text-muted-foreground mr-2 text-xs">{displayDate.shortDate(post.date)}</span>
+          <a href={localizedPath(`/post/${encodeSlug(post.slug)}`, locale)} class="dashed-border">
+            {post.title}
           </a>
         </p>
       ))}

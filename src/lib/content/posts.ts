@@ -16,13 +16,13 @@ import { buildCategoryPath } from './category-path';
 import { filterPostsByLocale, getPostSlug } from './locale';
 
 /** WeakMap-based cache for reading-time results — auto-GC when post objects are collected */
-const readingTimeCache = new WeakMap<CollectionEntry<'blog'>, { words: number; text: string; minutes: number }>();
+const readingTimeCache = new WeakMap<object, { words: number; text: string; minutes: number }>();
 
 /**
  * Get reading-time stats for a post, cached per object identity.
  * Ensures each post's body is parsed at most once across transforms, Cover, and stats.
  */
-export function getPostReadingTime(post: CollectionEntry<'blog'>): { words: number; text: string; minutes: number } {
+export function getPostReadingTime(post: { body?: string }): { words: number; text: string; minutes: number } {
   let cached = readingTimeCache.get(post);
   if (!cached) {
     const result = readingTime(post.body ?? '');

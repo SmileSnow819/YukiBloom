@@ -1,12 +1,12 @@
 ---
 import type { FeaturedSeriesItem } from '@lib/config/types';
-import { translateSeriesField } from '@lib/content';
 import { getLqipStyle } from '@lib/lqip';
 import { getSanitizeHtml } from '@lib/sanitize';
 import { Icon } from 'astro-icon/components';
 import { marked } from 'marked';
 import { MAX_WIDTH } from '@/constants/layout';
 import { getLocaleFromUrl, t } from '@/i18n';
+import { getContentSeriesField } from '@/i18n/content';
 import WaveSvg from './wave';
 
 interface Props {
@@ -17,8 +17,8 @@ const { series } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 
 // Translate series fields with fallback to YAML values
-const seriesLabel = translateSeriesField(series.slug, 'label', series.label, locale);
-const seriesFullName = translateSeriesField(series.slug, 'fullName', series.fullName, locale);
+const seriesLabel = getContentSeriesField(locale, series.slug, 'label') ?? series.label ?? '';
+const seriesFullName = getContentSeriesField(locale, series.slug, 'fullName') ?? series.fullName ?? '';
 const seriesTitle = seriesFullName || seriesLabel || series.categoryName;
 
 // Convert Markdown description to HTML and sanitize for XSS protection

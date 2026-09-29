@@ -1,12 +1,14 @@
 ---
 import { Button } from '@components/ui/button';
-import type { Page } from 'astro';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import type { BlogPost } from 'types/blog';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
 
 interface Props {
-  page: Page<BlogPost>;
+  page: {
+    currentPage: number;
+    lastPage: number;
+    url: { prev?: string; next?: string };
+  };
   baseUrl?: string; // 分页基础路径，默认为 '/posts'
   isHomePage?: boolean; // 是否是首页
 }

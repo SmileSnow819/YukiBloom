@@ -1,0 +1,30 @@
+---
+import SeriesLanding from '@components/series/SeriesLanding.astro';
+import { siteConfig } from '@/constants/site-config';
+import { defaultLocale, localeList } from '@/i18n/config';
+import HomePage from './index.astro';
+
+export const prerender = false;
+
+const segments = (Astro.params.path ?? '').split('/').filter(Boolean);
+const localized = segments.length > 0 && localeList.includes(segments[0]) && segments[0] !== defaultLocale;
+const localePrefixLength = localized ? 1 : 0;
+const isLocalizedHome = localized && segments.length === 1;
+const seriesSlug = segments[localePrefixLength];
+const series =
+  !isLocalizedHome && segments.length === localePrefixLength + 1
+    ? siteConfig.featuredSeries.find((item) => item.enabled !== false && item.slug.toLowerCase() === seriesSlug?.toLowerCase())
+    : undefined;
+const notFound = !isLocalizedHome && !series;
+if (notFound) Astro.response.status = 404;
+---
+
+{
+  isLocalizedHome ? (
+    <HomePage />
+  ) : series ? (
+    <SeriesLanding series={series} />
+  ) : (
+    <main class="mx-auto w-full max-w-3xl px-6 py-16 text-center">Not Found</main>
+  )
+}

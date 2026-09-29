@@ -1,12 +1,13 @@
 ---
 import type { HomeSiderType } from '@constants/enum';
 import type { BlogPost } from 'types/blog';
+import type { PublicPostPageModel } from '@/lib/public-api';
 
 interface Props {
   title: string;
   description?: string;
   siderType?: HomeSiderType;
-  post?: BlogPost;
+  post?: BlogPost | PublicPostPageModel;
   /** Override canonical URL (e.g., for fallback pages pointing to default-locale version) */
   canonical?: string;
 }
@@ -361,7 +362,7 @@ const canonicalHref = canonicalOverride ?? Astro.url.href;
         </div>
       )}
       <FloatingGroup client:only="react" />
-      <MobileDrawer type={siderType} post={post} />
+      <MobileDrawer type={siderType} post={post && 'collection' in post ? post : undefined} />
       <SearchDialog client:idle />
       <SearchPortal />
       <CodeBlockFullscreen client:idle />
