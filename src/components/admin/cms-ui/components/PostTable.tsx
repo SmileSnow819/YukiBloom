@@ -4,6 +4,7 @@
  * Displays a sortable table of blog posts with actions.
  */
 
+import { ImagePreviewDialog } from '@admin-ui/components/ImagePreviewDialog';
 import type { SortField, SortOrder } from '@admin-ui/hooks';
 import { cn } from '@admin-ui/lib/utils';
 import type { PostListItem } from '@admin-ui/types';
@@ -129,12 +130,7 @@ export function PostTable({
               <tr key={post.id} className="transition-colors hover:bg-muted/30">
                 <td className="px-4 py-3">
                   {post.coverUrl ? (
-                    <img
-                      src={post.coverUrl}
-                      alt={`${post.title}封面`}
-                      loading="lazy"
-                      className="aspect-video w-20 rounded-md border border-border object-cover"
-                    />
+                    <ImagePreviewDialog src={post.coverUrl} alt={`${post.title}封面`} thumbnailClassName="aspect-video w-20" />
                   ) : (
                     <div
                       className="grid aspect-video w-20 place-items-center rounded-md border border-border border-dashed bg-muted/40 text-muted-foreground"

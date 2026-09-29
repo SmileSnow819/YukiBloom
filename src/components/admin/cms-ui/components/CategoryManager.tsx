@@ -1,4 +1,5 @@
 import { ImageCropDialog } from '@admin-ui/components/ImageCropDialog';
+import { ImagePreviewDialog } from '@admin-ui/components/ImagePreviewDialog';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
 import { Button } from '@admin-ui/components/ui/button';
 import {
@@ -205,12 +206,7 @@ export function CategoryManager({
               label: '封面',
               render: (item) =>
                 item.image ? (
-                  <img
-                    src={item.image}
-                    alt={`${item.label}封面`}
-                    loading="lazy"
-                    className="aspect-video w-24 rounded-md border border-border object-cover"
-                  />
+                  <ImagePreviewDialog src={item.image} alt={`${item.label}封面`} thumbnailClassName="aspect-video w-24" />
                 ) : (
                   <div className="grid aspect-video w-24 place-items-center rounded-md border border-border border-dashed bg-muted/40 text-muted-foreground">
                     <Icon icon="ri:image-line" className="size-5" />
