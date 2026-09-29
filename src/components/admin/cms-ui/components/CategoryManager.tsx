@@ -1,3 +1,4 @@
+import { ImageCropDialog } from '@admin-ui/components/ImageCropDialog';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
 import { Button } from '@admin-ui/components/ui/button';
 import {
@@ -9,9 +10,11 @@ import {
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
 import { generateCategorySlug } from '@admin-ui/lib/category';
+import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import { Icon } from '@iconify/react';
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { uploadAdminMedia } from '@/lib/admin/api';
 import { getManagedCategoryNames, upsertCategoryMapping } from '@/lib/admin/category-settings';
 import { type AdminSiteContent, getAdminSiteContent, saveAdminSiteContent } from '@/lib/admin/site-content';
 import type { PublicFeaturedCategory } from '@/lib/public-api/types';
@@ -39,6 +42,9 @@ export function CategoryManager({
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const categoryNames = useMemo(
     () => (content ? getManagedCategoryNames(categories, content.categoryMappings) : categories),
     [categories, content],
@@ -87,6 +93,34 @@ export function CategoryManager({
     if (!content || !window.confirm(`确定删除精选分类“${content.featuredCategories[index].label}”吗？`)) return;
     setContent({ ...content, featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index) });
     setDirty(true);
+  }
+
+  function handleImageSelection(file: File | undefined) {
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('仅支持 JPG、PNG 或 WebP 图片');
+      return;
+    }
+    setCropFile(file);
+    if (imageInputRef.current) imageInputRef.current.value = '';
+  }
+
+  async function uploadFeaturedImage(file: File) {
+    const validationError = validateImageUpload(file);
+    if (validationError) {
+      toast.error(`裁剪后的图片无法上传：${validationError}`);
+      return;
+    }
+    setIsImageUploading(true);
+    try {
+      const media = await uploadAdminMedia(file);
+      setEditor((current) => (current ? { ...current, item: { ...current.item, image: media.url } } : current));
+      toast.success('封面已上传，应用并保存分类配置后生效');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '分类封面上传失败');
+    } finally {
+      setIsImageUploading(false);
+    }
   }
 
   const save = useCallback(async () => {
@@ -168,6 +202,22 @@ export function CategoryManager({
           columns={[
             { label: '显示位置', render: (_, index) => <span className="text-muted-foreground">{index + 1}</span> },
             {
+              label: '封面',
+              render: (item) =>
+                item.image ? (
+                  <img
+                    src={item.image}
+                    alt={`${item.label}封面`}
+                    loading="lazy"
+                    className="aspect-video w-24 rounded-md border border-border object-cover"
+                  />
+                ) : (
+                  <div className="grid aspect-video w-24 place-items-center rounded-md border border-border border-dashed bg-muted/40 text-muted-foreground">
+                    <Icon icon="ri:image-line" className="size-5" />
+                  </div>
+                ),
+            },
+            {
               label: '名称 / 链接',
               render: (item) => (
                 <>
@@ -189,10 +239,6 @@ export function CategoryManager({
                   {item.enabled ? '首页展示' : '已隐藏'}
                 </span>
               ),
-            },
-            {
-              label: '图片',
-              render: (item) => <span className="line-clamp-1 text-muted-foreground">{item.image || '未设置'}</span>,
             },
           ]}
           onEdit={(item, index) => setEditor({ index, order: index + 1, item: { ...item } })}
@@ -239,7 +285,7 @@ export function CategoryManager({
         />
       </section>
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && setEditor(null)}>
+      <Dialog open={editor !== null} onOpenChange={(open) => !open && !isImageUploading && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{`${editor?.index === null ? '新增' : '编辑'}精选分类`}</DialogTitle>
@@ -265,11 +311,32 @@ export function CategoryManager({
                 onChange={(link) => setEditor({ ...editor, item: { ...editor.item, link } })}
                 placeholder="/categories/front-end"
               />
-              <Field
-                label="图片 URL"
-                value={editor.item.image}
-                onChange={(image) => setEditor({ ...editor, item: { ...editor.item, image } })}
-              />
+              <div className="space-y-2 sm:col-span-2">
+                <Field
+                  label="图片 URL"
+                  value={editor.item.image}
+                  onChange={(image) => setEditor({ ...editor, item: { ...editor.item, image } })}
+                />
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(event) => handleImageSelection(event.currentTarget.files?.[0])}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={isImageUploading}
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  <Icon
+                    icon={isImageUploading ? 'ri:loader-4-line' : 'ri:image-add-line'}
+                    className={`mr-1.5 size-4 ${isImageUploading ? 'animate-spin' : ''}`}
+                  />
+                  {isImageUploading ? '上传中…' : editor.item.image ? '上传并更换封面' : '上传封面'}
+                </Button>
+              </div>
               <label className="flex items-center gap-2 self-end pb-2 text-sm">
                 <input
                   type="checkbox"
@@ -287,19 +354,31 @@ export function CategoryManager({
                 <img
                   src={editor.item.image}
                   alt=""
-                  className="h-32 w-full rounded-lg border border-border object-cover sm:col-span-2"
+                  className="aspect-video w-full rounded-lg border border-border object-cover sm:col-span-2"
                   loading="lazy"
                 />
               )}
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditor(null)}>
+            <Button variant="outline" onClick={() => setEditor(null)} disabled={isImageUploading}>
               取消
             </Button>
-            <Button onClick={applyEditor}>应用到列表</Button>
+            <Button onClick={applyEditor} disabled={isImageUploading}>
+              应用到列表
+            </Button>
           </DialogFooter>
         </DialogContent>
+        {cropFile && (
+          <ImageCropDialog
+            file={cropFile}
+            onOpenChange={(open) => !open && setCropFile(null)}
+            onCrop={(file) => {
+              setCropFile(null);
+              void uploadFeaturedImage(file);
+            }}
+          />
+        )}
       </Dialog>
     </section>
   );

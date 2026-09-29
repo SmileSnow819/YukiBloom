@@ -1,6 +1,6 @@
 import { generateSlug } from '@admin-ui/lib/slug';
 import type { CreatePostParams, CreatePostResponse, ListPostsParams, ListPostsResponse, ReadPostResult } from '@admin-ui/types';
-import { adminRequest, type Media, type Post } from '@/lib/admin/api';
+import { adminRequest, type Media, type Post, uploadAdminMedia } from '@/lib/admin/api';
 import { setCategoryMap } from './category';
 import {
   buildPostContentUpdate,
@@ -86,9 +86,7 @@ export async function readPostMetadata(postId: string): Promise<{ values: PostMe
 }
 
 export async function uploadPostCover(file: File): Promise<Media> {
-  const body = new FormData();
-  body.set('file', file);
-  const media = await adminRequest<Media>('/media', { method: 'POST', body });
+  const media = await uploadAdminMedia(file);
   mediaById.set(media.id, media);
   return media;
 }

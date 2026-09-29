@@ -91,3 +91,9 @@ export type Page = {
 };
 export type Media = { id: string; url: string; width: number; height: number; sizeBytes: number; createdAt: string };
 export type Paged<T> = { items: T[]; page: number; limit: number; total: number };
+
+export async function uploadAdminMedia(file: File): Promise<Media> {
+  const body = new FormData();
+  body.set('file', file);
+  return await adminRequest<Media>('/media', { method: 'POST', body });
+}
