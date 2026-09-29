@@ -18,7 +18,7 @@ import { type StatusFilter, useDashboardState } from '@admin-ui/hooks';
 import { MAX_RECENT_POSTS_DISPLAY } from '@admin-ui/lib/paths';
 import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Toaster, toast } from 'sonner';
 import logoUrl from '@/assets/logo/logo.png?url';
@@ -95,6 +95,7 @@ function AppContent() {
 }
 
 function CMSDashboard({ onLogout }: { onLogout: () => void }) {
+  const [pageActions, setPageActions] = useState<ReactNode>(null);
   const {
     activeTab,
     setActiveTab,
@@ -198,17 +199,18 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
                   新建文章
                 </Button>
               )}
+              {(activeTab === 'timeline' || activeTab === 'footprints' || activeTab === 'categories') && pageActions}
             </div>
           </header>
 
           <main className="admin-content flex-1 bg-background">
             <div className="mx-auto max-w-7xl p-6">
               {activeTab === 'timeline' ? (
-                <TimelineManager />
+                <TimelineManager onToolbarChange={setPageActions} />
               ) : activeTab === 'footprints' ? (
-                <FootprintsManager />
+                <FootprintsManager onToolbarChange={setPageActions} />
               ) : activeTab === 'categories' ? (
-                <CategoryManager categories={data?.categories || []} />
+                <CategoryManager categories={data?.categories || []} onToolbarChange={setPageActions} />
               ) : isLoading ? (
                 <div className="flex h-64 items-center justify-center">
                   <Icon icon="ri:loader-4-line" className="size-8 animate-spin text-muted-foreground" />
