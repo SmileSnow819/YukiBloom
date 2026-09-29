@@ -1,0 +1,17 @@
+---
+import { App as CMSApp } from '../../components/admin/cms-ui/App';
+
+export function getStaticPaths() {
+  return ['posts', 'timeline', 'footprints', 'categories'].map((tab) => ({ params: { tab } }));
+}
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>内容管理 · YukiBloom</title>
+  </head>
+  <body><CMSApp client:only="react" /></body>
+</html>

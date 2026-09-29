@@ -4,13 +4,13 @@
  * Manages the main dashboard state including posts data, filters, sorting, and actions.
  */
 
-import { getAdminPostId, withAdminPost } from '@admin-ui/lib/admin-route';
+import { type AdminTab, getAdminPostId, getAdminTab, withAdminPost, withAdminTab } from '@admin-ui/lib/admin-route';
 import { deletePost, listPosts, toggleDraft, toggleSticky } from '@admin-ui/lib/api';
 import type { ListPostsResponse } from '@admin-ui/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-export type Tab = 'overview' | 'posts' | 'timeline' | 'footprints' | 'categories';
+export type Tab = AdminTab;
 export type StatusFilter = 'all' | 'draft' | 'published';
 export type SortField = 'date' | 'updated' | 'title';
 export type SortOrder = 'asc' | 'desc';
@@ -53,7 +53,9 @@ export interface UseDashboardStateResult {
 }
 
 export function useDashboardState(): UseDashboardStateResult {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [activeTab, setActiveTabState] = useState<Tab>(() =>
+    typeof window === 'undefined' ? 'overview' : getAdminTab(new URL(window.location.href)),
+  );
   const [data, setData] = useState<ListPostsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,10 +66,24 @@ export function useDashboardState(): UseDashboardStateResult {
     typeof window === 'undefined' ? null : getAdminPostId(new URL(window.location.href)),
   );
 
+  const setActiveTab = useCallback((tab: Tab) => {
+    const currentUrl = new URL(window.location.href);
+    const nextUrl = withAdminTab(currentUrl, tab);
+    if (nextUrl.href !== currentUrl.href) {
+      window.history.pushState({ ...window.history.state, adminTab: tab }, '', nextUrl);
+    }
+    setActiveTabState(tab);
+    if (tab !== 'posts') setEditingPostId(null);
+  }, []);
+
   useEffect(() => {
-    const syncEditorFromUrl = () => setEditingPostId(getAdminPostId(new URL(window.location.href)));
-    window.addEventListener('popstate', syncEditorFromUrl);
-    return () => window.removeEventListener('popstate', syncEditorFromUrl);
+    const syncFromUrl = () => {
+      const url = new URL(window.location.href);
+      setActiveTabState(getAdminTab(url));
+      setEditingPostId(getAdminPostId(url));
+    };
+    window.addEventListener('popstate', syncFromUrl);
+    return () => window.removeEventListener('popstate', syncFromUrl);
   }, []);
 
   const openPost = useCallback((postId: string) => {
