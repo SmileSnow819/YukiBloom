@@ -10,7 +10,7 @@ import type { ListPostsResponse } from '@admin-ui/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-export type Tab = 'overview' | 'posts';
+export type Tab = 'overview' | 'posts' | 'timeline' | 'footprints' | 'categories';
 export type StatusFilter = 'all' | 'draft' | 'published';
 export type SortField = 'date' | 'updated' | 'title';
 export type SortOrder = 'asc' | 'desc';

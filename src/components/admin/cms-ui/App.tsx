@@ -4,12 +4,15 @@
  * Main entry point for the standalone CMS application.
  */
 
+import { CategoryManager } from '@admin-ui/components/CategoryManager';
 import { CreatePostDialog } from '@admin-ui/components/CreatePostDialog';
 import { DashboardCharts } from '@admin-ui/components/DashboardCharts';
 import { ErrorFallback } from '@admin-ui/components/ErrorFallback';
+import { FootprintsManager } from '@admin-ui/components/FootprintsManager';
 import { PostEditor } from '@admin-ui/components/PostEditor';
 import { PostTable } from '@admin-ui/components/PostTable';
 import { RecentUpdates } from '@admin-ui/components/RecentUpdates';
+import { TimelineManager } from '@admin-ui/components/TimelineManager';
 import { Button } from '@admin-ui/components/ui/button';
 import { type StatusFilter, useDashboardState } from '@admin-ui/hooks';
 import { MAX_RECENT_POSTS_DISPLAY } from '@admin-ui/lib/paths';
@@ -119,6 +122,13 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
     handleEditorClose,
     handleEditorSaved,
   } = useDashboardState();
+  const tabLabels = {
+    overview: '总览',
+    posts: '文章管理',
+    timeline: '实习经历',
+    footprints: '足迹管理',
+    categories: '分类配置',
+  } as const;
 
   // Show editor if editing
   if (editingPostId) {
@@ -134,7 +144,7 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
           </div>
           <nav className="admin-nav" aria-label="后台导航">
             <p className="admin-nav-caption">工作区</p>
-            {(['overview', 'posts'] as const).map((tab) => (
+            {(['overview', 'posts', 'timeline', 'footprints', 'categories'] as const).map((tab) => (
               <button
                 key={tab}
                 type="button"
@@ -142,8 +152,19 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
                 aria-current={activeTab === tab ? 'page' : undefined}
                 className={cn('admin-nav-link', activeTab === tab && 'is-active')}
               >
-                <Icon icon={tab === 'overview' ? 'ri:dashboard-line' : 'ri:article-line'} className="size-5 shrink-0" />
-                <span>{tab === 'overview' ? '总览' : '文章管理'}</span>
+                <Icon
+                  icon={
+                    {
+                      overview: 'ri:dashboard-line',
+                      posts: 'ri:article-line',
+                      timeline: 'ri:briefcase-line',
+                      footprints: 'ri:map-pin-line',
+                      categories: 'ri:folder-settings-line',
+                    }[tab]
+                  }
+                  className="size-5 shrink-0"
+                />
+                <span>{tabLabels[tab]}</span>
               </button>
             ))}
           </nav>
@@ -159,26 +180,36 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
           <header className="admin-topbar">
             <div className="admin-page-heading">
               <p className="text-muted-foreground text-xs">YukiBloom / 工作区</p>
-              <h2 className="font-semibold text-lg">{activeTab === 'overview' ? '总览' : '文章管理'}</h2>
+              <h2 className="font-semibold text-lg">{tabLabels[activeTab]}</h2>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
-                <Icon
-                  icon={isLoading ? 'ri:loader-4-line' : 'ri:refresh-line'}
-                  className={cn('mr-1.5 size-4', isLoading && 'animate-spin')}
-                />
-                刷新
-              </Button>
-              <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
-                <Icon icon="ri:add-line" className="mr-1.5 size-4" />
-                新建文章
-              </Button>
+              {(activeTab === 'overview' || activeTab === 'posts') && (
+                <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+                  <Icon
+                    icon={isLoading ? 'ri:loader-4-line' : 'ri:refresh-line'}
+                    className={cn('mr-1.5 size-4', isLoading && 'animate-spin')}
+                  />
+                  刷新
+                </Button>
+              )}
+              {activeTab === 'posts' && (
+                <Button size="sm" onClick={() => setIsCreateDialogOpen(true)}>
+                  <Icon icon="ri:add-line" className="mr-1.5 size-4" />
+                  新建文章
+                </Button>
+              )}
             </div>
           </header>
 
           <main className="admin-content flex-1 bg-background">
             <div className="mx-auto max-w-7xl p-6">
-              {isLoading ? (
+              {activeTab === 'timeline' ? (
+                <TimelineManager />
+              ) : activeTab === 'footprints' ? (
+                <FootprintsManager />
+              ) : activeTab === 'categories' ? (
+                <CategoryManager categories={data?.categories || []} />
+              ) : isLoading ? (
                 <div className="flex h-64 items-center justify-center">
                   <Icon icon="ri:loader-4-line" className="size-8 animate-spin text-muted-foreground" />
                 </div>
