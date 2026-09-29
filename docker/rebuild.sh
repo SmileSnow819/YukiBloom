@@ -16,7 +16,7 @@ set -euo pipefail
 echo "================================================"
 echo "  Reminder: If you added new content, consider running first:"
 echo "    pnpm generate:all"
-echo "  to update LQIP, similarity vectors, and AI summaries."
+echo "  to update LQIP images and AI summaries."
 echo "================================================"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

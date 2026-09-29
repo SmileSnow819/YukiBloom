@@ -67,7 +67,6 @@ pnpm knip             # Find unused files/dependencies
 
 # Content data generation
 pnpm generate:lqips       # Generate LQIP image placeholders
-pnpm generate:similarities # Generate semantic similarity data
 pnpm generate:summaries   # Generate AI summaries
 pnpm generate:all         # Generate all content assets
 ```

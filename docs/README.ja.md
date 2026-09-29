@@ -99,7 +99,6 @@ pnpm dev
 - **国際化（i18n）**：中国語/英語/日本語 UI 翻訳内蔵、カスタム言語パック、コンテンツレベル翻訳（カテゴリー/シリーズ名）、言語切り替え、hreflang SEO タグ、ロケール対応 RSS フィード。デフォルトロケールの URL にはプレフィックスなし、他のロケールは自動プレフィックス付き（例：`/en/post/xxx`）
 - RSS フィード対応
 - LQIP 対応：画像読み込み前にグラデーションプレースホルダーを表示
-- [切り替え可能] [transformers.js](https://huggingface.co/docs/transformers.js) を使用したセマンティック類似度ベースの記事レコメンドシステム
 - [切り替え可能] AI 自動要約生成
 - [切り替え可能] クリスマス特集：雪降り、クリスマスカラー、サンタ帽、イルミネーションなど季節エフェクト
 - サーバーレスサイトお知らせシステム：設定ファイルで管理、時間制御・複数お知らせスタック・カスタムカラー・ホバーで既読
@@ -112,7 +111,6 @@ pnpm dev
 
 ```bash
 pnpm generate:lqips         # 画像プレースホルダー
-pnpm generate:similarities  # 関連記事の類似度データ
 pnpm generate:summaries     # AI 要約
 pnpm generate:all           # すべての生成処理を順に実行
 ```

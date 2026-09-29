@@ -15,7 +15,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 
 # Copy package files first (for Docker layer caching)
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install dependencies (include dev deps for build)
 RUN pnpm install --frozen-lockfile --prod=false

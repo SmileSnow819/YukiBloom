@@ -100,7 +100,6 @@ pnpm dev
 - **多语言支持（i18n）**：内置中英文 UI 翻译，支持自定义语言包、内容级翻译（分类名/系列名）、语言切换器、hreflang SEO 标签、locale-aware RSS 订阅。默认语言 URL 无前缀，其他语言自动加前缀（如 `/en/post/xxx`）
 - RSS 订阅支持
 - 支持 LQIP：图片加载前显示渐变色占位，提升视觉体验
-- [可开关] 基于语义相似度的智能文章推荐系统，使用 [transformers.js](https://huggingface.co/docs/transformers.js) 在本地生成文章嵌入向量，计算文章间的语义相似度
 - [可开关] AI 自动摘要生成，自动生成摘要。
 - [可开关] 圣诞特辑：包含雪花飘落、圣诞配色、圣诞帽装饰、灯串装饰等节日氛围效果
 - 无后端站点公告系统：可通过配置文件管理公告，支持时间控制、多条公告堆叠、自定义颜色、hover 已读
@@ -109,11 +108,10 @@ pnpm dev
 
 ## 内容资产生成
 
-内容资产可按需生成。命令分别写入 LQIP 图片占位数据、文章相似度数据和 AI 摘要：
+内容资产可按需生成。命令分别写入 LQIP 图片占位数据和 AI 摘要：
 
 ```bash
 pnpm generate:lqips         # 生成图片占位数据
-pnpm generate:similarities  # 生成相关文章所需的相似度数据
 pnpm generate:summaries     # 生成文章摘要
 pnpm generate:all           # 依次执行全部生成任务
 ```
@@ -130,7 +128,7 @@ pnpm generate:all           # 依次执行全部生成任务
 
 项目将 `.cache/og-data.json` 提交到 Git 仓库，用于缓存链接嵌入功能抓取的 OG 元数据（标题、描述、图片等）。这样在 Vercel、Netlify 等平台构建时可以直接复用已有缓存，避免每次构建都重新抓取外部链接的元信息，显著加速构建并减少对外部站点的请求。
 
-`.cache/` 目录下的其他文件（如 transformers 模型缓存）仍被 `.gitignore` 忽略。
+`.cache/` 目录下的其他文件仍被 `.gitignore` 忽略。
 
 ## 配置说明
 

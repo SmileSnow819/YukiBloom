@@ -99,7 +99,6 @@ pnpm dev
 - **Internationalization (i18n)**: Built-in Chinese/English UI translations, custom language packs, content-level translations (category/series names), language switcher, hreflang SEO tags, and locale-aware RSS feeds. Default locale URLs have no prefix; other locales are prefixed (e.g., `/en/post/xxx`)
 - RSS feed support
 - LQIP support: Gradient placeholders before images load for better visual experience
-- [Toggleable] Semantic similarity-based smart article recommendation system using [transformers.js](https://huggingface.co/docs/transformers.js) to generate local article embedding vectors
 - [Toggleable] AI-powered automatic summary generation
 - [Toggleable] Christmas special: snowfall, Christmas colors, Santa hats, string lights, and other festive effects
 - Serverless site announcement system: Manage announcements via config file with time controls, stacking, custom colors, and hover-to-read
@@ -112,7 +111,6 @@ Generate content assets as needed with the existing scripts:
 
 ```bash
 pnpm generate:lqips         # Image placeholders
-pnpm generate:similarities  # Related-post similarity data
 pnpm generate:summaries     # AI summaries
 pnpm generate:all           # Run all generators in sequence
 ```

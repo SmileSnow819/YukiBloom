@@ -259,7 +259,6 @@ bgm:
 
 ```bash
 pnpm generate:lqips         # 生成 LQIP 图片占位符
-pnpm generate:similarities  # 生成相关文章所需的相似度数据
 pnpm generate:summaries     # 生成 AI 摘要
 pnpm generate:all           # 依次执行以上全部任务
 ```
