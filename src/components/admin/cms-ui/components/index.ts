@@ -12,6 +12,7 @@ export { EditorTOC } from './EditorTOC';
 export { EmbedHydrator } from './EmbedHydrator';
 export { ErrorFallback } from './ErrorFallback';
 export { FrontmatterEditor, type FrontmatterEditorRef } from './FrontmatterEditor';
+export { ImageCropDialog } from './ImageCropDialog';
 export { MarkdownPreview } from './MarkdownPreview';
 export { PostEditor } from './PostEditor';
 export { PostMetadataDialog } from './PostMetadataDialog';

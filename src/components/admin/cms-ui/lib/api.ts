@@ -10,17 +10,51 @@ import {
 } from './post-metadata';
 
 const categories = (post: Post) => post.categories || [];
+const MEDIA_PAGE_SIZE = 100;
+const mediaById = new Map<string, Media>();
+const mediaPagePromises = new Map<number, Promise<void>>();
+let nextMediaPage = 1;
+let mediaTotalPages: number | null = null;
+
 const toListItem = (post: Post) => ({
   id: post.id,
   slug: post.slug,
   title: post.title,
   date: post.displayDate || post.updatedAt,
   updated: post.updatedAt,
+  coverMediaId: post.coverMediaId || undefined,
   categories: categories(post),
   tags: post.tags || [],
   draft: post.status !== 'published',
   sticky: Boolean(post.extra?.sticky),
 });
+
+async function findMediaByIds(ids: string[]): Promise<Map<string, Media>> {
+  const wanted = new Set(ids.filter(Boolean));
+  while ([...wanted].some((id) => !mediaById.has(id)) && (mediaTotalPages === null || nextMediaPage <= mediaTotalPages)) {
+    const pageNumber = nextMediaPage;
+    let pageRequest = mediaPagePromises.get(pageNumber);
+    if (!pageRequest) {
+      pageRequest = adminRequest<{ items: Media[]; total: number; limit: number }>(
+        `/media?page=${pageNumber}&limit=${MEDIA_PAGE_SIZE}`,
+      )
+        .then((page) => {
+          for (const media of page.items) mediaById.set(media.id, media);
+          mediaTotalPages = Math.ceil(page.total / (page.limit || MEDIA_PAGE_SIZE));
+          if (nextMediaPage === pageNumber) nextMediaPage += 1;
+        })
+        .finally(() => mediaPagePromises.delete(pageNumber));
+      mediaPagePromises.set(pageNumber, pageRequest);
+    }
+    await pageRequest;
+  }
+  return new Map(
+    [...wanted].flatMap((id) => {
+      const media = mediaById.get(id);
+      return media ? ([[id, media]] as const) : [];
+    }),
+  );
+}
 
 export async function readPost(postId: string): Promise<ReadPostResult> {
   const post = await readPostRecord(postId);
@@ -44,17 +78,19 @@ async function readPostRecord(postId: string): Promise<Post> {
 
 export async function readPostMetadata(postId: string): Promise<{ values: PostMetadataValues; cover: Media | null }> {
   const post = await readPostRecord(postId);
-  const media = await adminRequest<{ items: Media[] }>('/media?page=1&limit=100').catch(() => ({ items: [] }));
+  const media = post.coverMediaId ? await findMediaByIds([post.coverMediaId]).catch(() => new Map<string, Media>()) : new Map();
   return {
     values: getPostMetadataDefaults(post),
-    cover: media.items.find((item) => item.id === post.coverMediaId) || null,
+    cover: post.coverMediaId ? media.get(post.coverMediaId) || null : null,
   };
 }
 
 export async function uploadPostCover(file: File): Promise<Media> {
   const body = new FormData();
   body.set('file', file);
-  return await adminRequest<Media>('/media', { method: 'POST', body });
+  const media = await adminRequest<Media>('/media', { method: 'POST', body });
+  mediaById.set(media.id, media);
+  return media;
 }
 
 export async function savePostMetadata(postId: string, values: PostMetadataValues): Promise<void> {
@@ -86,6 +122,10 @@ export async function listPosts(params?: ListPostsParams): Promise<ListPostsResp
     const bv = params?.sort === 'title' ? b.title : params?.sort === 'updated' ? b.updated || b.date : b.date;
     return av.localeCompare(bv) * (params?.order === 'asc' ? 1 : -1);
   });
+  const media = await findMediaByIds(posts.flatMap((post) => (post.coverMediaId ? [post.coverMediaId] : []))).catch(
+    () => new Map<string, Media>(),
+  );
+  posts = posts.map((post) => ({ ...post, coverUrl: post.coverMediaId ? media.get(post.coverMediaId)?.url : undefined }));
   const categoryStats = [...new Set(posts.flatMap((post) => post.categories))].map((name) => ({
     name,
     count: posts.filter((post) => post.categories.includes(name)).length,

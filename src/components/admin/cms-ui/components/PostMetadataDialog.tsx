@@ -14,6 +14,7 @@ import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { ImageCropDialog } from './ImageCropDialog';
 
 interface PostMetadataDialogProps {
   postId: string;
@@ -27,6 +28,7 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,14 +55,22 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
     setValues((current) => (current ? { ...current, [key]: value } : current));
   }
 
-  async function handleCoverChange(file: File | undefined) {
+  function handleCoverChange(file: File | undefined) {
     if (!file) return;
-    const validationError = validateImageUpload(file);
-    if (validationError) {
-      toast.error(validationError);
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      toast.error('仅支持 JPG、PNG 或 WebP 图片');
       return;
     }
+    setCropFile(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
 
+  async function uploadCroppedCover(file: File) {
+    const validationError = validateImageUpload(file);
+    if (validationError) {
+      toast.error(`裁剪后的图片无法上传：${validationError}`);
+      return;
+    }
     setIsUploading(true);
     try {
       const media = await uploadPostCover(file);
@@ -71,7 +81,6 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
       toast.error(cause instanceof Error ? cause.message : '封面上传失败');
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   }
 
@@ -180,7 +189,7 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   className="hidden"
-                  onChange={(event) => void handleCoverChange(event.currentTarget.files?.[0])}
+                  onChange={(event) => handleCoverChange(event.currentTarget.files?.[0])}
                 />
                 <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
                   <Icon
@@ -217,6 +226,16 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
           </Button>
         </DialogFooter>
       </DialogContent>
+      {cropFile && (
+        <ImageCropDialog
+          file={cropFile}
+          onOpenChange={(open) => !open && setCropFile(null)}
+          onCrop={(file) => {
+            setCropFile(null);
+            void uploadCroppedCover(file);
+          }}
+        />
+      )}
     </Dialog>
   );
 }

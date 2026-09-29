@@ -101,6 +101,9 @@ export function PostTable({
         <table className="w-full">
           <thead className="border-border border-b bg-muted/50">
             <tr>
+              <th className="w-24 px-4 py-3 text-left">
+                <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">封面</span>
+              </th>
               <th className="px-4 py-3 text-left">
                 <SortableHeader label="标题" field="title" sortField={sortField} sortOrder={sortOrder} onSort={onSort} />
               </th>
@@ -124,6 +127,23 @@ export function PostTable({
           <tbody className="divide-y divide-border">
             {posts.map((post) => (
               <tr key={post.id} className="transition-colors hover:bg-muted/30">
+                <td className="px-4 py-3">
+                  {post.coverUrl ? (
+                    <img
+                      src={post.coverUrl}
+                      alt={`${post.title}封面`}
+                      loading="lazy"
+                      className="aspect-video w-20 rounded-md border border-border object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="grid aspect-video w-20 place-items-center rounded-md border border-border border-dashed bg-muted/40 text-muted-foreground"
+                      title={post.coverMediaId ? '封面图片暂不可用' : '未设置封面'}
+                    >
+                      <Icon icon="ri:image-line" className="size-5" />
+                    </div>
+                  )}
+                </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
                     {post.sticky && (

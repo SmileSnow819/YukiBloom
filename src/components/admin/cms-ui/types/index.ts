@@ -68,6 +68,8 @@ export interface PostListItem {
   title: string;
   date: string;
   updated?: string;
+  coverMediaId?: string;
+  coverUrl?: string;
   categories: string[];
   tags: string[];
   draft: boolean;
