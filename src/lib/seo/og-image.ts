@@ -8,7 +8,13 @@ import { siteConfig } from '@constants/site-config';
  * @param site - Site URL for absolute URL generation
  * @returns Absolute URL string or undefined
  */
-export function getOgImageUrl(cover: string | undefined, site: URL | undefined): string | undefined {
-  const imagePath = cover || siteConfig.defaultOgImage || siteConfig.avatar;
+export function getOgImageUrl(
+  cover: string | undefined,
+  site: URL | undefined,
+  defaults?: { defaultOgImage?: string; avatar?: string },
+): string | undefined {
+  const imagePath = defaults
+    ? cover || defaults.defaultOgImage || defaults.avatar
+    : cover || siteConfig.defaultOgImage || siteConfig.avatar;
   return imagePath && site ? new URL(imagePath, site).href : undefined;
 }

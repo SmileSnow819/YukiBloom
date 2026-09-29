@@ -1,8 +1,12 @@
-import { friendsIntro } from '@constants/friends-config';
 import { useTranslation } from '@hooks/useTranslation';
 import { useClipboard } from 'foxact/use-clipboard';
 import { useCallback, useState } from 'react';
+import type { PublicFriendSettings } from '@/lib/public-api';
 import SakuraSVG from '../svg/SakuraSvg';
+
+interface Props {
+  settings: PublicFriendSettings;
+}
 
 interface FormData {
   site: string;
@@ -13,7 +17,7 @@ interface FormData {
   color: string;
 }
 
-export default function FriendRequestForm() {
+export default function FriendRequestForm({ settings }: Props) {
   const { t } = useTranslation();
   const [formData, setFormData] = useState<FormData>({
     site: '',
@@ -66,7 +70,7 @@ color: "${formData.color || '#ffc0cb'}"`;
                 <SakuraSVG className="size-6 animate-spin text-[#FFC0CB] duration-10000" />
                 {t('friends.applyTitle')}
               </h2>
-              <p className="font-medium text-gray-500 text-sm dark:text-gray-400">{friendsIntro.applyDesc}</p>
+              <p className="font-medium text-gray-500 text-sm dark:text-gray-400">{settings.applyDesc}</p>
             </div>
 
             <div className="space-y-4">

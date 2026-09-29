@@ -3,12 +3,14 @@ import { SeriesNavigation } from '@components/post/SeriesNavigation';
 import { SeriesPostList } from '@components/post/SeriesPostList';
 import HomeSiderSegmented from '@components/ui/segmented/HomeSiderSegmented';
 import { HomeSiderSegmentType, HomeSiderType } from '@constants/enum';
-import { getPostSlug } from '@lib/content/locale';
-import { getAdjacentSeriesPosts, getSeriesPosts } from '@lib/content/posts';
-import { toPostRef, toPostRefs } from '@lib/content/transforms';
 import { cn } from '@lib/utils';
-import type { BlogPost } from 'types/blog';
 import { getLocaleFromUrl } from '@/i18n';
+import {
+  getLocalizedPublicPosts,
+  getPostCategoryNames,
+  type PublicPostPageModel,
+  toPublicPostRefWithCategory,
+} from '@/lib/public-api';
 import HomeInfo from './HomeInfo.astro';
 import { ScrollProgress } from './ScrollProgress';
 import { TableOfContents } from './TableOfContents/index';
@@ -17,21 +19,25 @@ interface Props {
   type?: HomeSiderType;
   className?: string;
   isDrawer?: boolean;
-  post?: BlogPost;
+  post?: PublicPostPageModel;
 }
 
 const { type = HomeSiderType.HOME, className, isDrawer = false, post } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const defaultSegmentType = type === HomeSiderType.POST ? HomeSiderSegmentType.DIRECTORY : HomeSiderSegmentType.INFO;
 
-// 获取系列文章（转换为轻量级引用）
-const seriesPosts = post && type === HomeSiderType.POST ? toPostRefs(await getSeriesPosts(post, locale)) : [];
-
-// 获取上一篇和下一篇（转换为轻量级引用）
-const adjacentPosts =
-  post && type === HomeSiderType.POST ? await getAdjacentSeriesPosts(post, locale) : { prevPost: null, nextPost: null };
-const prevPost = adjacentPosts.prevPost ? toPostRef(adjacentPosts.prevPost) : null;
-const nextPost = adjacentPosts.nextPost ? toPostRef(adjacentPosts.nextPost) : null;
+const seriesPostsData = post && type === HomeSiderType.POST ? await getLocalizedPublicPosts(locale) : [];
+const postCategory = post
+  ? Array.isArray(post.data.categories?.[0])
+    ? post.data.categories[0].at(-1)
+    : post.data.categories?.[0]
+  : undefined;
+const seriesPosts = postCategory
+  ? seriesPostsData.filter((item) => getPostCategoryNames(item).includes(postCategory)).map(toPublicPostRefWithCategory)
+  : [];
+const currentPostIndex = seriesPosts.findIndex((item) => item.slug === post?.slug);
+const prevPost = currentPostIndex > 0 ? seriesPosts[currentPostIndex - 1] : null;
+const nextPost = currentPostIndex >= 0 && currentPostIndex < seriesPosts.length - 1 ? seriesPosts[currentPostIndex + 1] : null;
 ---
 
 <div
@@ -66,7 +72,7 @@ const nextPost = adjacentPosts.nextPost ? toPostRef(adjacentPosts.nextPost) : nu
       {type === HomeSiderType.POST && <TableOfContents client:only="react" enableNumbering={post?.data.tocNumbering ?? true} />}
     </div>
     <div slot="series" class="sider-slot" data-slot-type="series">
-      {type === HomeSiderType.POST && <SeriesPostList client:idle posts={seriesPosts} currentPostSlug={post ? getPostSlug(post) : undefined} locale={locale} />}
+      {type === HomeSiderType.POST && <SeriesPostList client:idle posts={seriesPosts} currentPostSlug={post?.slug} locale={locale} />}
     </div>
   </sider-content>
 

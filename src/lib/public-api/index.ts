@@ -22,12 +22,19 @@ export { getLocalizedPublicPage } from './public-page';
 export type { PublicTimelinePost } from './public-taxonomy';
 export { findPublicCategoryByLink, getPublicCategoryLinks, getPublicTagCounts, getPublicTaxonomy } from './public-taxonomy';
 export { getPublicRssItems } from './rss';
+export { getPublicFeaturedCategoryField, getPublicSeriesField } from './site-content-view';
+export { createPublicSitemap } from './sitemap';
 export type {
+  PublicFeaturedCategory,
+  PublicFeaturedSeries,
   PublicFootprints,
+  PublicFriendLink,
+  PublicFriendSettings,
   PublicPage,
   PublicPost,
   PublicPostPage,
   PublicPostQuery,
   PublicPostSummary,
   PublicSiteContent,
+  PublicSocialLink,
 } from './types';

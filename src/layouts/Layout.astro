@@ -40,6 +40,7 @@ import {
   localizedPath,
   stripLocaleFromPath,
 } from '@/i18n';
+import { getPublicSiteContent } from '@/lib/public-api';
 
 import '@styles/index.css';
 
@@ -63,8 +64,10 @@ const htmlLang = getHtmlLang(locale);
 // Detect if current page is a post page for mobile header (locale-prefix safe)
 const isPostPage = stripLocaleFromPath(Astro.url.pathname).startsWith('/post/');
 
-// OGP image: use post cover if available, otherwise use default from config, fallback to avatar
-const ogImage = getOgImageUrl(post?.data.cover, Astro.site);
+// OGP image: use backend-managed defaults on rendered pages.
+const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
+const profile = isNotFoundPage ? undefined : (await getPublicSiteContent()).profile;
+const ogImage = getOgImageUrl(post?.data.cover, Astro.site, profile);
 
 // Pre-compute i18n URLs for <head> links
 const rssHref = new URL(localizedPath('/rss.xml', locale), Astro.site).href;
@@ -362,7 +365,7 @@ const canonicalHref = canonicalOverride ?? Astro.url.href;
         </div>
       )}
       <FloatingGroup client:only="react" />
-      <MobileDrawer type={siderType} post={post && 'collection' in post ? post : undefined} />
+      <MobileDrawer type={siderType} post={post && !('collection' in post) ? post : undefined} />
       <SearchDialog client:idle />
       <SearchPortal />
       <CodeBlockFullscreen client:idle />

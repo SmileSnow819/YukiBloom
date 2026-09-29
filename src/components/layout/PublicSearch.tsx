@@ -1,3 +1,4 @@
+import { encodeSlug } from '@lib/route';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/hooks/useTranslation';
 import { localizedPath } from '@/i18n';
@@ -86,7 +87,7 @@ export default function PublicSearch() {
             <a
               key={`${result.locale}:${result.slug}`}
               className="pagefind-ui__result rounded-lg px-3 py-3 transition-colors hover:bg-foreground/5"
-              href={localizedPath(`/post/${encodeURIComponent(result.slug)}`, locale)}
+              href={localizedPath(`/post/${encodeSlug(result.slug)}`, locale)}
             >
               <span className="pagefind-ui__result-link block font-medium text-primary">{result.title}</span>
               {result.description && (

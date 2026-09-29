@@ -1,4 +1,5 @@
 import { renderMarkdown } from '@lib/markdown/render-markdown';
+import { encodeSlug } from '@lib/route';
 import { getSanitizeHtml, stripHtmlToText } from '@lib/sanitize';
 import { localizedPath, t } from '@/i18n';
 import { getPublicPost } from './api';
@@ -13,7 +14,7 @@ export async function getPublicRssItems(locale: string, site: URL) {
       const rendered = password ? '' : await renderMarkdown(post.bodyMarkdown, post.extra ?? {});
       const rssNotice = t(locale, 'encrypted.post.rssNotice');
       const categoryNames = getPostCategoryNames(summary);
-      const postLink = new URL(localizedPath(`/post/${summary.slug}`, locale), site).pathname;
+      const postLink = new URL(localizedPath(`/post/${encodeSlug(summary.slug)}`, locale), site).pathname;
       const categories = [...categoryNames.map((name) => `category:${name}`), ...summary.tags.map((tag) => `tag:${tag}`)];
       const description = password ? rssNotice : summary.description || stripHtmlToText(rendered);
 

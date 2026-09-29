@@ -1,7 +1,7 @@
 ---
 import SeriesLanding from '@components/series/SeriesLanding.astro';
-import { siteConfig } from '@/constants/site-config';
 import { defaultLocale, localeList } from '@/i18n/config';
+import { getPublicSiteContent } from '@/lib/public-api';
 import HomePage from './index.astro';
 
 export const prerender = false;
@@ -11,9 +11,10 @@ const localized = segments.length > 0 && localeList.includes(segments[0]) && seg
 const localePrefixLength = localized ? 1 : 0;
 const isLocalizedHome = localized && segments.length === 1;
 const seriesSlug = segments[localePrefixLength];
+const siteContent = isLocalizedHome ? undefined : await getPublicSiteContent();
 const series =
   !isLocalizedHome && segments.length === localePrefixLength + 1
-    ? siteConfig.featuredSeries.find((item) => item.enabled !== false && item.slug.toLowerCase() === seriesSlug?.toLowerCase())
+    ? siteContent?.featuredSeries.find((item) => item.enabled && item.slug.toLowerCase() === seriesSlug?.toLowerCase())
     : undefined;
 const notFound = !isLocalizedHome && !series;
 if (notFound) Astro.response.status = 404;
@@ -23,7 +24,7 @@ if (notFound) Astro.response.status = 404;
   isLocalizedHome ? (
     <HomePage />
   ) : series ? (
-    <SeriesLanding series={series} />
+    <SeriesLanding series={series} siteContent={siteContent!} />
   ) : (
     <main class="mx-auto w-full max-w-3xl px-6 py-16 text-center">Not Found</main>
   )

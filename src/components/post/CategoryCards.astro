@@ -3,21 +3,15 @@ import { Badge } from '@components/ui/badge';
 import { Button } from '@components/ui/button';
 import { categoryMap } from '@constants/category';
 import { Routes } from '@constants/router';
-import { siteConfig } from '@constants/site-config';
-import {
-  type Category,
-  getCategoryByLink,
-  getCategoryList,
-  getParentCategory,
-  getPostsByCategory,
-  translateCategoryName,
-} from '@lib/content';
-import { toPostRefs } from '@lib/content/transforms';
+import { translateCategoryName } from '@lib/content/category-translate';
 import { getLqipStyle } from '@lib/lqip';
 import { routeBuilder } from '@lib/route';
 import { cn } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
+import type { Category } from '@/lib/content/types';
+import type { PublicSiteContent } from '@/lib/public-api';
+import { findPublicCategoryByLink, getPublicFeaturedCategoryField, getPublicTaxonomy } from '@/lib/public-api';
 import type { PostRef } from '@/types/blog';
 import FlippedCard from './FlippedCard.astro';
 
@@ -28,24 +22,48 @@ interface CategoryWithPosts {
   posts: PostRef[];
   category: Category | null;
   parentCategory: Category | null;
+  count: number;
+}
+
+interface Props {
+  siteContent: PublicSiteContent;
 }
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const { categories } = await getCategoryList(locale);
+const { siteContent } = Astro.props;
+const featuredCategories = siteContent.featuredCategories;
+const { categories, countMap, posts: allPosts } = await getPublicTaxonomy(locale);
+
+function findParent(category: Category | null, roots: Category[]): Category | null {
+  if (!category) return null;
+  for (const parent of roots) {
+    if (parent.children?.some((child) => child.name === category.name)) return parent;
+    const found = findParent(category, parent.children ?? []);
+    if (found) return found;
+  }
+  return null;
+}
 
 const categoryPosts: CategoryWithPosts[] = await Promise.all(
-  siteConfig.featuredCategories?.map(async (category) => {
-    const categoryInfo = getCategoryByLink(categories, category?.link);
-    const posts = await getPostsByCategory(categoryInfo?.name ?? '', locale);
-    return {
-      link: category.link,
-      label: category?.label,
-      image: category.image,
-      category: categoryInfo,
-      parentCategory: getParentCategory(categoryInfo, categories),
-      posts: toPostRefs(posts),
-    };
-  }) || [],
+  featuredCategories
+    .filter((category) => category.enabled)
+    .map(async (category) => {
+      const categoryInfo = findPublicCategoryByLink(categories, category?.link ?? '');
+      const posts = categoryInfo
+        ? allPosts
+            .filter((post) => post.categoryNames.includes(categoryInfo.name))
+            .map((post) => ({ slug: post.slug, link: post.slug, title: post.title }))
+        : [];
+      return {
+        link: category.link,
+        label: getPublicFeaturedCategoryField(siteContent, locale, category.link, 'label') ?? category.label,
+        image: category.image,
+        category: categoryInfo,
+        parentCategory: findParent(categoryInfo, categories),
+        posts,
+        count: countMap[categoryInfo?.name ?? ''] ?? 0,
+      };
+    }) || [],
 );
 ---
 
@@ -127,7 +145,7 @@ const categoryPosts: CategoryWithPosts[] = await Promise.all(
                 {categoryInfo?.children?.length
                   ? `${t(locale, 'category.subCategoryCount', { count: categoryInfo.children.length })}, `
                   : ''}
-                {t(locale, 'category.postCount', { count: category.posts?.length ?? 0 })}
+                {t(locale, 'category.postCount', { count: category.count })}
               </Fragment>
             </p>
             <a href={categoryLink} aria-label="more info" class="absolute right-0 bottom-0">

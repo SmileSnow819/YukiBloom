@@ -3,19 +3,25 @@ import HomeSider from '@components/layout/HomeSider.astro';
 import PostList from '@components/post/PostList.astro';
 import Cover from '@components/ui/cover/Cover.astro';
 import { CONTENT_PADDING, PAGINATION } from '@constants/layout';
-import { seoConfig, siteConfig } from '@constants/site-config';
+import { seoConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
 import CategoryCards from '@/components/post/CategoryCards.astro';
 import Divider from '@/components/ui/divider';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
-import { getExtraBoolean, getLocalizedPublicPosts, getPostCategoryNames, toPublicPostCardData } from '@/lib/public-api';
+import {
+  getExtraBoolean,
+  getLocalizedPublicPosts,
+  getPostCategoryNames,
+  getPublicSiteContent,
+  toPublicPostCardData,
+} from '@/lib/public-api';
 
 export const prerender = false;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const allPosts = await getLocalizedPublicPosts(locale);
-const enabledSeries = siteConfig.featuredSeries.filter((series) => series.enabled !== false);
+const [allPosts, siteContent] = await Promise.all([getLocalizedPublicPosts(locale), getPublicSiteContent()]);
+const enabledSeries = siteContent.featuredSeries.filter((series) => series.enabled);
 const featuredCategoryNames = new Set(enabledSeries.map((series) => series.categoryName));
 const getMatchingCategory = (post: (typeof allPosts)[number], name: string) => getPostCategoryNames(post).includes(name);
 
@@ -58,10 +64,10 @@ const page = {
       )}
       <Divider>{t(locale, 'post.postList')}</Divider>
       <PostList posts={posts} page={page} showPaginator={true} baseUrl={postsBaseUrl} isHomePage={true} />
-      {!!siteConfig?.featuredCategories?.length && (
+      {siteContent.featuredCategories.some((category) => category.enabled) && (
         <>
           <Divider className="mt-6">{t(locale, 'post.featuredCategories')}</Divider>
-          <CategoryCards />
+          <CategoryCards siteContent={siteContent} />
         </>
       )}
     </div>

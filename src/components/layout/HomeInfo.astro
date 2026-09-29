@@ -9,7 +9,7 @@ import { getLqipStyle } from '@lib/lqip';
 import { cn, filterNavItems } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 import { getLocaleFromUrl, localizedPath, resolveNavName, stripLocaleFromPath, t } from '@/i18n';
-import { getPublicTagCounts, getPublicTaxonomy } from '@/lib/public-api';
+import { getPublicSiteContent, getPublicTagCounts, getPublicTaxonomy } from '@/lib/public-api';
 import type { BlogSchema } from '@/types/blog';
 import Social from './Social.astro';
 
@@ -23,6 +23,8 @@ interface Props {
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
 const { countMap, posts } = isNotFoundPage ? { countMap: {}, posts: [] } : await getPublicTaxonomy(locale);
+const siteContent = isNotFoundPage ? undefined : await getPublicSiteContent();
+const profile = siteContent?.profile;
 const postCount = posts.length;
 const tags = getPublicTagCounts(posts);
 const allTags = Object.entries(tags).map(([tag, count]) => ({ tag, count }));
@@ -37,21 +39,21 @@ const strippedPath = stripLocaleFromPath(Astro.url.pathname);
 ---
 
 <div class={cn('flex flex-col items-center', className)} data-home-info-container={uniqueId}>
-  <div class="relative h-40 w-40 rounded-full" style={getLqipStyle(siteConfig.avatar ?? '/img/avatar.webp')}>
+  <div class="relative h-40 w-40 rounded-full" style={getLqipStyle(profile?.avatar ?? siteConfig.avatar ?? '/img/avatar.webp')}>
     <img
       transition:persist="page-home-info-avatar"
       class="shadow-card-darker hover:animate-shake h-full w-full rounded-full transition"
-      src={siteConfig.avatar ?? '/img/avatar.webp'}
-      alt={`${siteConfig.name ?? ''} avatar`}
+      src={profile?.avatar ?? siteConfig.avatar ?? '/img/avatar.webp'}
+      alt={`${profile?.name ?? siteConfig.name ?? ''} avatar`}
       loading="eager"
       fetchpriority="high"
     />
     {christmasConfig.enabled && christmasConfig.features.christmasHat && <ChristmasHat />}
   </div>
 
-  <p class="mt-2">{siteConfig?.name}</p>
-  <p class="text-muted-foreground mt-3 text-center">{siteConfig?.description}</p>
-  <Social />
+  <p class="mt-2">{profile?.name ?? siteConfig.name}</p>
+  <p class="text-muted-foreground mt-3 text-center">{profile?.description ?? siteConfig.description}</p>
+  {siteContent && <Social links={siteContent.socialLinks} />}
   <div
     class="text-muted-foreground mt-3 flex justify-center text-center text-sm/4 whitespace-nowrap select-none dark:text-white/80"
   >

@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import node from '@astrojs/node';
 import react from '@astrojs/react';
-import sitemap from '@astrojs/sitemap';
 import yaml from '@rollup/plugin-yaml';
 import tailwindcss from '@tailwindcss/vite';
 import umami from '@yeskunall/astro-umami';
@@ -92,7 +91,6 @@ export default defineConfig({
   },
   integrations: [
     react(),
-    sitemap(),
     icon({
       include: {
         gg: ['*'],
@@ -115,7 +113,7 @@ export default defineConfig({
     mermaid({
       autoTheme: true,
     }),
-    robotsTxt(robotsConfig || {}),
+    robotsTxt({ ...(robotsConfig || {}), sitemap: new URL('/sitemap.xml', yamlConfig.site.url).href }),
     ...(isAnalyze ? [Sonda()] : []),
   ],
   devToolbar: {

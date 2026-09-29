@@ -1,5 +1,4 @@
 import { microDampingPreset } from '@constants/anim/spring';
-import type { FriendLink } from '@constants/friends-config';
 import { useIsMounted } from '@hooks/useIsMounted';
 import { useStore } from '@nanostores/react';
 import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from 'motion/react';
@@ -7,8 +6,17 @@ import { type MouseEvent, useRef } from 'react';
 import { cn, normalizeHexColor } from '@/lib/utils';
 import { christmasEnabled } from '@/store/christmas';
 
+interface FriendCardData {
+  site: string;
+  url: string;
+  owner: string;
+  description: string;
+  image: string;
+  color?: string;
+}
+
 interface FriendCardProps {
-  friend: FriendLink;
+  friend: FriendCardData;
   index: number;
 }
 
@@ -130,7 +138,7 @@ export default function FriendCard({ friend, index }: FriendCardProps) {
               {friend.owner}
             </p>
             <p className="mb-1 truncate font-medium text-[10px] text-gray-400 uppercase tracking-wider">{friend.site}</p>
-            <p className="line-clamp-2 text-[10px] text-gray-600 dark:text-gray-300">{friend.desc}</p>
+            <p className="line-clamp-2 text-[10px] text-gray-600 dark:text-gray-300">{friend.description}</p>
           </div>
         </div>
 

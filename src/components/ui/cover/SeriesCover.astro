@@ -1,28 +1,29 @@
 ---
-import type { FeaturedSeriesItem } from '@lib/config/types';
 import { getLqipStyle } from '@lib/lqip';
 import { getSanitizeHtml } from '@lib/sanitize';
 import { Icon } from 'astro-icon/components';
 import { marked } from 'marked';
 import { MAX_WIDTH } from '@/constants/layout';
 import { getLocaleFromUrl, t } from '@/i18n';
-import { getContentSeriesField } from '@/i18n/content';
+import { getPublicSeriesField, type PublicFeaturedSeries, type PublicSiteContent } from '@/lib/public-api';
 import WaveSvg from './wave';
 
 interface Props {
-  series: FeaturedSeriesItem;
+  series: PublicFeaturedSeries;
+  siteContent: PublicSiteContent;
 }
 
-const { series } = Astro.props;
+const { series, siteContent } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 
-// Translate series fields with fallback to YAML values
-const seriesLabel = getContentSeriesField(locale, series.slug, 'label') ?? series.label ?? '';
-const seriesFullName = getContentSeriesField(locale, series.slug, 'fullName') ?? series.fullName ?? '';
+// Translate series fields with fallback to the API's default-locale values.
+const seriesLabel = getPublicSeriesField(siteContent, locale, series.slug, 'label') ?? series.label ?? '';
+const seriesFullName = getPublicSeriesField(siteContent, locale, series.slug, 'fullName') ?? series.fullName ?? '';
 const seriesTitle = seriesFullName || seriesLabel || series.categoryName;
+const description = getPublicSeriesField(siteContent, locale, series.slug, 'description') ?? series.description;
 
 // Convert Markdown description to HTML and sanitize for XSS protection
-const rawHtml = series.description ? await marked.parse(series.description) : '';
+const rawHtml = description ? await marked.parse(description) : '';
 const descriptionHtml = getSanitizeHtml(rawHtml);
 // Derive mobile cover from naming convention: *_1920.ext -> *_800.ext
 const mobileSeriesCover = series.cover?.replace(/_1920(\.[a-zA-Z0-9]+)$/u, '_800$1');
@@ -107,7 +108,7 @@ const mobileSeriesCover = series.cover?.replace(/_1920(\.[a-zA-Z0-9]+)$/u, '_800
 
     <!-- Description -->
     {
-      series.description && (
+      description && (
         <div class="shadow-text mt-8 max-w-3xl text-center">
           <div class="prose prose-invert mx-auto text-sm leading-relaxed md:text-xs" set:html={descriptionHtml} />
         </div>

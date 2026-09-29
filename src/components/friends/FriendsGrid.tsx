@@ -1,22 +1,26 @@
 import { ErrorBoundary, ErrorFallback } from '@components/common';
 import { microDampingPreset } from '@constants/anim/spring';
-import { friendsData } from '@constants/friends-config';
 import { motion } from 'motion/react';
+import type { PublicFriendLink } from '@/lib/public-api';
 import FriendCard from './FriendCard';
 
-export default function FriendsGrid() {
+interface Props {
+  friends: PublicFriendLink[];
+}
+
+export default function FriendsGrid({ friends }: Props) {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <div className="w-full">
         {/* Grid Container */}
         <div className="grid grid-cols-3 gap-6 md:grid-cols-2 md:gap-4 xl:grid-cols-4 xl:gap-8">
-          {friendsData.map((friend, index) => (
+          {friends.map((friend, index) => (
             <FriendCard key={friend.url} friend={friend} index={index} />
           ))}
         </div>
 
         {/* Empty State */}
-        {friendsData.length === 0 && (
+        {friends.length === 0 && (
           <motion.div
             className="flex min-h-[300px] flex-col items-center justify-center text-center"
             initial={{ opacity: 0, y: 20 }}

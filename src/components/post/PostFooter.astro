@@ -1,7 +1,11 @@
 ---
-import { getRelatedPostSlugs, hasSimilarityData } from '@lib/content/similarities';
 import { getLocaleFromUrl } from '@/i18n';
-import { getLocalizedPublicPosts, toPublicPostRefWithCategory } from '@/lib/public-api';
+import {
+  getLocalizedPublicPosts,
+  getPostCategoryNames,
+  getPublicPostDate,
+  toPublicPostRefWithCategory,
+} from '@/lib/public-api';
 import PostFooterLists from './PostFooterLists';
 import RandomPostList from './RandomPostList';
 import RelatedPostList from './RelatedPostList';
@@ -12,12 +16,10 @@ interface Props {
 
 const { post } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
-
-// Check if similarity data is available
-const hasData = hasSimilarityData();
+const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
 
 // Get all posts
-const allPosts = await getLocalizedPublicPosts(locale);
+const allPosts = isNotFoundPage ? [] : await getLocalizedPublicPosts(locale);
 const totalPosts = allPosts.length;
 
 // Calculate how many posts to show on each side
@@ -31,9 +33,22 @@ const allPostItems = allPosts.map(toPublicPostRefWithCategory);
 const leftPool = totalPosts <= 10 ? allPostItems : allPostItems.slice(0, Math.floor(totalPosts / 2));
 const rightPool = totalPosts <= 10 ? allPostItems : allPostItems.slice(Math.floor(totalPosts / 2));
 
-// Get related posts if current post is provided and similarity data exists
-const relatedSlugs = hasData && post ? new Set(getRelatedPostSlugs(post.slug, 5).map(({ slug }) => slug)) : new Set<string>();
-const relatedPosts = allPostItems.filter((item) => relatedSlugs.has(item.slug)).slice(0, 5);
+// Rank current API posts by shared tags and categories, so newly published posts can appear immediately.
+const currentPost = post ? allPosts.find((item) => item.slug === post.slug) : undefined;
+const relatedPosts = currentPost
+  ? allPosts
+      .filter((item) => item.slug !== currentPost.slug)
+      .map((item) => {
+        const sharedTags = item.tags.filter((tag) => currentPost.tags.includes(tag)).length;
+        const currentCategories = getPostCategoryNames(currentPost);
+        const sharedCategories = getPostCategoryNames(item).filter((category) => currentCategories.includes(category)).length;
+        return { item, score: sharedTags * 2 + sharedCategories };
+      })
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || getPublicPostDate(b.item).getTime() - getPublicPostDate(a.item).getTime())
+      .slice(0, 5)
+      .map(({ item }) => toPublicPostRefWithCategory(item))
+  : [];
 ---
 
 <div class="tablet:grid-cols-1 grid grid-cols-2 gap-4 px-10 md:px-6">
@@ -42,7 +57,7 @@ const relatedPosts = allPostItems.filter((item) => relatedSlugs.has(item.slug)).
   ) : (
     <>
       <RandomPostList client:only="react" postsPool={leftPool} count={leftCount} locale={locale} />
-      {(hasData || totalPosts <= 10) && <RelatedPostList client:only="react" posts={relatedPosts} fallbackPool={rightPool} fallbackCount={rightCount} startIndex={leftCount + 1} locale={locale} />}
+      <RelatedPostList client:only="react" posts={relatedPosts} fallbackPool={rightPool} fallbackCount={rightCount} startIndex={leftCount + 1} locale={locale} />
     </>
   )}
 </div>

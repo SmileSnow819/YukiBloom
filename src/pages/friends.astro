@@ -9,9 +9,11 @@ import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
 import { Comment } from '@/components/comment';
 import { getLocaleFromUrl, t } from '@/i18n';
+import { getPublicSiteContent } from '@/lib/public-api';
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
 export const prerender = false;
+const siteContent = await getPublicSiteContent();
 const title = `${t(locale, 'friends.title')} | ${siteConfig.title}`;
 const description = t(locale, 'friends.title');
 ---
@@ -24,10 +26,10 @@ const description = t(locale, 'friends.title');
       class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col gap-10 overflow-hidden ${CONTENT_PADDING.standard}`}
     >
       <div class="mt-4">
-        <FriendsGrid client:load />
+        <FriendsGrid client:load friends={siteContent.friendLinks} />
       </div>
       <div class="mb-4">
-        <FriendRequestForm client:visible />
+        <FriendRequestForm client:visible settings={siteContent.friendSettings} />
         <Comment />
       </div>
     </div>

@@ -1,15 +1,22 @@
 ---
-import { socialConfig } from '@constants/site-config';
 import { cn } from '@lib/utils';
 import { Icon } from 'astro-icon/components';
 import { capitalize } from 'es-toolkit';
+import type { PublicSocialLink } from '@/lib/public-api';
+
+interface Props {
+  links: PublicSocialLink[];
+}
+
+const { links } = Astro.props;
+const enabledLinks = links.filter((link) => link.enabled);
 ---
 
 <!-- TODO: use CSS squircle corner-shape replace the rounded-xl border-radius with a squircle corner-shape (https://www.squircle.style/) -->
 <div class="mt-2 grid grid-cols-3 gap-2">
   {
-    Object.entries(socialConfig).map(([key, config]) => {
-      const { url, icon, color } = config;
+    enabledLinks.map(({ platform, url, icon, color }) => {
+      const key = platform;
       return (
         <div>
           <a

@@ -8,6 +8,8 @@ export interface PublicTimelinePost {
   slug: string;
   title: string;
   date: Date;
+  updatedAt?: string;
+  locale: string;
   categoryNames: string[];
   tags: string[];
 }
@@ -55,6 +57,8 @@ export async function getPublicTaxonomy(locale: string): Promise<{
       slug: post.slug,
       title: post.title,
       date: getPublicPostDate(post),
+      updatedAt: post.updatedAt,
+      locale: post.locale,
       categoryNames: getCategoryPath(post),
       tags: post.tags.map((tag) => tag.toLowerCase()),
     })),

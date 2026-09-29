@@ -1,13 +1,13 @@
 ---
 import { HomeSiderType } from '@constants/enum';
 import { Icon } from 'astro-icon/components';
-import type { BlogPost } from 'types/blog';
 import { getAlternateUrl, getLocaleFromUrl, getLocaleLabel, localeEntries, t } from '@/i18n';
+import type { PublicPostPageModel } from '@/lib/public-api';
 import HomeSider from './HomeSider.astro';
 
 interface Props {
   type?: HomeSiderType;
-  post?: BlogPost;
+  post?: PublicPostPageModel;
 }
 
 const { type = HomeSiderType.HOME, post } = Astro.props;

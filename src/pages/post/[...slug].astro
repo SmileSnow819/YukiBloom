@@ -19,7 +19,13 @@ import { Icon } from 'astro-icon/components';
 import { Comment } from '@/components/comment';
 import EditButton from '@/components/EditButton';
 import { defaultLocale, getLocaleFromUrl, getLocaleLabel, localizedPath, t } from '@/i18n';
-import { getPublicPost, PublicApiNotFoundError, type PublicPost, toPublicPostPageModel } from '@/lib/public-api';
+import {
+  getPublicPost,
+  getPublicSiteContent,
+  PublicApiNotFoundError,
+  type PublicPost,
+  toPublicPostPageModel,
+} from '@/lib/public-api';
 import { extractTextFromMarkdown } from '@/lib/sanitize';
 
 export const prerender = false;
@@ -49,7 +55,8 @@ const tags = post?.data.tags ?? [];
 const finalDescription = post?.protectedContent
   ? t(locale, 'encrypted.post.description')
   : post?.data.description || (post ? extractTextFromMarkdown(post.body, 150) : '');
-const ogImage = getOgImageUrl(post?.data.cover, Astro.site);
+const profile = (await getPublicSiteContent()).profile;
+const ogImage = getOgImageUrl(post?.data.cover, Astro.site, profile);
 const renderedHtml = post
   ? await renderMarkdown(post.body, {
       ...post.data,
@@ -120,7 +127,7 @@ if (post?.protectedContent) {
     post ? (
       <TwoColumnLayout post={post}>
         <Cover slot="cover" data={post} />
-        <HomeSider slot="sider" type={HomeSiderType.POST} />
+        <HomeSider slot="sider" type={HomeSiderType.POST} post={post} />
         <div class={`shadow-box bg-gradient-start flex flex-col gap-2 ${CONTENT_PADDING.standard}`}>
           <nav class="text-muted-foreground flex items-center justify-between gap-2 text-sm">
             <div class="flex items-center gap-2">

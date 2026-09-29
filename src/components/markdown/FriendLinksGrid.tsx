@@ -1,5 +1,4 @@
 import FriendCard from '@components/friends/FriendCard';
-import type { FriendLink } from '@lib/config/types';
 
 interface Props {
   gridElement: HTMLElement;
@@ -13,11 +12,11 @@ export function FriendLinksGrid({ gridElement }: Props) {
   } catch {
     raw = [];
   }
-  const friends: FriendLink[] = raw.map((item) => ({
+  const friends = raw.map((item) => ({
     site: item.site || '',
     url: item.url || '',
     owner: item.owner || item.site || '',
-    desc: item.desc || '',
+    description: item.desc || '',
     image: item.image || '',
     color: item.color,
   }));

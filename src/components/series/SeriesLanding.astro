@@ -6,29 +6,35 @@ import { CONTENT_PADDING } from '@constants/layout';
 import { siteConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
-import type { FeaturedSeriesItem } from '@lib/config/types';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
-import { getContentSeriesField } from '@/i18n/content';
-import { getLocalizedPublicPosts, getPostCategoryNames, toPublicPostCardData } from '@/lib/public-api';
+import {
+  getLocalizedPublicPosts,
+  getPostCategoryNames,
+  getPublicSeriesField,
+  type PublicFeaturedSeries,
+  type PublicSiteContent,
+  toPublicPostCardData,
+} from '@/lib/public-api';
 
 interface Props {
-  series: FeaturedSeriesItem;
+  series: PublicFeaturedSeries;
+  siteContent: PublicSiteContent;
 }
 
-const { series } = Astro.props;
+const { series, siteContent } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const seriesPosts = (await getLocalizedPublicPosts(locale))
   .filter((post) => getPostCategoryNames(post).includes(series.categoryName))
   .map(toPublicPostCardData);
-const seriesFullName = getContentSeriesField(locale, series.slug, 'fullName') ?? series.fullName;
-const seriesLabel = getContentSeriesField(locale, series.slug, 'label') ?? series.label;
+const seriesFullName = getPublicSeriesField(siteContent, locale, series.slug, 'fullName') ?? series.fullName;
+const seriesLabel = getPublicSeriesField(siteContent, locale, series.slug, 'label') ?? series.label;
 const pageTitle = seriesFullName || seriesLabel || series.categoryName;
-const pageDescription = getContentSeriesField(locale, series.slug, 'description') ?? series.description;
+const pageDescription = getPublicSeriesField(siteContent, locale, series.slug, 'description') ?? series.description;
 ---
 
 <Layout title={`${pageTitle} | ${siteConfig.title}`} description={pageDescription?.slice(0, 160)}>
   <TwoColumnLayout>
-    <SeriesCover slot="cover" series={series} />
+    <SeriesCover slot="cover" series={series} siteContent={siteContent} />
     <HomeSider slot="sider" />
     <div class={`shadow-box bg-gradient-start mx-0 flex w-full flex-col ${CONTENT_PADDING.standard}`}>
       <h2 class="shoka-decoration-circle group relative h-19 px-6 py-5 text-2xl/9 font-bold md:text-xl/9">

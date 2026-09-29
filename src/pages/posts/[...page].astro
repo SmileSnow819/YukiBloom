@@ -3,12 +3,12 @@ import HomeSider from '@components/layout/HomeSider.astro';
 import PostList from '@components/post/PostList.astro';
 import Cover from '@components/ui/cover/Cover.astro';
 import { CONTENT_PADDING, PAGINATION } from '@constants/layout';
-import { seoConfig, siteConfig } from '@constants/site-config';
+import { seoConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
 import Divider from '@/components/ui/divider';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
-import { getLocalizedPublicPosts, getPostCategoryNames, toPublicPostCardData } from '@/lib/public-api';
+import { getLocalizedPublicPosts, getPostCategoryNames, getPublicSiteContent, toPublicPostCardData } from '@/lib/public-api';
 
 export const prerender = false;
 
@@ -16,12 +16,11 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
 const pageSegment = Astro.params.page ?? '1';
 if (!/^\d+$/.test(pageSegment)) Astro.response.status = 404;
 const currentPage = Math.max(1, Number.parseInt(pageSegment, 10) || 1);
+const [allPosts, siteContent] = await Promise.all([getLocalizedPublicPosts(locale), getPublicSiteContent()]);
 const featuredCategoryNames = new Set(
-  siteConfig.featuredSeries.filter((series) => series.enabled !== false).map((series) => series.categoryName),
+  siteContent.featuredSeries.filter((series) => series.enabled).map((series) => series.categoryName),
 );
-const posts = (await getLocalizedPublicPosts(locale)).filter(
-  (post) => !getPostCategoryNames(post).some((name) => featuredCategoryNames.has(name)),
-);
+const posts = allPosts.filter((post) => !getPostCategoryNames(post).some((name) => featuredCategoryNames.has(name)));
 const { pageSize } = PAGINATION;
 const lastPage = Math.max(1, Math.ceil(posts.length / pageSize));
 if (currentPage > lastPage) Astro.response.status = 404;

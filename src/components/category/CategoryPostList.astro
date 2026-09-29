@@ -22,6 +22,8 @@ const posts = rootCategory
         slug: post.slug,
         title: post.title,
         date: getPublicPostDate(post),
+        updatedAt: post.updatedAt,
+        locale: post.locale,
         categoryNames: getPostCategoryNames(post),
         tags: post.tags,
       }))
