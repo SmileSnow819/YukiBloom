@@ -256,6 +256,10 @@
         "coverMediaId": {
           "type": "string"
         },
+        "coverUrl": {
+          "description": "CoverURL 是有封面时返回的公开图片相对地址；无封面时省略。",
+          "type": "string"
+        },
         "createdAt": {
           "type": "string"
         },
