@@ -10,6 +10,7 @@ import { DashboardCharts } from '@admin-ui/components/DashboardCharts';
 import { ErrorFallback } from '@admin-ui/components/ErrorFallback';
 import { FootprintsManager } from '@admin-ui/components/FootprintsManager';
 import { PostEditor } from '@admin-ui/components/PostEditor';
+import { PostMetadataDialog } from '@admin-ui/components/PostMetadataDialog';
 import { PostTable } from '@admin-ui/components/PostTable';
 import { RecentUpdates } from '@admin-ui/components/RecentUpdates';
 import { TimelineManager } from '@admin-ui/components/TimelineManager';
@@ -96,6 +97,7 @@ function AppContent() {
 
 function CMSDashboard({ onLogout }: { onLogout: () => void }) {
   const [pageActions, setPageActions] = useState<ReactNode>(null);
+  const [metadataPostId, setMetadataPostId] = useState<string | null>(null);
   const {
     activeTab,
     setActiveTab,
@@ -312,7 +314,8 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
                         onToggleDraft={handleToggleDraft}
                         onDelete={handleDeletePost}
                         onToggleSticky={handleToggleSticky}
-                        onEdit={handleEditPost}
+                        onEditMetadata={setMetadataPostId}
+                        onEditContent={handleEditPost}
                       />
                     </div>
                   )}
@@ -330,6 +333,14 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
         existingCategories={data?.categories || []}
         onSuccess={handleCreatePostSuccess}
       />
+      {metadataPostId && (
+        <PostMetadataDialog
+          key={metadataPostId}
+          postId={metadataPostId}
+          onOpenChange={(open) => !open && setMetadataPostId(null)}
+          onSaved={fetchData}
+        />
+      )}
     </>
   );
 }

@@ -43,7 +43,8 @@ interface PostTableProps {
   onToggleDraft: (postId: string) => void;
   onDelete: (postId: string) => void;
   onToggleSticky?: (postId: string) => void;
-  onEdit?: (postId: string) => void;
+  onEditMetadata?: (postId: string) => void;
+  onEditContent?: (postId: string) => void;
 }
 
 interface PostActionProps {
@@ -82,7 +83,8 @@ export function PostTable({
   onToggleDraft,
   onDelete,
   onToggleSticky,
-  onEdit,
+  onEditMetadata,
+  onEditContent,
 }: PostTableProps) {
   if (posts.length === 0) {
     return (
@@ -165,7 +167,22 @@ export function PostTable({
                 </td>
                 <td className="whitespace-nowrap px-3 py-2">
                   <div className="flex flex-nowrap items-start justify-end gap-1">
-                    {onEdit && <PostAction label="编辑" title="编辑文章" icon="ri:edit-line" onClick={() => onEdit(post.id)} />}
+                    {onEditMetadata && (
+                      <PostAction
+                        label="信息"
+                        title="编辑标题、封面、分类、标签和日期"
+                        icon="ri:file-edit-line"
+                        onClick={() => onEditMetadata(post.id)}
+                      />
+                    )}
+                    {onEditContent && (
+                      <PostAction
+                        label="内容"
+                        title="编辑文章正文"
+                        icon="ri:article-line"
+                        onClick={() => onEditContent(post.id)}
+                      />
+                    )}
                     {onToggleSticky && (
                       <PostAction
                         label={post.sticky ? '已置顶' : '置顶'}

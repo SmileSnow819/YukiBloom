@@ -1,16 +1,14 @@
 import { generateSlug } from '@admin-ui/lib/slug';
-import type {
-  BlogSchema,
-  CreatePostParams,
-  CreatePostResponse,
-  ListPostsParams,
-  ListPostsResponse,
-  ReadPostResult,
-} from '@admin-ui/types';
-import { adminRequest, type Post, type PostInput } from '@/lib/admin/api';
+import type { CreatePostParams, CreatePostResponse, ListPostsParams, ListPostsResponse, ReadPostResult } from '@admin-ui/types';
+import { adminRequest, type Media, type Post } from '@/lib/admin/api';
 import { setCategoryMap } from './category';
+import {
+  buildPostContentUpdate,
+  buildPostMetadataUpdate,
+  getPostMetadataDefaults,
+  type PostMetadataValues,
+} from './post-metadata';
 
-const versions = new Map<string, number>();
 const categories = (post: Post) => post.categories || [];
 const toListItem = (post: Post) => ({
   id: post.id,
@@ -25,8 +23,7 @@ const toListItem = (post: Post) => ({
 });
 
 export async function readPost(postId: string): Promise<ReadPostResult> {
-  const post = await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`);
-  versions.set(postId, post.version);
+  const post = await readPostRecord(postId);
   return {
     frontmatter: {
       title: post.title,
@@ -41,32 +38,39 @@ export async function readPost(postId: string): Promise<ReadPostResult> {
   };
 }
 
-export async function writePost(
-  postId: string,
-  frontmatter: BlogSchema,
-  content: string,
-  _categoryMappings?: Record<string, string>,
-): Promise<void> {
-  const current = await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`);
-  const input: PostInput = {
-    locale: current.locale,
-    slug: current.slug,
-    title: frontmatter.title,
-    description: frontmatter.description || '',
-    bodyMarkdown: content,
-    displayDate: frontmatter.date instanceof Date ? frontmatter.date.toISOString() : current.displayDate,
-    categories: Array.isArray(frontmatter.categories)
-      ? frontmatter.categories.flat(2)
-      : frontmatter.categories
-        ? [frontmatter.categories]
-        : [],
-    tags: frontmatter.tags || [],
-    extra: current.extra || {},
-    coverMediaId: current.coverMediaId,
-    version: versions.get(postId) ?? current.version,
+async function readPostRecord(postId: string): Promise<Post> {
+  return await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`);
+}
+
+export async function readPostMetadata(postId: string): Promise<{ values: PostMetadataValues; cover: Media | null }> {
+  const post = await readPostRecord(postId);
+  const media = await adminRequest<{ items: Media[] }>('/media?page=1&limit=100').catch(() => ({ items: [] }));
+  return {
+    values: getPostMetadataDefaults(post),
+    cover: media.items.find((item) => item.id === post.coverMediaId) || null,
   };
-  const updated = await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`, { method: 'PATCH', body: input });
-  versions.set(postId, updated.version);
+}
+
+export async function uploadPostCover(file: File): Promise<Media> {
+  const body = new FormData();
+  body.set('file', file);
+  return await adminRequest<Media>('/media', { method: 'POST', body });
+}
+
+export async function savePostMetadata(postId: string, values: PostMetadataValues): Promise<void> {
+  const current = await readPostRecord(postId);
+  await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`, {
+    method: 'PATCH',
+    body: buildPostMetadataUpdate(current, values),
+  });
+}
+
+export async function writePostContent(postId: string, content: string): Promise<void> {
+  const current = await readPostRecord(postId);
+  await adminRequest<Post>(`/posts/${encodeURIComponent(postId)}`, {
+    method: 'PATCH',
+    body: buildPostContentUpdate(current, content),
+  });
 }
 
 export async function listPosts(params?: ListPostsParams): Promise<ListPostsResponse> {
@@ -113,6 +117,7 @@ export async function createPost(params: CreatePostParams): Promise<CreatePostRe
       title: params.title,
       description: '',
       bodyMarkdown: '',
+      displayDate: new Date().toISOString(),
       categories: params.categories || [],
       tags: params.tags || [],
     },

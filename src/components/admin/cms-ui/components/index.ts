@@ -14,5 +14,6 @@ export { ErrorFallback } from './ErrorFallback';
 export { FrontmatterEditor, type FrontmatterEditorRef } from './FrontmatterEditor';
 export { MarkdownPreview } from './MarkdownPreview';
 export { PostEditor } from './PostEditor';
+export { PostMetadataDialog } from './PostMetadataDialog';
 export { PostTable } from './PostTable';
 export { RecentUpdates } from './RecentUpdates';

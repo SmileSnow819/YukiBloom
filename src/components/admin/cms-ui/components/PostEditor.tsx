@@ -10,14 +10,11 @@ import { zh } from '@blocknote/core/locales';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/shadcn';
 import '@blocknote/shadcn/style.css';
-import { CategoryMappingDialog } from '@admin-ui/components/CategoryMappingDialog';
 import { EditorTOC } from '@admin-ui/components/EditorTOC';
-import { FrontmatterEditor, type FrontmatterEditorRef } from '@admin-ui/components/FrontmatterEditor';
 import { MarkdownPreview } from '@admin-ui/components/MarkdownPreview';
 import { Button } from '@admin-ui/components/ui/button';
 import { useEditorHeadings } from '@admin-ui/hooks';
-import { readPost, writePost } from '@admin-ui/lib/api';
-import { detectNewCategories, getCategoryMap, setCategoryMap } from '@admin-ui/lib/category';
+import { readPost, writePostContent } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import { cn } from '@admin-ui/lib/utils';
 import type { BlogSchema } from '@admin-ui/types';
@@ -104,7 +101,7 @@ async function markdownToBlocks(editor: ReturnType<typeof useCreateBlockNote>, m
   editor.replaceBlocks(editor.document, blocks);
 }
 
-type SidebarTab = 'frontmatter' | 'toc' | 'preview';
+type SidebarTab = 'toc' | 'preview';
 
 const SIDEBAR_WIDTH_KEY = 'cms-sidebar-width';
 const SIDEBAR_DEFAULT_WIDTH = 320;
@@ -116,7 +113,7 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('frontmatter');
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('toc');
 
   // Sidebar resize state
   const [sidebarWidth, setSidebarWidth] = useState(() => {
@@ -127,22 +124,15 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
 
   // Frontmatter state
   const [frontmatter, setFrontmatter] = useState<BlogSchema>({ title: '' });
-  const frontmatterRef = useRef<FrontmatterEditorRef>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const imageInsertAnchorRef = useRef<string | null>(null);
 
   // Preview state
   const [previewContent, setPreviewContent] = useState('');
 
-  // Category state
-  const [currentCategories, setCurrentCategories] = useState<string[]>([]);
-  const [pendingCategoryMappings, setPendingCategoryMappings] = useState<Record<string, string>>({});
-  const [showCategoryDialog, setShowCategoryDialog] = useState(false);
-
   // BlockNote editor with code block language support
   const editor = useCreateBlockNote({ schema, dictionary: zh });
   const initialContentLoaded = useRef(false);
-  const initialFrontmatterLoaded = useRef(false);
 
   // Extract headings for TOC
   const headings = useEditorHeadings(editor);
@@ -156,11 +146,10 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
       try {
         const data = await readPost(postId);
         setFrontmatter(data.frontmatter);
-        initialFrontmatterLoaded.current = true;
 
         // Load content into editor
-        if (data.content && editor) {
-          await markdownToBlocks(editor, data.content);
+        if (editor) {
+          if (data.content) await markdownToBlocks(editor, data.content);
           initialContentLoaded.current = true;
         }
       } catch (err) {
@@ -187,73 +176,25 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     return unsubscribe;
   }, [editor]);
 
-  // Handle frontmatter changes
-  const handleFrontmatterChange = useCallback((fm: BlogSchema) => {
-    setFrontmatter(fm);
-    // Only mark as changed after initial frontmatter is loaded
-    if (initialFrontmatterLoaded.current) {
-      setHasUnsavedChanges(true);
-    }
-  }, []);
-
-  // Handle categories change for new category detection
-  const handleCategoriesChange = useCallback((categories: string[]) => {
-    setCurrentCategories(categories);
-  }, []);
-
-  // Actual save operation (defined first so handleSave can reference it)
-  const performSave = useCallback(
-    async (categoryMappings?: Record<string, string>) => {
-      if (!editor) return;
-
-      setIsSaving(true);
-      try {
-        // Get markdown content
-        const content = await blocksToMarkdown(editor);
-
-        // Update the updated date
-        const now = new Date();
-        const updatedFrontmatter = {
-          ...frontmatter,
-          updated: now,
-          // Set date if not present (new post)
-          date: frontmatter.date || now,
-        };
-
-        await writePost(postId, updatedFrontmatter, content, categoryMappings);
-
-        // Update category map if we added new mappings
-        if (categoryMappings) {
-          const currentMap = getCategoryMap();
-          setCategoryMap({ ...currentMap, ...categoryMappings });
-        }
-
-        setHasUnsavedChanges(false);
-        toast.success('文章已保存');
-        onSaved?.();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : '保存文章失败');
-      } finally {
-        setIsSaving(false);
-      }
-    },
-    [editor, frontmatter, postId, onSaved],
-  );
-
-  // Save post with new category detection
-  const handleSave = useCallback(async () => {
+  const performSave = useCallback(async () => {
     if (!editor) return;
 
-    // Check for new categories
-    const newCats = detectNewCategories(currentCategories);
-    if (Object.keys(newCats).length > 0) {
-      setPendingCategoryMappings(newCats);
-      setShowCategoryDialog(true);
-      return;
-    }
+    setIsSaving(true);
+    try {
+      const content = await blocksToMarkdown(editor);
+      await writePostContent(postId, content);
 
-    await performSave();
-  }, [editor, currentCategories, performSave]);
+      setHasUnsavedChanges(false);
+      toast.success('正文已保存');
+      onSaved?.();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : '保存文章失败');
+    } finally {
+      setIsSaving(false);
+    }
+  }, [editor, postId, onSaved]);
+
+  const handleSave = useCallback(async () => await performSave(), [performSave]);
 
   const handleImageUpload = useCallback(
     async (file: File) => {
@@ -294,15 +235,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     imageInsertAnchorRef.current = editor.getTextCursorPosition().block.id;
     imageInputRef.current?.click();
   }, [editor]);
-
-  // Handle category mapping confirmation
-  const handleCategoryMappingConfirm = useCallback(
-    (mappings: Record<string, string>) => {
-      setShowCategoryDialog(false);
-      performSave(mappings);
-    },
-    [performSave],
-  );
 
   // Keyboard shortcut for save
   useEffect(() => {
@@ -363,7 +295,7 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
   // Handle close with unsaved changes check
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm('You have unsaved changes. Are you sure you want to close?');
+      const confirmed = window.confirm('正文尚未保存，确定关闭吗？');
       if (!confirmed) return;
     }
     onClose();
@@ -498,7 +430,7 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
               'rounded-lg p-2 transition-colors',
               showSidebar ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted',
             )}
-            title="显示或隐藏文章属性"
+            title="显示或隐藏目录与预览"
           >
             <Icon icon="ri:sidebar-unfold-line" className="size-5" />
           </button>
@@ -553,19 +485,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
             <div className="flex border-border border-b">
               <button
                 type="button"
-                onClick={() => handleTabChange('frontmatter')}
-                className={cn(
-                  'flex-1 px-3 py-2.5 font-medium text-sm transition-colors',
-                  sidebarTab === 'frontmatter'
-                    ? 'border-primary border-b-2 text-foreground'
-                    : 'text-muted-foreground hover:text-foreground',
-                )}
-              >
-                <Icon icon="ri:settings-3-line" className="mr-1 inline-block size-4" />
-                属性
-              </button>
-              <button
-                type="button"
                 onClick={() => handleTabChange('toc')}
                 className={cn(
                   'flex-1 px-3 py-2.5 font-medium text-sm transition-colors',
@@ -594,14 +513,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
 
             {/* Tab content */}
             <div className="flex-1 overflow-auto">
-              {sidebarTab === 'frontmatter' && (
-                <FrontmatterEditor
-                  ref={frontmatterRef}
-                  frontmatter={frontmatter}
-                  onChange={handleFrontmatterChange}
-                  onCategoriesChange={handleCategoriesChange}
-                />
-              )}
               {sidebarTab === 'toc' && (
                 <div className="p-4">
                   <EditorTOC headings={headings} onNavigate={handleTOCNavigate} />
@@ -616,15 +527,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
           </aside>
         )}
       </div>
-
-      {/* Category Mapping Dialog */}
-      <CategoryMappingDialog
-        open={showCategoryDialog}
-        onOpenChange={setShowCategoryDialog}
-        newCategories={pendingCategoryMappings}
-        onConfirm={handleCategoryMappingConfirm}
-        onCancel={() => setShowCategoryDialog(false)}
-      />
     </div>
   );
 }

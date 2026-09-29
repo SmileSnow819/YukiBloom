@@ -5,7 +5,16 @@
  */
 
 // API functions
-export { createPost, listPosts, readPost, toggleDraft, writePost } from './api';
+export {
+  createPost,
+  listPosts,
+  readPost,
+  readPostMetadata,
+  savePostMetadata,
+  toggleDraft,
+  uploadPostCover,
+  writePostContent,
+} from './api';
 // Category utilities
 export { detectNewCategories, extractCategoryNames, generateCategorySlug, getCategoryMap, setCategoryMap } from './category';
 // Config utilities (server-side only)
