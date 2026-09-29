@@ -1,7 +1,7 @@
 ---
-import PublicContentPage from '@components/pages/PublicContentPage.astro';
+import { getLocaleStaticPaths } from '../_shared/utils';
+import MusicPage from '../music.md';
 
-export const prerender = false;
+export const getStaticPaths = getLocaleStaticPaths;
 ---
-
-<PublicContentPage slug="music" />
+<MusicPage />

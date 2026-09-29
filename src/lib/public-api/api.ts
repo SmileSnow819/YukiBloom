@@ -1,4 +1,5 @@
 import { getSecret } from 'astro:env/server';
+import { getCachedPublicApiRequest } from './request-cache';
 import type {
   PublicFootprints,
   PublicPage,
@@ -61,44 +62,48 @@ async function publicRequest<T>(path: string, query?: URLSearchParams): Promise<
   const url = new URL(`/api/v1${path}`, getBaseUrl());
   if (query) url.search = query.toString();
 
-  const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      method: 'GET',
-      headers: { Accept: 'application/json' },
-      credentials: 'omit',
-      signal,
-    });
-  } catch {
-    if (signal.aborted) throw new PublicApiError('公开内容 API 请求超时。', 'timeout');
-    throw new PublicApiError('无法连接公开内容 API。', 'network');
-  }
+  return getCachedPublicApiRequest(url.href, async () => {
+    const signal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method: 'GET',
+        headers: { Accept: 'application/json' },
+        credentials: 'omit',
+        signal,
+      });
+    } catch {
+      if (signal.aborted) throw new PublicApiError('公开内容 API 请求超时。', 'timeout');
+      throw new PublicApiError('无法连接公开内容 API。', 'network');
+    }
 
-  let envelope: ApiEnvelope<T>;
-  try {
-    envelope = (await response.json()) as ApiEnvelope<T>;
-  } catch (error) {
-    if (signal.aborted) throw new PublicApiError('公开内容 API 请求超时。', 'timeout');
-    if (error instanceof SyntaxError) throw new PublicApiError('公开内容 API 返回了无效 JSON。', 'response', response.status);
-    throw new PublicApiError('无法读取公开内容 API 响应。', 'network', response.status);
-  }
-  const code = typeof envelope?.code === 'number' ? envelope.code : undefined;
-  const message =
-    typeof envelope?.message === 'string' && envelope.message ? envelope.message : `请求失败（HTTP ${response.status}）`;
+    let envelope: ApiEnvelope<T>;
+    try {
+      envelope = (await response.json()) as ApiEnvelope<T>;
+    } catch (error) {
+      if (signal.aborted) throw new PublicApiError('公开内容 API 请求超时。', 'timeout');
+      if (error instanceof SyntaxError) throw new PublicApiError('公开内容 API 返回了无效 JSON。', 'response', response.status);
+      throw new PublicApiError('无法读取公开内容 API 响应。', 'network', response.status);
+    }
+    const code = typeof envelope?.code === 'number' ? envelope.code : undefined;
+    const message =
+      typeof envelope?.message === 'string' && envelope.message ? envelope.message : `请求失败（HTTP ${response.status}）`;
 
-  if (response.status === 404 || code === 10004) throw new PublicApiNotFoundError(message, code);
-  if (response.ok && code === undefined) throw new PublicApiError('公开内容 API 返回了无效响应。', 'response', response.status);
-  if (!response.ok || code !== 0) throw new PublicApiError(message, 'backend', response.status, code);
-  if (envelope?.data === undefined || envelope.data === null) {
-    throw new PublicApiError('公开内容 API 返回的数据为空。', 'response', response.status, code);
-  }
-  return envelope.data;
+    if (response.status === 404 || code === 10004) throw new PublicApiNotFoundError(message, code);
+    if (response.ok && code === undefined)
+      throw new PublicApiError('公开内容 API 返回了无效响应。', 'response', response.status);
+    if (!response.ok || code !== 0) throw new PublicApiError(message, 'backend', response.status, code);
+    if (envelope?.data === undefined || envelope.data === null) {
+      throw new PublicApiError('公开内容 API 返回的数据为空。', 'response', response.status, code);
+    }
+    return envelope.data;
+  });
 }
 
 function postQuery(query: PublicPostQuery): URLSearchParams {
   const params = new URLSearchParams();
-  for (const key of ['locale', 'category', 'tag', 'q'] as const) {
+  if (query.locale !== undefined) params.set('locale', toApiLocale(query.locale));
+  for (const key of ['category', 'tag', 'q'] as const) {
     if (query[key] !== undefined) params.set(key, query[key]);
   }
   if (query.page !== undefined) params.set('page', String(query.page));
@@ -107,7 +112,10 @@ function postQuery(query: PublicPostQuery): URLSearchParams {
 }
 
 export function getPublicPosts(query: PublicPostQuery = {}): Promise<PublicPostPage> {
-  return publicRequest<PublicPostPage>('/posts', postQuery(query));
+  return publicRequest<PublicPostPage>('/posts', postQuery(query)).then((page) => ({
+    ...page,
+    items: page.items.map(normalizePostLocale),
+  }));
 }
 
 /** Walk every list page at the backend's maximum page size. List bodies are empty. */
@@ -125,15 +133,29 @@ export async function getAllPublicPosts(query: Omit<PublicPostQuery, 'page' | 'l
 }
 
 function localeQuery(locale: string): URLSearchParams {
-  return new URLSearchParams({ locale });
+  return new URLSearchParams({ locale: toApiLocale(locale) });
+}
+
+/** Map the site's short Chinese locale to the backend's stored BCP 47 locale. */
+function toApiLocale(locale: string): string {
+  return locale.toLowerCase() === 'zh' ? 'zh-CN' : locale;
+}
+
+/** Map the backend's stored locale back to the site's locale used by routes and UI. */
+function toSiteLocale(locale: string): string {
+  return locale.toLowerCase() === 'zh-cn' ? 'zh' : locale;
+}
+
+function normalizePostLocale<T extends { locale: string }>(post: T): T {
+  return { ...post, locale: toSiteLocale(post.locale) };
 }
 
 export function getPublicPost(slug: string, locale: string): Promise<PublicPost> {
-  return publicRequest<PublicPost>(`/posts/${encodeURIComponent(slug)}`, localeQuery(locale));
+  return publicRequest<PublicPost>(`/posts/${encodeURIComponent(slug)}`, localeQuery(locale)).then(normalizePostLocale);
 }
 
 export function getPublicPage(slug: string, locale: string): Promise<PublicPage> {
-  return publicRequest<PublicPage>(`/pages/${encodeURIComponent(slug)}`, localeQuery(locale));
+  return publicRequest<PublicPage>(`/pages/${encodeURIComponent(slug)}`, localeQuery(locale)).then(normalizePostLocale);
 }
 
 export function getPublicFootprints(): Promise<PublicFootprints> {

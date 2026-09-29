@@ -1,7 +1,6 @@
 ---
-import PublicContentPage from '@components/pages/PublicContentPage.astro';
-
-export const prerender = false;
+import { getLocaleStaticPaths } from '../_shared/utils';
+import AboutPage from '../about.astro';
+export const getStaticPaths = getLocaleStaticPaths;
 ---
-
-<PublicContentPage slug="about" showTimeline={true} />
+<AboutPage />
