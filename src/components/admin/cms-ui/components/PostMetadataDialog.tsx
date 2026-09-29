@@ -183,7 +183,7 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
                   {values.coverMediaId ? `当前封面媒体 ID：${values.coverMediaId}` : '尚未设置封面'}
                 </div>
               )}
-              <div className="flex flex-wrap gap-2">
+              <div>
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -198,18 +198,6 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
                   />
                   {isUploading ? '上传中…' : values.coverMediaId ? '更换封面' : '上传封面'}
                 </Button>
-                {values.coverMediaId && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      updateValue('coverMediaId', null);
-                      setCoverUrl('');
-                    }}
-                  >
-                    移除封面
-                  </Button>
-                )}
               </div>
             </div>
           </div>
