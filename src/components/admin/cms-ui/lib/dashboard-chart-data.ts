@@ -1,4 +1,4 @@
-import { format, subDays } from 'date-fns';
+import { eachDayOfInterval, format, startOfDay, startOfWeek, subWeeks } from 'date-fns';
 
 export interface DashboardChartInput {
   published: number;
@@ -12,7 +12,7 @@ export interface RecentUpdateInput {
   updated?: string;
 }
 
-export interface RecentUpdateTrendPoint {
+export interface PostDateHeatmapPoint {
   date: string;
   count: number;
   titles: string[];
@@ -36,7 +36,9 @@ export function getDashboardChartData(
   };
 }
 
-export function getRecentUpdateTrendData(posts: RecentUpdateInput[], dayCount = 30): RecentUpdateTrendPoint[] {
+export function getPostDateHeatmapData(posts: RecentUpdateInput[]): PostDateHeatmapPoint[] {
+  if (posts.length === 0) return [];
+
   const postsByDate = new Map<string, string[]>();
   for (const post of posts) {
     const timestamp = new Date(post.date);
@@ -45,12 +47,10 @@ export function getRecentUpdateTrendData(posts: RecentUpdateInput[], dayCount = 
     postsByDate.set(date, [...(postsByDate.get(date) || []), post.title]);
   }
 
-  const latestDate = [...postsByDate.keys()].sort().at(-1);
-  if (!latestDate) return [];
-
-  const latest = new Date(`${latestDate}T00:00:00`);
-  return Array.from({ length: dayCount }, (_, index) => {
-    const date = format(subDays(latest, dayCount - index - 1), 'yyyy-MM-dd');
+  const today = startOfDay(new Date());
+  const firstDate = startOfWeek(subWeeks(today, 51), { weekStartsOn: 1 });
+  return eachDayOfInterval({ start: firstDate, end: today }).map((day) => {
+    const date = format(day, 'yyyy-MM-dd');
     const titles = postsByDate.get(date) || [];
     return { date, count: titles.length, titles };
   });

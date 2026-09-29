@@ -20,12 +20,14 @@ export function EChartsCanvas({ option, label }: { option: EChartsOption; label:
 
       core.use([
         charts.BarChart,
-        charts.LineChart,
+        charts.HeatmapChart,
         charts.PieChart,
         components.AriaComponent,
+        components.CalendarComponent,
         components.GridComponent,
         components.LegendComponent,
         components.TooltipComponent,
+        components.VisualMapComponent,
         renderer.CanvasRenderer,
       ]);
       chart = core.init(elementRef.current, undefined, { renderer: 'canvas' });
