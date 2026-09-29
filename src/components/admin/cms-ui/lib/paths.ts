@@ -15,6 +15,3 @@ export const RECENT_POSTS_COUNT = 10;
 
 /** Maximum categories to display in overview */
 export const MAX_CATEGORY_DISPLAY = 10;
-
-/** Maximum recent posts to display in overview */
-export const MAX_RECENT_POSTS_DISPLAY = 5;

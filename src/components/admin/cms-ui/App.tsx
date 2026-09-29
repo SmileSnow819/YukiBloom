@@ -16,7 +16,6 @@ import { RecentUpdates } from '@admin-ui/components/RecentUpdates';
 import { TimelineManager } from '@admin-ui/components/TimelineManager';
 import { Button } from '@admin-ui/components/ui/button';
 import { type StatusFilter, useDashboardState } from '@admin-ui/hooks';
-import { MAX_RECENT_POSTS_DISPLAY } from '@admin-ui/lib/paths';
 import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -229,14 +228,8 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
                 <>
                   {activeTab === 'overview' && (
                     <div className="admin-overview">
+                      <RecentUpdates posts={data.stats.recentPosts} />
                       <DashboardCharts stats={data.stats} />
-                      <div className="admin-recent-card">
-                        <RecentUpdates
-                          posts={data.stats.recentPosts}
-                          maxDisplay={MAX_RECENT_POSTS_DISPLAY}
-                          onEdit={handleEditPost}
-                        />
-                      </div>
                     </div>
                   )}
 

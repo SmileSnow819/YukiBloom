@@ -134,7 +134,7 @@ export async function listPosts(params?: ListPostsParams): Promise<ListPostsResp
     draft: page.items.filter((post) => post.status !== 'published').length,
     categoryStats,
     tagStats: [],
-    recentPosts: [...posts].slice(0, 5),
+    recentPosts: page.items.map(toListItem).sort((left, right) => right.date.localeCompare(left.date)),
   };
   return {
     posts,

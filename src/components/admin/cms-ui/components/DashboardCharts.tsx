@@ -1,50 +1,8 @@
+import { EChartsCanvas } from '@admin-ui/components/EChartsCanvas';
 import type { DashboardChartInput } from '@admin-ui/lib/dashboard-chart-data';
 import { getDashboardChartData } from '@admin-ui/lib/dashboard-chart-data';
 import type { EChartsOption } from 'echarts';
-import { useEffect, useMemo, useRef } from 'react';
-
-function ChartCanvas({ option, label }: { option: EChartsOption; label: string }) {
-  const elementRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    let disposed = false;
-    let chart: import('echarts/core').ECharts | undefined;
-    let observer: ResizeObserver | undefined;
-
-    async function renderChart() {
-      const [core, charts, components, renderer] = await Promise.all([
-        import('echarts/core'),
-        import('echarts/charts'),
-        import('echarts/components'),
-        import('echarts/renderers'),
-      ]);
-      if (disposed || !elementRef.current) return;
-
-      core.use([
-        charts.BarChart,
-        charts.PieChart,
-        components.AriaComponent,
-        components.GridComponent,
-        components.LegendComponent,
-        components.TooltipComponent,
-        renderer.CanvasRenderer,
-      ]);
-      chart = core.init(elementRef.current, undefined, { renderer: 'canvas' });
-      chart.setOption(option);
-      observer = new ResizeObserver(() => chart?.resize());
-      observer.observe(elementRef.current);
-    }
-
-    renderChart();
-    return () => {
-      disposed = true;
-      observer?.disconnect();
-      chart?.dispose();
-    };
-  }, [option]);
-
-  return <div ref={elementRef} className="admin-chart-canvas" role="img" aria-label={label} />;
-}
+import { useMemo } from 'react';
 
 function StatusChart({ stats }: { stats: DashboardChartInput }) {
   const chartData = getDashboardChartData(stats).status;
@@ -91,7 +49,7 @@ function StatusChart({ stats }: { stats: DashboardChartInput }) {
         <h3 id="status-chart-title">文章状态</h3>
       </div>
       <div className="admin-status-chart-wrap">
-        <ChartCanvas option={option} label="已发布文章与草稿数量环形图" />
+        <EChartsCanvas option={option} label="已发布文章与草稿数量环形图" />
         <div className="admin-status-chart-center" aria-hidden="true">
           <strong>{total}</strong>
         </div>
@@ -167,7 +125,7 @@ function CategoryChart({ stats }: { stats: DashboardChartInput }) {
         <h3 id="category-chart-title">分类分布</h3>
       </div>
       {categories.length > 0 ? (
-        <ChartCanvas option={option} label="各分类文章数量横向柱状图" />
+        <EChartsCanvas option={option} label="各分类文章数量横向柱状图" />
       ) : (
         <div className="admin-chart-empty admin-category-empty">还没有分类数据</div>
       )}

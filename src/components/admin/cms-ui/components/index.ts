@@ -8,6 +8,7 @@ export { CategoryMappingDialog } from './CategoryMappingDialog';
 export { CategoryStats } from './CategoryStats';
 export { CreatePostDialog } from './CreatePostDialog';
 export { DashboardStats } from './DashboardStats';
+export { EChartsCanvas } from './EChartsCanvas';
 export { EditorTOC } from './EditorTOC';
 export { EmbedHydrator } from './EmbedHydrator';
 export { ErrorFallback } from './ErrorFallback';
