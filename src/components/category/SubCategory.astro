@@ -22,7 +22,7 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
   level="h3"
 />
 {
-  category.children?.length && (
+  category.children?.length ? (
     <div class="category-second-level-container flex flex-col">
       {category.children.map((grandChild) => (
         <p class="shoka-decoration-circle relative px-7.5 py-2 text-base/9 text-primary hover:text-blue">
@@ -33,6 +33,6 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
         </p>
       ))}
     </div>
-  )
+  ) : null
 }
 <!-- </div> -->

@@ -91,6 +91,24 @@ export interface PublicFootprints {
   version: number;
 }
 
+export interface PublicInternship {
+  id: string;
+  startDate: string;
+  endDate: string;
+  isPresent: boolean;
+  company: string;
+  icon: string;
+  iconColor: string;
+  position: string;
+  description: string;
+  sortOrder: number;
+}
+
+export interface PublicTimeline {
+  items: PublicInternship[];
+  version: number;
+}
+
 export interface PublicAnnouncementLink {
   text: string;
   url: string;

@@ -8,6 +8,7 @@ import type {
   PublicPostQuery,
   PublicPostSummary,
   PublicSiteContent,
+  PublicTimeline,
 } from './types';
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -160,6 +161,10 @@ export function getPublicPage(slug: string, locale: string): Promise<PublicPage>
 
 export function getPublicFootprints(): Promise<PublicFootprints> {
   return publicRequest<PublicFootprints>('/footprints');
+}
+
+export function getPublicTimeline(): Promise<PublicTimeline> {
+  return publicRequest<PublicTimeline>('/timeline');
 }
 
 export function getPublicSiteContent(): Promise<PublicSiteContent> {

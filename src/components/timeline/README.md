@@ -2,11 +2,11 @@
 
 ## 简介
 
-Timeline 是一个用于展示时间线（如实习经历）的可配置组件。它通过读取 YAML 配置文件来渲染时间线内容。
+Timeline 是一个用于展示实习经历的时间线组件。页面通过公开接口读取后端保存的时间线数据。
 
 ## 特性
 
-- ✅ 完全可配置（通过 YAML 文件）
+- ✅ 从后端公开 API 读取实习经历
 - ✅ 支持无限添加条目
 - ✅ 竖向时间线，从现在到过去排序
 - ✅ 支持"至今"状态
@@ -27,9 +27,13 @@ import TimelineWrapper from '../components/timeline/TimelineWrapper.astro';
 <TimelineWrapper />
 ```
 
-### 2. 配置时间线数据
+### 2. 管理时间线数据
 
-编辑 `config/timeline.yaml` 文件：
+公开数据由 `GET /api/v1/timeline` 提供，管理端通过 `PUT /api/v1/admin/timeline` 保存。接口结构见 `docs/api-cache/operations/全部_get_-api-v1-timeline.json`。
+
+`config/timeline.yaml` 仅供旧数据导入器使用，不再是页面的运行时数据源。
+
+### 3. 数据字段
 
 ```yaml
 timeline:
@@ -64,31 +68,6 @@ timeline:
 | `position` | string | ✅ | 职位名称 |
 | `description` | string | ❌ | 工作描述 |
 
-## 添加新条目
-
-在 `config/timeline.yaml` 的 `timeline` 数组最前面添加新条目：
-
-```yaml
-timeline:
-  # 新条目添加在这里（最新的）
-  - startDate: "2026.06"
-    endDate: ""
-    isPresent: true
-    company: "新公司"
-    icon: "ri:building-4-line"
-    iconColor: "#ed788c"
-    position: "高级前端开发工程师"
-    description: ""
-  
-  # 旧条目在下面
-  - startDate: "2026.03"
-    endDate: "2026.06"
-    isPresent: false
-    company: "快手"
-    position: "前端开发实习生"
-    description: ""
-```
-
 ## 样式自定义
 
 如需自定义样式，编辑 `src/components/timeline/timeline.css` 文件。
@@ -104,13 +83,11 @@ timeline:
 ```plain
 src/components/timeline/
 ├── Timeline.tsx           # React 组件（核心渲染逻辑）
-├── TimelineWrapper.astro  # Astro 包装组件（读取 YAML 配置）
+├── TimelineWrapper.astro  # Astro 包装组件（读取公开 API）
 ├── timeline.css           # 样式文件
 ├── index.ts              # 导出文件
 └── README.md             # 本文档
 
-config/
-└── timeline.yaml          # 时间线数据配置
 ```
 
 ## 示例效果

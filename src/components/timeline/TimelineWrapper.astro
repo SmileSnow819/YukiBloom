@@ -1,16 +1,10 @@
 ---
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { parse } from 'yaml';
+import { getPublicTimeline } from '@/lib/public-api';
 import type { TimelineItem } from './Timeline';
 import Timeline from './Timeline';
 
-// 读取 YAML 配置文件
-const timelineConfigPath = resolve(process.cwd(), 'config/timeline.yaml');
-const timelineYaml = readFileSync(timelineConfigPath, 'utf-8');
-const timelineData = parse(timelineYaml);
-
-const items: TimelineItem[] = timelineData.timeline || [];
+const timeline = await getPublicTimeline();
+const items: TimelineItem[] = timeline.items;
 ---
 
 <Timeline items={items} client:load />

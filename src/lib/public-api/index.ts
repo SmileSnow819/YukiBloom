@@ -5,6 +5,7 @@ export {
   getPublicPost,
   getPublicPosts,
   getPublicSiteContent,
+  getPublicTimeline,
   PublicApiError,
   PublicApiNotFoundError,
 } from './api';
@@ -30,6 +31,7 @@ export type {
   PublicFootprints,
   PublicFriendLink,
   PublicFriendSettings,
+  PublicInternship,
   PublicPage,
   PublicPost,
   PublicPostPage,
@@ -37,4 +39,5 @@ export type {
   PublicPostSummary,
   PublicSiteContent,
   PublicSocialLink,
+  PublicTimeline,
 } from './types';

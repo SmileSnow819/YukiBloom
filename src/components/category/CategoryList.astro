@@ -32,14 +32,13 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
             href={localizedPath(buildCategoryPath(category.name), locale)}
             className={category?.children?.length ? 'has-children' : ''}
           />
-          {category?.children?.length && (
+          {category?.children?.length ? (
             <div class="category-first-level-container flex flex-col">
-              {category?.children?.length &&
-                category.children.map((child) => (
-                  <SubCategory category={child} parentName={category.name} countMap={countMap} />
-                ))}
+              {category.children.map((child) => (
+                <SubCategory category={child} parentName={category.name} countMap={countMap} />
+              ))}
             </div>
-          )}
+          ) : null}
         </>
       ))
     }
