@@ -8,7 +8,6 @@ import umami from '@yeskunall/astro-umami';
 import { defineConfig } from 'astro/config';
 import icon from 'astro-icon';
 import mermaid from 'astro-mermaid';
-import pagefind from 'astro-pagefind';
 import robotsTxt from 'astro-robots-txt';
 import Sonda from 'sonda/astro';
 import { loadEnv } from 'vite';
@@ -109,7 +108,6 @@ export default defineConfig({
           }),
         ]
       : []),
-    pagefind(),
     mermaid({
       autoTheme: true,
     }),

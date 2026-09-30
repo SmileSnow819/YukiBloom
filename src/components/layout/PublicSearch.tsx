@@ -69,7 +69,7 @@ export default function PublicSearch() {
       </label>
       <input
         id="public-search-input"
-        className="pagefind-ui__search-input public-search-input w-full rounded-lg border border-foreground/15 bg-background/60 px-4 py-3 text-foreground outline-none focus:border-primary"
+        className="public-search-input w-full rounded-lg border border-foreground/15 bg-background/60 px-4 py-3 text-foreground outline-none focus:border-primary"
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
@@ -82,14 +82,14 @@ export default function PublicSearch() {
         <p className="py-5 text-muted-foreground text-sm">{t('search.noResults')}</p>
       )}
       {results.length > 0 && (
-        <div className="pagefind-ui__results mt-3 flex flex-col gap-2">
+        <div className="search-results mt-3 flex flex-col gap-2">
           {results.map((result) => (
             <a
               key={`${result.locale}:${result.slug}`}
-              className="pagefind-ui__result rounded-lg px-3 py-3 transition-colors hover:bg-foreground/5"
+              className="search-result rounded-lg px-3 py-3 transition-colors hover:bg-foreground/5 data-[selected=true]:bg-foreground/5"
               href={localizedPath(`/post/${encodeSlug(result.slug)}`, locale)}
             >
-              <span className="pagefind-ui__result-link block font-medium text-primary">{result.title}</span>
+              <span className="search-result-link block font-medium text-primary">{result.title}</span>
               {result.description && (
                 <span className="mt-1 line-clamp-2 block text-muted-foreground text-sm">{result.description}</span>
               )}

@@ -9,7 +9,6 @@
  * 2. If password is present, serialize entire HAST tree to HTML
  * 3. Encrypt the HTML with AES-256-GCM using the password
  * 4. Replace entire tree with a single <div class="encrypted-post" data-cipher/iv/salt>
- * 5. Add data-pagefind-ignore to exclude from search index
  */
 import type { Root } from 'hast';
 import { toHtml } from 'hast-util-to-html';
@@ -39,7 +38,6 @@ export function rehypeEncryptedPost() {
           'data-cipher': cipher,
           'data-iv': iv,
           'data-salt': salt,
-          'data-pagefind-ignore': '',
         },
         children: [],
       },

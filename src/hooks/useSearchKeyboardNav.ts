@@ -12,15 +12,10 @@ import { closeModal } from '@store/modal';
 import { useEffect, useRef } from 'react';
 
 /**
- * Get selectable items from the Pagefind search results DOM
+ * Get selectable items from the API search results DOM
  */
 function getSelectableItems(): HTMLElement[] {
-  const results = Array.from(document.querySelectorAll('.pagefind-ui__result')) as HTMLElement[];
-  const loadMoreBtn = document.querySelector('.pagefind-ui__button') as HTMLElement | null;
-  if (loadMoreBtn && loadMoreBtn.offsetParent !== null) {
-    return [...results, loadMoreBtn];
-  }
-  return results;
+  return Array.from(document.querySelectorAll('.search-result')) as HTMLElement[];
 }
 
 export function useSearchKeyboardNav(isOpen: boolean) {
@@ -77,13 +72,7 @@ export function useSearchKeyboardNav(isOpen: boolean) {
 
       const selectedItem = items[currentIndex];
 
-      if (selectedItem.classList.contains('pagefind-ui__button')) {
-        selectedItem.click();
-        selectedIndexRef.current = -1;
-        return;
-      }
-
-      const link = selectedItem.querySelector('.pagefind-ui__result-link') as HTMLAnchorElement;
+      const link = selectedItem as HTMLAnchorElement;
       if (link?.href) {
         closeModal();
         window.location.href = link.href;

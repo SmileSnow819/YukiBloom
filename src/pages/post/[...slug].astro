@@ -157,7 +157,7 @@ if (post?.protectedContent) {
             </div>
           )}
           {summaryText && summarySource && <SummaryPanel client:visible summary={summaryText} source={summarySource} className="mt-2" />}
-          <article class="prose md:prose-sm dark:prose-invert" data-pagefind-body>
+          <article class="prose md:prose-sm dark:prose-invert">
             <CustomContent html={renderedHtml} />
           </article>
           <Comment />

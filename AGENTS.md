@@ -368,7 +368,6 @@ Keep business logic pure, framework calls at boundaries.
 
 ### Tools
 - [Biome](https://biomejs.dev/) - Linter and formatter
-- [Pagefind](https://pagefind.app/) - Static search
 - [es-toolkit](https://es-toolkit.slash.page/) - Utility library
 
 ### Internal References

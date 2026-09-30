@@ -18,7 +18,7 @@ Under active development
 - Cute / anime-style / pink-blue color scheme, ideal for ACG, frontend, and journaling sites
 - Multi-category and multi-tag support without forcing complex information architecture
 - Minimal performance overhead
-- Serverless full-site search powered by Pagefind
+- Full-site search powered by the backend API
 - LQIP (Low Quality Image Placeholders) — gradient placeholders shown before images load
 
 ![Demo](https://r2.cosine.ren/i/2025/12/417b098dffce2ced9c0ff6009e5213df.gif)
@@ -81,7 +81,7 @@ pnpm dev
 
 - Built on Astro 5.x with static site generation and excellent performance
 - Elegant dark/light theme toggle
-- Serverless full-site search powered by Pagefind
+- Full-site search powered by the backend API
 - **Swappable comment systems**: Supports Waline (recommended), Giscus, and Remark42 — one-click switch in config, theme auto-follows
 - Full Markdown enhancements (GFM, syntax highlighting, auto TOC, Mermaid diagrams, Infographic charts)
 - **Shoka-compatible Markdown syntax**: Text effects (underline/highlight/superscript & subscript/color), spoiler text, ruby annotations, admonition blocks, collapsible blocks, tab cards, friend link cards, audio/video players, quiz system (single choice/multiple choice/true-false/fill-in-the-blank), math formulas (KaTeX), code block enhancements (title/mark/command) — all features can be individually toggled

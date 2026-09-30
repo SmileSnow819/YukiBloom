@@ -10,7 +10,6 @@
  * 3. Encrypt HTML with AES-256-GCM using the password
  * 4. Replace children with empty, add data-cipher/data-iv/data-salt attributes
  * 5. Remove data-password (password must not appear in final HTML)
- * 6. Add data-pagefind-ignore to exclude from search index
  */
 import type { Element, Root } from 'hast';
 import { toHtml } from 'hast-util-to-html';
@@ -45,9 +44,6 @@ export function rehypeEncryptedBlock() {
 
         // Remove password from final HTML
         delete node.properties['data-password'];
-
-        // Exclude from Pagefind search index
-        node.properties['data-pagefind-ignore'] = '';
       }),
     );
   };
