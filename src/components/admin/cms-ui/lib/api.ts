@@ -1,6 +1,6 @@
 import { generateSlug } from '@admin-ui/lib/slug';
 import type { CreatePostParams, CreatePostResponse, ListPostsParams, ListPostsResponse, ReadPostResult } from '@admin-ui/types';
-import { adminRequest, type Media, type Post, uploadAdminMedia } from '@/lib/admin/api';
+import { adminRequest, adminRequestWithMessage, type Media, type Post, uploadAdminMedia } from '@/lib/admin/api';
 import { setCategoryMap } from './category';
 import {
   buildPostContentUpdate,
@@ -192,8 +192,9 @@ export async function toggleSticky(postId: string) {
   return { success: true, sticky: Boolean(extra.sticky) };
 }
 
-export async function deletePost(postId: string): Promise<void> {
-  await adminRequest(`/posts/${encodeURIComponent(postId)}`, { method: 'DELETE' });
+export async function deletePost(postId: string): Promise<string> {
+  const response = await adminRequestWithMessage<null>(`/posts/${encodeURIComponent(postId)}`, { method: 'DELETE' });
+  return response.message;
 }
 
 export async function getCMSConfig() {

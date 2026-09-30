@@ -12,14 +12,15 @@ import RelatedPostList from './RelatedPostList';
 
 interface Props {
   post?: { slug: string };
+  useBackendData?: boolean;
 }
 
-const { post } = Astro.props;
+const { post, useBackendData = true } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
 
 // Get all posts
-const allPosts = isNotFoundPage ? [] : await getLocalizedPublicPosts(locale);
+const allPosts = isNotFoundPage || !useBackendData ? [] : await getLocalizedPublicPosts(locale);
 const totalPosts = allPosts.length;
 
 // Calculate how many posts to show on each side

@@ -14,6 +14,7 @@ export interface Props {
     description?: string;
     coverTitle?: string;
     comments?: boolean;
+    useBackendData?: boolean;
   };
 }
 
@@ -21,10 +22,10 @@ const { frontmatter } = Astro.props;
 const showComments = frontmatter.comments ?? true;
 ---
 
-<Layout title={`${frontmatter.title} | ${seoConfig.title}`}>
-  <TwoColumnLayout>
+<Layout title={`${frontmatter.title} | ${seoConfig.title}`} useBackendData={frontmatter.useBackendData}>
+  <TwoColumnLayout useBackendData={frontmatter.useBackendData}>
     <Cover slot="cover" title={frontmatter.coverTitle ?? frontmatter.title} />
-    <HomeSider slot="sider" />
+    <HomeSider slot="sider" useBackendData={frontmatter.useBackendData} />
     <div class={`shadow-box bg-gradient-start mx-0 flex w-full flex-col gap-8 ${CONTENT_PADDING.standard}`}>
       <div class="prose md:prose-sm dark:prose-invert" data-pagefind-body>
         <CustomContent>

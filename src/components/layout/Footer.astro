@@ -11,13 +11,14 @@ import SakuraSVG from '../svg/SakuraSvg';
 
 interface Props {
   className?: string;
+  useBackendData?: boolean;
 }
 
-const { className } = Astro.props;
+const { className, useBackendData = true } = Astro.props;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
-const postCount = isNotFoundPage ? 0 : (await getAllPublicPosts({ locale: defaultLocale })).length;
+const postCount = isNotFoundPage || !useBackendData ? 0 : (await getAllPublicPosts({ locale: defaultLocale })).length;
 const currentYear = new Date().getFullYear();
 const startYear = siteConfig?.startYear ?? currentYear;
 ---

@@ -169,10 +169,9 @@ export function useDashboardState(): UseDashboardStateResult {
 
   const handleDeletePost = useCallback(
     async (postId: string) => {
-      if (!window.confirm('确定删除这篇文章吗？此操作无法撤销。')) return;
       try {
-        await deletePost(postId);
-        toast.success('文章已删除');
+        const message = await deletePost(postId);
+        toast.success(message || '文章已删除');
         await fetchData();
       } catch (err) {
         toast.error(err instanceof Error ? err.message : '删除文章失败');

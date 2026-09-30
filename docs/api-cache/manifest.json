@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-29T03:53:30.880Z",
+  "generatedAt": "2026-09-30T04:05:58.894Z",
   "documents": [
     {
       "name": "全部",
       "slug": "全部",
       "file": "openapi/全部.json",
-      "sha256": "505e97da3fba441b8d5e2faeef92d178b2656f8de18a3156755fb4c4d46293d4",
-      "pathCount": 26,
-      "operationCount": 34
+      "sha256": "fd2b2142e80ce4ab0daef0c55d8ed7feb57b100bb15bc95414d0dfa6b5fe80d2",
+      "pathCount": 25,
+      "operationCount": 33
     }
   ],
   "operations": [
@@ -310,7 +310,7 @@
       "summary": "查询公开文章列表",
       "tags": ["文章"],
       "file": "operations/全部_get_-api-v1-posts.json",
-      "sha256": "21967c7c011d2ebcf54171f3a2da45f98b88838d1ef528c5ed8113f1ee1d9cdb"
+      "sha256": "c62c5f7747da62e4cb22643adfe84bb60f4540709dc91e543f345746e180a986"
     },
     {
       "id": "全部_get_-api-v1-posts-slug",
@@ -320,7 +320,7 @@
       "summary": "按链接标识查询公开文章",
       "tags": ["文章"],
       "file": "operations/全部_get_-api-v1-posts-slug.json",
-      "sha256": "df60e7214428f926e441b23da2b1af4c940107684163fe274405129793d49e32"
+      "sha256": "518170fbd329a47bdba7411d3d38fbb0f0436f9c10ad10f61de1b6cc660420da"
     },
     {
       "id": "全部_get_-api-v1-site-content",
@@ -341,16 +341,6 @@
       "tags": ["个人内容"],
       "file": "operations/全部_get_-api-v1-timeline.json",
       "sha256": "d68591b1030c66b1ebf9fb68e08f142cc21dba9afd1ef398f074412cd5970f15"
-    },
-    {
-      "id": "全部_get_-uploads-key",
-      "document": "全部",
-      "method": "GET",
-      "path": "/uploads/{key}",
-      "summary": "获取公开图片文件",
-      "tags": ["图片"],
-      "file": "operations/全部_get_-uploads-key.json",
-      "sha256": "e9c15bb34059696656255e86459c78b02fee6ead271258a2d81eb82c2f69cf5b"
     }
   ]
 }

@@ -1,3 +1,4 @@
+import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { IconField, IconPreview } from '@admin-ui/components/IconField';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
 import { RecordId } from '@admin-ui/components/RecordId';
@@ -11,6 +12,7 @@ import {
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
 import { Icon } from '@iconify/react';
+import * as Popover from '@radix-ui/react-popover';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getTimelineValidationError } from '@/lib/admin/content-validation';
@@ -39,9 +41,9 @@ const emptyInternship = (): PublicInternship => ({
 export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions: ReactNode | null) => void }) {
   const [timeline, setTimeline] = useState<TimelineContent | null>(null);
   const [editor, setEditor] = useState<TimelineEditorState | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
 
   const reload = useCallback(async () => {
@@ -50,7 +52,6 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
     try {
       const data = await getAdminTimeline();
       setTimeline({ ...data, items: sortBySortOrder(data.items) });
-      setDirty(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '读取实习经历失败');
     } finally {
@@ -62,51 +63,56 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
     void reload();
   }, [reload]);
 
-  function applyEditor() {
-    if (!timeline || !editor) return;
-    const validationError = getTimelineValidationError({ version: timeline.version, items: [editor.item] });
+  async function applyEditor() {
+    if (!timeline || !editor || saving) return;
+    const item = {
+      ...editor.item,
+      startDate: normalizeMonthDate(editor.item.startDate),
+      endDate: normalizeMonthDate(editor.item.endDate),
+    };
+    const validationError = getTimelineValidationError({ version: timeline.version, items: [item] });
     if (validationError) {
       toast.error(validationError);
       return;
     }
     const items =
       editor.index === null
-        ? [...timeline.items, editor.item]
-        : timeline.items.map((item, index) => (index === editor.index ? editor.item : item));
-    if (!Number.isInteger(editor.item.sortOrder) || editor.item.sortOrder < 0) {
+        ? [...timeline.items, item]
+        : timeline.items.map((entry, index) => (index === editor.index ? item : entry));
+    if (!Number.isInteger(item.sortOrder) || item.sortOrder < 0) {
       toast.error('排序值必须是大于等于 0 的整数。');
-      return;
-    }
-    setTimeline({ ...timeline, items: sortBySortOrder(items) });
-    setDirty(true);
-    setEditor(null);
-  }
-
-  function removeItem(item: PublicInternship) {
-    if (!timeline || !window.confirm(`确定删除“${item.company || '这段经历'}”吗？`)) return;
-    setTimeline({ ...timeline, items: sortBySortOrder(timeline.items.filter((entry) => entry.id !== item.id)) });
-    setDirty(true);
-  }
-
-  const save = useCallback(async () => {
-    if (!timeline) return;
-    const validationError = getTimelineValidationError(timeline);
-    if (validationError) {
-      toast.error(validationError);
       return;
     }
     setSaving(true);
     try {
-      const saved = await saveAdminTimeline({ ...timeline, items: sortBySortOrder(timeline.items) });
+      const { data: saved, message } = await saveAdminTimeline({ ...timeline, items: sortBySortOrder(items) });
       setTimeline({ ...saved, items: sortBySortOrder(saved.items) });
-      setDirty(false);
-      toast.success('实习经历已保存');
+      setEditor(null);
+      toast.success(message || (editor.index === null ? '实习经历已创建' : '实习经历已更新'));
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '保存实习经历失败');
     } finally {
       setSaving(false);
     }
-  }, [timeline]);
+  }
+
+  async function removeItem(item: PublicInternship) {
+    if (!timeline || saving) return;
+    const nextTimeline = {
+      ...timeline,
+      items: sortBySortOrder(timeline.items.filter((entry) => entry.id !== item.id)),
+    };
+    setSaving(true);
+    try {
+      const { data: saved, message } = await saveAdminTimeline(nextTimeline);
+      setTimeline({ ...saved, items: sortBySortOrder(saved.items) });
+      toast.success(message || '实习经历已删除');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '删除实习经历失败');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   useEffect(() => {
     if (!timeline) {
@@ -116,10 +122,10 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
 
     onToolbarChange(
       <div className="flex items-center gap-2">
-        {dirty && <span className="mr-2 text-amber-600 text-sm">有未保存更改</span>}
         <Button
           variant="outline"
           size="sm"
+          disabled={saving}
           onClick={() =>
             setEditor({ index: null, item: { ...emptyInternship(), sortOrder: getNextSortOrder(timeline.items) } })
           }
@@ -127,17 +133,10 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
           <Icon icon="ri:add-line" className="mr-1.5 size-4" />
           新增经历
         </Button>
-        <Button size="sm" onClick={save} disabled={saving || !dirty}>
-          <Icon
-            icon={saving ? 'ri:loader-4-line' : 'ri:save-line'}
-            className={`mr-1.5 size-4 ${saving ? 'animate-spin' : ''}`}
-          />
-          {saving ? '保存中…' : '保存更改'}
-        </Button>
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [dirty, onToolbarChange, save, saving, timeline]);
+  }, [onToolbarChange, saving, timeline]);
 
   if (loading) return <ManagerMessage>正在读取实习经历…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -184,87 +183,97 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
           },
         ]}
         onEdit={(item, index) => setEditor({ index, item: { ...item } })}
-        onDelete={removeItem}
+        onDelete={(item) =>
+          setPendingDelete({
+            description: `确定删除“${item.company || '这段经历'}”吗？`,
+            onConfirm: () => void removeItem(item),
+          })
+        }
       />
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && setEditor(null)}>
+      <DeleteConfirmDialog
+        open={pendingDelete !== null}
+        title="确认删除实习经历？"
+        description={pendingDelete?.description ?? ''}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onConfirm={() => {
+          pendingDelete?.onConfirm();
+          setPendingDelete(null);
+        }}
+      />
+
+      <Dialog open={editor !== null} onOpenChange={(open) => !open && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editor?.index === null ? '新增实习经历' : '编辑实习经历'}</DialogTitle>
             <DialogDescription>填写时间线中展示的公司、职位和经历信息。</DialogDescription>
           </DialogHeader>
           {editor && (
-            <div className="grid gap-4 py-2 sm:grid-cols-2">
-              <Field
-                label="公司"
-                value={editor.item.company}
-                onChange={(company) => setEditor({ ...editor, item: { ...editor.item, company } })}
-              />
-              <Field
-                label="职位"
-                value={editor.item.position}
-                onChange={(position) => setEditor({ ...editor, item: { ...editor.item, position } })}
-              />
-              <Field
-                label="开始日期"
-                value={editor.item.startDate}
-                onChange={(startDate) => setEditor({ ...editor, item: { ...editor.item, startDate } })}
-                placeholder="2026.08"
-              />
-              <Field
-                label="结束日期"
-                value={editor.item.endDate}
-                onChange={(endDate) => setEditor({ ...editor, item: { ...editor.item, endDate } })}
-                placeholder="2026.08"
-                disabled={editor.item.isPresent}
-              />
-              <NumberField
-                label="排序值（越小越靠前）"
-                value={editor.item.sortOrder}
-                onChange={(sortOrder) => setEditor({ ...editor, item: { ...editor.item, sortOrder } })}
-              />
-              <IconField
-                label="公司图标"
-                value={editor.item.icon}
-                onChange={(icon) => setEditor({ ...editor, item: { ...editor.item, icon } })}
-                placeholder="ri:building-line"
-                color={editor.item.iconColor}
-              />
-              <Field
-                label="图标颜色"
-                value={editor.item.iconColor}
-                onChange={(iconColor) => setEditor({ ...editor, item: { ...editor.item, iconColor } })}
-                placeholder="#d95778"
-              />
-              <label className="flex items-center gap-2 text-sm sm:col-span-2">
-                <input
-                  type="checkbox"
-                  checked={editor.item.isPresent}
-                  onChange={(event) =>
+            <fieldset disabled={saving} className="contents">
+              <div className="grid gap-4 py-2 sm:grid-cols-2">
+                <Field
+                  label="公司"
+                  value={editor.item.company}
+                  onChange={(company) => setEditor({ ...editor, item: { ...editor.item, company } })}
+                />
+                <Field
+                  label="职位"
+                  value={editor.item.position}
+                  onChange={(position) => setEditor({ ...editor, item: { ...editor.item, position } })}
+                />
+                <MonthField
+                  label="开始日期"
+                  value={editor.item.startDate}
+                  onChange={(startDate) => setEditor({ ...editor, item: { ...editor.item, startDate } })}
+                />
+                <MonthField
+                  label="结束日期"
+                  value={editor.item.endDate}
+                  onChange={(endDate) => setEditor({ ...editor, item: { ...editor.item, endDate, isPresent: false } })}
+                  current={editor.item.isPresent}
+                  onSelectCurrent={() =>
                     setEditor({
                       ...editor,
                       item: {
                         ...editor.item,
-                        isPresent: event.target.checked,
-                        endDate: event.target.checked ? '' : editor.item.endDate,
+                        isPresent: true,
+                        endDate: '',
                       },
                     })
                   }
                 />
-                目前仍在职
-              </label>
-              <TextArea
-                label="经历描述"
-                value={editor.item.description}
-                onChange={(description) => setEditor({ ...editor, item: { ...editor.item, description } })}
-              />
-            </div>
+                <NumberField
+                  label="排序值（越小越靠前）"
+                  value={editor.item.sortOrder}
+                  onChange={(sortOrder) => setEditor({ ...editor, item: { ...editor.item, sortOrder } })}
+                />
+                <IconField
+                  label="公司图标"
+                  value={editor.item.icon}
+                  onChange={(icon) => setEditor({ ...editor, item: { ...editor.item, icon } })}
+                  placeholder="ri:building-line"
+                  color={editor.item.iconColor}
+                />
+                <ColorField
+                  label="图标颜色"
+                  value={editor.item.iconColor}
+                  onChange={(iconColor) => setEditor({ ...editor, item: { ...editor.item, iconColor } })}
+                />
+                <TextArea
+                  label="经历描述"
+                  value={editor.item.description}
+                  onChange={(description) => setEditor({ ...editor, item: { ...editor.item, description } })}
+                />
+              </div>
+            </fieldset>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditor(null)}>
+            <Button variant="outline" onClick={() => setEditor(null)} disabled={saving}>
               取消
             </Button>
-            <Button onClick={applyEditor}>应用到列表</Button>
+            <Button onClick={() => void applyEditor()} disabled={saving}>
+              {saving ? '保存中…' : editor?.index === null ? '保存并创建' : '保存修改'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -297,6 +306,156 @@ function Field({
       />
     </label>
   );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+  const pickerValue = /^#[\da-f]{6}$/i.test(value) ? value : '#d95778';
+
+  return (
+    <div className="space-y-1.5 text-sm">
+      <span className="block font-medium">{label}</span>
+      <div className="flex items-center gap-3">
+        <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border border-input shadow-sm">
+          <input
+            type="color"
+            value={pickerValue}
+            onChange={(event) => onChange(event.target.value)}
+            aria-label={`${label}颜色选择器`}
+            className="absolute -top-1/2 -left-1/2 h-[200%] w-[200%] cursor-pointer p-0"
+          />
+        </div>
+        <input
+          type="text"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={`${label} HEX 值`}
+          placeholder="留空使用默认颜色"
+          className="w-full rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm"
+        />
+      </div>
+    </div>
+  );
+}
+
+function MonthField({
+  label,
+  value,
+  onChange,
+  disabled,
+  current,
+  onSelectCurrent,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  current?: boolean;
+  onSelectCurrent?: () => void;
+}) {
+  const selectedMonth = toMonthInputValue(value);
+  const selectedYear = selectedMonth ? Number(selectedMonth.slice(0, 4)) : new Date().getFullYear();
+  const [displayYear, setDisplayYear] = useState(selectedYear);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => setDisplayYear(selectedYear), [selectedYear]);
+
+  return (
+    <div className="block space-y-1.5 text-sm">
+      <span className="font-medium">{label}</span>
+      <Popover.Root open={open} onOpenChange={setOpen}>
+        <Popover.Trigger asChild>
+          <Button type="button" variant="outline" disabled={disabled} className="w-full justify-between font-normal">
+            <span className={selectedMonth || current ? '' : 'text-muted-foreground'}>
+              {current
+                ? '至今'
+                : selectedMonth
+                  ? `${selectedMonth.slice(0, 4)} 年 ${Number(selectedMonth.slice(5))} 月`
+                  : '选择年月'}
+            </span>
+            <Icon icon="ri:calendar-line" className="size-4 text-muted-foreground" aria-hidden="true" />
+          </Button>
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content
+            side="bottom"
+            align="start"
+            sideOffset={4}
+            className="z-[60] w-72 rounded-xl border border-border bg-popover p-3 text-popover-foreground shadow-lg outline-none"
+          >
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="上一年"
+                  onClick={() => setDisplayYear((year) => year - 1)}
+                >
+                  <Icon icon="ri:arrow-left-s-line" className="size-5" />
+                </Button>
+                <span className="font-medium tabular-nums">{displayYear} 年</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="下一年"
+                  onClick={() => setDisplayYear((year) => year + 1)}
+                >
+                  <Icon icon="ri:arrow-right-s-line" className="size-5" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {Array.from({ length: 12 }, (_, index) => {
+                  const month = String(index + 1).padStart(2, '0');
+                  const monthValue = `${displayYear}-${month}`;
+                  const isSelected = selectedMonth === monthValue;
+
+                  return (
+                    <Button
+                      key={month}
+                      type="button"
+                      variant={isSelected ? 'default' : 'ghost'}
+                      className="h-9 px-2"
+                      onClick={() => {
+                        onChange(`${displayYear}.${month}`);
+                        setOpen(false);
+                      }}
+                    >
+                      {index + 1} 月
+                    </Button>
+                  );
+                })}
+              </div>
+              {onSelectCurrent && (
+                <Button
+                  type="button"
+                  variant={current ? 'secondary' : 'outline'}
+                  aria-pressed={current}
+                  className="w-full"
+                  onClick={() => {
+                    onSelectCurrent();
+                    setOpen(false);
+                  }}
+                >
+                  至今
+                </Button>
+              )}
+            </div>
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>
+    </div>
+  );
+}
+
+function toMonthInputValue(value: string): string {
+  const match = /^(\d{4})\.(\d{2})(?:\.\d{2})?$/.exec(value);
+  return match ? `${match[1]}-${match[2]}` : '';
+}
+
+function normalizeMonthDate(value: string): string {
+  const match = /^(\d{4})\.(\d{2})(?:\.\d{2})?$/.exec(value);
+  return match ? `${match[1]}.${match[2]}` : value;
 }
 
 function TextArea({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {

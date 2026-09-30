@@ -55,9 +55,10 @@ interface PostActionProps {
   onClick: () => void;
   destructive?: boolean;
   emphasized?: boolean;
+  tone?: 'success' | 'warning';
 }
 
-function PostAction({ label, title, icon, onClick, destructive = false, emphasized = false }: PostActionProps) {
+function PostAction({ label, title, icon, onClick, destructive = false, emphasized = false, tone }: PostActionProps) {
   return (
     <button
       type="button"
@@ -65,7 +66,11 @@ function PostAction({ label, title, icon, onClick, destructive = false, emphasiz
       className={cn(
         'flex min-w-12 cursor-pointer flex-col items-center gap-1 rounded-md px-1.5 py-1.5 text-[10px] leading-none transition-colors hover:bg-accent hover:text-foreground',
         destructive && 'hover:bg-destructive/10 hover:text-destructive',
-        emphasized ? 'text-orange-500' : 'text-muted-foreground',
+        tone === 'success' &&
+          'text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300',
+        tone === 'warning' &&
+          'text-amber-600 hover:bg-amber-500/10 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300',
+        !tone && (emphasized ? 'text-orange-500' : 'text-muted-foreground'),
       )}
       title={title}
       aria-label={title}
@@ -213,6 +218,7 @@ export function PostTable({
                       title={post.draft ? '发布文章' : '设为草稿'}
                       icon={post.draft ? 'ri:check-line' : 'ri:draft-line'}
                       onClick={() => onToggleDraft(post.id)}
+                      tone={post.draft ? 'success' : 'warning'}
                     />
                     <PostAction
                       label="删除"

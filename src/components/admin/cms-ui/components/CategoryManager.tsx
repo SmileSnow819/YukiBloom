@@ -1,3 +1,4 @@
+import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { ImageCropDialog } from '@admin-ui/components/ImageCropDialog';
 import { ImagePreviewDialog } from '@admin-ui/components/ImagePreviewDialog';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
@@ -43,13 +44,14 @@ export function CategoryManager({
 }) {
   const [content, setContent] = useState<AdminSiteContent | null>(null);
   const [editor, setEditor] = useState<CategoryEditor | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
   const [cropFile, setCropFile] = useState<File | null>(null);
   const [isImageUploading, setIsImageUploading] = useState(false);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const savedContentRef = useRef<AdminSiteContent | null>(null);
   const categoryNames = useMemo(
     () => (content ? getManagedCategoryNames(categories, content.categoryMappings) : categories),
     [categories, content],
@@ -59,8 +61,9 @@ export function CategoryManager({
     setLoading(true);
     setError('');
     try {
-      setContent(await getAdminSiteContent());
-      setDirty(false);
+      const savedContent = await getAdminSiteContent();
+      savedContentRef.current = savedContent;
+      setContent(savedContent);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '读取站点分类配置失败');
     } finally {
@@ -72,7 +75,45 @@ export function CategoryManager({
     void reload();
   }, [reload]);
 
-  function applyEditor() {
+  async function persistContent(nextContent: AdminSiteContent, successMessage: string, failureMessage: string) {
+    if (saving) return false;
+    const nextCategoryNames = getManagedCategoryNames(categories, nextContent.categoryMappings);
+    const incompleteCategory = nextCategoryNames.find((name) => {
+      const mapping = nextContent.categoryMappings.find((entry) => entry.name === name);
+      return !(mapping?.slug || generateCategorySlug(name)).trim();
+    });
+    if (incompleteCategory) {
+      toast.error(`分类“${incompleteCategory}”无法生成链接标识，请手动填写。`);
+      return false;
+    }
+    const incompleteFeatured = nextContent.featuredCategories.find(
+      (category) => !category.label.trim() || !category.link.trim(),
+    );
+    if (incompleteFeatured) {
+      toast.error('每个精选分类都需要填写名称和分类链接。');
+      return false;
+    }
+    const categoryMappings = nextCategoryNames.map((name) => {
+      const mapping = nextContent.categoryMappings.find((entry) => entry.name === name);
+      return { name, slug: mapping?.slug || generateCategorySlug(name) };
+    });
+    setSaving(true);
+    try {
+      const { data: savedContent, message } = await saveAdminSiteContent({ ...nextContent, categoryMappings });
+      savedContentRef.current = savedContent;
+      setContent(savedContent);
+      toast.success(message || successMessage);
+      return true;
+    } catch (cause) {
+      setContent(savedContentRef.current);
+      toast.error(cause instanceof Error ? cause.message : failureMessage);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function applyEditor() {
     if (!content || !editor) return;
     if (!editor.item.label.trim() || !editor.item.link.trim()) {
       toast.error('请填写精选分类名称和分类链接。');
@@ -84,23 +125,28 @@ export function CategoryManager({
       return;
     }
     const featuredCategories = [...content.featuredCategories];
-    if (editor.index === null) featuredCategories.splice(editor.order - 1, 0, editor.item);
+    const item = { ...editor.item, label: editor.item.label.trim(), link: editor.item.link.trim() };
+    if (editor.index === null) featuredCategories.splice(editor.order - 1, 0, item);
     else {
       featuredCategories.splice(editor.index, 1);
-      featuredCategories.splice(editor.order - 1, 0, editor.item);
+      featuredCategories.splice(editor.order - 1, 0, item);
     }
-    setContent({ ...content, featuredCategories });
-    setDirty(true);
+    const success = await persistContent(
+      { ...content, featuredCategories },
+      editor.index === null ? '分类已添加' : '分类已更新',
+      editor.index === null ? '新增分类失败，请重试' : '保存分类修改失败，请重试',
+    );
+    if (!success) return;
     setEditor(null);
   }
 
-  function removeFeatured(index: number) {
-    if (!content || !window.confirm(`确定删除精选分类“${content.featuredCategories[index].label}”吗？`)) return;
-    setContent({
-      ...content,
-      featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index),
-    });
-    setDirty(true);
+  async function removeFeatured(index: number) {
+    if (!content) return;
+    await persistContent(
+      { ...content, featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index) },
+      '分类已删除',
+      '删除分类失败，请重试',
+    );
   }
 
   function handleImageSelection(file: File | undefined) {
@@ -123,44 +169,13 @@ export function CategoryManager({
     try {
       const media = await uploadAdminMedia(file);
       setEditor((current) => (current ? { ...current, item: { ...current.item, image: media.url } } : current));
-      toast.success('封面已上传，应用并保存分类配置后生效');
+      toast.success('封面已上传，确认分类后立即保存配置');
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '分类封面上传失败');
     } finally {
       setIsImageUploading(false);
     }
   }
-
-  const save = useCallback(async () => {
-    if (!content) return;
-    const incompleteCategory = categoryNames.find((name) => {
-      const mapping = content.categoryMappings.find((entry) => entry.name === name);
-      return !(mapping?.slug || generateCategorySlug(name)).trim();
-    });
-    if (incompleteCategory) {
-      toast.error(`分类“${incompleteCategory}”无法生成链接标识，请手动填写。`);
-      return;
-    }
-    const incompleteFeatured = content.featuredCategories.find((category) => !category.label.trim() || !category.link.trim());
-    if (incompleteFeatured) {
-      toast.error('每个精选分类都需要填写名称和分类链接。');
-      return;
-    }
-    setSaving(true);
-    try {
-      const categoryMappings = categoryNames.map((name) => {
-        const mapping = content.categoryMappings.find((entry) => entry.name === name);
-        return { name, slug: mapping?.slug || generateCategorySlug(name) };
-      });
-      setContent(await saveAdminSiteContent({ ...content, categoryMappings }));
-      setDirty(false);
-      toast.success('分类配置已保存');
-    } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : '保存分类配置失败');
-    } finally {
-      setSaving(false);
-    }
-  }, [categoryNames, content]);
 
   useEffect(() => {
     if (!content) {
@@ -170,10 +185,15 @@ export function CategoryManager({
 
     onToolbarChange(
       <div className="flex items-center gap-2">
-        {dirty && <span className="mr-2 text-amber-600 text-sm">有未保存更改</span>}
+        {saving && (
+          <span className="mr-2 flex items-center gap-1 text-muted-foreground text-sm">
+            <Icon icon="ri:loader-4-line" className="size-4 animate-spin" /> 正在保存…
+          </span>
+        )}
         <Button
           variant="outline"
           size="sm"
+          disabled={saving}
           onClick={() =>
             setEditor({
               index: null,
@@ -185,14 +205,10 @@ export function CategoryManager({
           <Icon icon="ri:add-line" className="mr-1 size-4" />
           新增精选分类
         </Button>
-        <Button size="sm" onClick={save} disabled={saving || !dirty}>
-          <Icon icon={saving ? 'ri:loader-4-line' : 'ri:save-line'} className={`mr-1 size-4 ${saving ? 'animate-spin' : ''}`} />
-          {saving ? '保存中…' : '保存'}
-        </Button>
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [content, dirty, onToolbarChange, save, saving]);
+  }, [content, onToolbarChange, saving]);
 
   if (loading) return <ManagerMessage>正在读取分类配置…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -251,7 +267,12 @@ export function CategoryManager({
             },
           ]}
           onEdit={(item, index) => setEditor({ index, order: index + 1, item: { ...item } })}
-          onDelete={(_, index) => removeFeatured(index)}
+          onDelete={(item, index) =>
+            setPendingDelete({
+              description: `确定删除精选分类“${item.label}”吗？`,
+              onConfirm: () => void removeFeatured(index),
+            })
+          }
         />
       </section>
 
@@ -283,8 +304,11 @@ export function CategoryManager({
                       ...content,
                       categoryMappings: upsertCategoryMapping(content.categoryMappings, item.name, event.target.value.trim()),
                     });
-                    setDirty(true);
                   }}
+                  onBlur={() => {
+                    if (content) void persistContent(content, '分类链接已保存', '保存分类链接失败，请重试');
+                  }}
+                  disabled={saving}
                   aria-label={`${item.name} 的链接标识`}
                   className="w-full max-w-sm rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm"
                 />
@@ -294,11 +318,14 @@ export function CategoryManager({
         />
       </section>
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && !isImageUploading && setEditor(null)}>
+      <Dialog open={editor !== null} onOpenChange={(open) => !open && !isImageUploading && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{`${editor?.index === null ? '新增' : '编辑'}精选分类`}</DialogTitle>
-            <DialogDescription>编辑完成后，点击页面右上方保存全部更改。</DialogDescription>
+            <DialogDescription>
+              配置首页分类卡片。分类链接填写已有文章分类的链接标识，例如 front-end；不要填写完整的 /categories/front-end
+              路径。确认后会立即保存并生效。
+            </DialogDescription>
           </DialogHeader>
           {editor && (
             <div className="grid gap-4 py-2 sm:grid-cols-2">
@@ -318,7 +345,7 @@ export function CategoryManager({
                 label="分类链接"
                 value={editor.item.link}
                 onChange={(link) => setEditor({ ...editor, item: { ...editor.item, link } })}
-                placeholder="/categories/front-end"
+                placeholder="front-end"
               />
               <div className="space-y-2 sm:col-span-2">
                 <Field
@@ -380,11 +407,11 @@ export function CategoryManager({
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditor(null)} disabled={isImageUploading}>
+            <Button variant="outline" onClick={() => setEditor(null)} disabled={isImageUploading || saving}>
               取消
             </Button>
-            <Button onClick={applyEditor} disabled={isImageUploading}>
-              应用到列表
+            <Button onClick={() => void applyEditor()} disabled={isImageUploading || saving}>
+              {saving ? '保存中…' : editor?.index === null ? '添加并保存' : '保存修改'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -399,6 +426,16 @@ export function CategoryManager({
           />
         )}
       </Dialog>
+      <DeleteConfirmDialog
+        open={pendingDelete !== null}
+        title="确认删除精选分类？"
+        description={pendingDelete?.description ?? ''}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onConfirm={() => {
+          pendingDelete?.onConfirm();
+          setPendingDelete(null);
+        }}
+      />
     </section>
   );
 }

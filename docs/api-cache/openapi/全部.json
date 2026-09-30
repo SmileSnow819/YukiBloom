@@ -257,7 +257,7 @@
           "type": "string"
         },
         "coverUrl": {
-          "description": "CoverURL 是有封面时返回的公开图片相对地址；无封面时省略。",
+          "description": "公开文章封面对应的 COS 地址。",
           "type": "string"
         },
         "createdAt": {
@@ -2705,7 +2705,7 @@
         "produces": ["application/json"],
         "responses": {
           "200": {
-            "description": "文章分页结果",
+            "description": "文章分页结果，封面包含 coverUrl",
             "schema": {
               "allOf": [
                 {
@@ -2760,7 +2760,7 @@
         "produces": ["application/json"],
         "responses": {
           "200": {
-            "description": "文章详情",
+            "description": "文章详情，封面包含 coverUrl",
             "schema": {
               "allOf": [
                 {
@@ -2865,42 +2865,6 @@
         },
         "summary": "查询公开实习经历",
         "tags": ["个人内容"]
-      }
-    },
-    "/uploads/{key}": {
-      "get": {
-        "parameters": [
-          {
-            "description": "图片存储文件名",
-            "in": "path",
-            "name": "key",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": ["application/octet-stream"],
-        "responses": {
-          "200": {
-            "description": "图片文件",
-            "schema": {
-              "type": "file"
-            }
-          },
-          "404": {
-            "description": "code=10004，图片不存在",
-            "schema": {
-              "$ref": "#/definitions/apiresponse.Envelope"
-            }
-          },
-          "500": {
-            "description": "code=50000，读取图片失败",
-            "schema": {
-              "$ref": "#/definitions/apiresponse.Envelope"
-            }
-          }
-        },
-        "summary": "获取公开图片文件",
-        "tags": ["图片"]
       }
     }
   },

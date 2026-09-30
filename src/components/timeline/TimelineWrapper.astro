@@ -3,7 +3,12 @@ import { getPublicTimeline } from '@/lib/public-api';
 import type { TimelineItem } from './Timeline';
 import Timeline from './Timeline';
 
-const timeline = await getPublicTimeline();
+interface Props {
+  useBackendData?: boolean;
+}
+
+const { useBackendData = true } = Astro.props;
+const timeline = useBackendData ? await getPublicTimeline() : { items: [] };
 const items: TimelineItem[] = timeline.items;
 ---
 

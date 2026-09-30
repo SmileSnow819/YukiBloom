@@ -1,12 +1,12 @@
 # API 缓存摘要
 
-更新时间：2026-09-29T03:53:30.880Z
+更新时间：2026-09-30T04:05:58.894Z
 
 ## 文档分组
 
 | 分组 | 路径数 | 接口数 | 缓存文件 |
 | ---- | ------ | ------ | -------- |
-| 全部 | 26 | 34 | `openapi/全部.json` |
+| 全部 | 25 | 33 | `openapi/全部.json` |
 
 ## 接口索引
 
@@ -45,7 +45,6 @@
 | 全部 | GET | `/api/v1/posts/{slug}` | 按链接标识查询公开文章 | `operations/全部_get_-api-v1-posts-slug.json` |
 | 全部 | GET | `/api/v1/site-content` | 查询公开站点内容 | `operations/全部_get_-api-v1-site-content.json` |
 | 全部 | GET | `/api/v1/timeline` | 查询公开实习经历 | `operations/全部_get_-api-v1-timeline.json` |
-| 全部 | GET | `/uploads/{key}` | 获取公开图片文件 | `operations/全部_get_-uploads-key.json` |
 
 ## 使用方式
 

@@ -1,5 +1,10 @@
 export type ApiOptions = Omit<RequestInit, 'body'> & { body?: unknown };
 
+export interface AdminApiResult<T> {
+  data: T;
+  message: string;
+}
+
 export class AdminApiError extends Error {
   constructor(
     message: string,
@@ -35,7 +40,7 @@ export function getCsrfToken() {
 
 const base = (import.meta.env?.PUBLIC_API_BASE_URL || '').replace(/\/$/, '');
 
-export async function adminRequest<T>(path: string, options: ApiOptions = {}): Promise<T> {
+async function requestAdminResult<T>(path: string, options: ApiOptions = {}): Promise<AdminApiResult<T>> {
   const { body, ...rest } = options;
   const headers = new Headers(options.headers);
   const isForm = body instanceof FormData;
@@ -58,7 +63,15 @@ export async function adminRequest<T>(path: string, options: ApiOptions = {}): P
   if (!response.ok || envelope?.code !== 0) {
     throw new AdminApiError(envelope?.message || `请求失败（HTTP ${response.status}）`, response.status, envelope?.code);
   }
-  return envelope.data as T;
+  return { data: envelope.data as T, message: envelope.message || '' };
+}
+
+export async function adminRequest<T>(path: string, options: ApiOptions = {}): Promise<T> {
+  return (await requestAdminResult<T>(path, options)).data;
+}
+
+export async function adminRequestWithMessage<T>(path: string, options: ApiOptions = {}): Promise<AdminApiResult<T>> {
+  return requestAdminResult<T>(path, options);
 }
 
 export type Post = {

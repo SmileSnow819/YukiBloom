@@ -10,6 +10,8 @@ interface Props {
   post?: BlogPost | PublicPostPageModel;
   /** Override canonical URL (e.g., for fallback pages pointing to default-locale version) */
   canonical?: string;
+  /** Load backend-managed content and profile data for this page */
+  useBackendData?: boolean;
 }
 
 import { ClientRouter } from 'astro:transitions';
@@ -50,6 +52,7 @@ const {
   siderType,
   post,
   canonical: canonicalOverride,
+  useBackendData = true,
 } = Astro.props;
 
 // react-grab: dev-only tool for copying React component context (file, component name, HTML)
@@ -66,7 +69,7 @@ const isPostPage = stripLocaleFromPath(Astro.url.pathname).startsWith('/post/');
 
 // OGP image: use backend-managed defaults on rendered pages.
 const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
-const profile = isNotFoundPage ? undefined : (await getPublicSiteContent()).profile;
+const profile = isNotFoundPage || !useBackendData ? undefined : (await getPublicSiteContent()).profile;
 const ogImage = getOgImageUrl(post?.data.cover, Astro.site, profile);
 
 // Pre-compute i18n URLs for <head> links
@@ -365,7 +368,7 @@ const canonicalHref = canonicalOverride ?? Astro.url.href;
         </div>
       )}
       <FloatingGroup client:only="react" />
-      <MobileDrawer type={siderType} post={post && !('collection' in post) ? post : undefined} />
+      <MobileDrawer type={siderType} post={post && !('collection' in post) ? post : undefined} useBackendData={useBackendData} />
       <SearchDialog client:idle />
       <SearchPortal />
       <CodeBlockFullscreen client:idle />

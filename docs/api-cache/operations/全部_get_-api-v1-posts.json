@@ -45,7 +45,7 @@
     "produces": ["application/json"],
     "responses": {
       "200": {
-        "description": "文章分页结果",
+        "description": "文章分页结果，封面包含 coverUrl",
         "schema": {
           "allOf": [
             {

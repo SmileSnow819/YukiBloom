@@ -21,7 +21,7 @@
     "produces": ["application/json"],
     "responses": {
       "200": {
-        "description": "文章详情",
+        "description": "文章详情，封面包含 coverUrl",
         "schema": {
           "allOf": [
             {

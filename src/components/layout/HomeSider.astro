@@ -20,9 +20,10 @@ interface Props {
   className?: string;
   isDrawer?: boolean;
   post?: PublicPostPageModel;
+  useBackendData?: boolean;
 }
 
-const { type = HomeSiderType.HOME, className, isDrawer = false, post } = Astro.props;
+const { type = HomeSiderType.HOME, className, isDrawer = false, post, useBackendData = true } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const defaultSegmentType = type === HomeSiderType.POST ? HomeSiderSegmentType.DIRECTORY : HomeSiderSegmentType.INFO;
 
@@ -66,7 +67,7 @@ const nextPost = currentPostIndex >= 0 && currentPostIndex < seriesPosts.length 
     data-default-type={defaultSegmentType}
   >
     <div slot="info" class="sider-slot" data-slot-type="info">
-      <HomeInfo className={type === HomeSiderType.HOME ? 'pt-18 md:pt-0' : ''} />
+      <HomeInfo className={type === HomeSiderType.HOME ? 'pt-18 md:pt-0' : ''} useBackendData={useBackendData} />
     </div>
     <div slot="directory" class="sider-slot overflow-hidden h-full" data-slot-type="directory">
       {type === HomeSiderType.POST && <TableOfContents client:only="react" enableNumbering={post?.data.tocNumbering ?? true} />}

@@ -7,6 +7,7 @@
 import { CategoryManager } from '@admin-ui/components/CategoryManager';
 import { CreatePostDialog } from '@admin-ui/components/CreatePostDialog';
 import { DashboardCharts } from '@admin-ui/components/DashboardCharts';
+import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { ErrorFallback } from '@admin-ui/components/ErrorFallback';
 import { FootprintsManager } from '@admin-ui/components/FootprintsManager';
 import { PostEditor } from '@admin-ui/components/PostEditor';
@@ -97,6 +98,7 @@ function AppContent() {
 function CMSDashboard({ onLogout }: { onLogout: () => void }) {
   const [pageActions, setPageActions] = useState<ReactNode>(null);
   const [metadataPostId, setMetadataPostId] = useState<string | null>(null);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
   const {
     activeTab,
     setActiveTab,
@@ -305,7 +307,7 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
                         sortOrder={sortOrder}
                         onSort={handleSort}
                         onToggleDraft={handleToggleDraft}
-                        onDelete={handleDeletePost}
+                        onDelete={setPostToDelete}
                         onToggleSticky={handleToggleSticky}
                         onEditMetadata={setMetadataPostId}
                         onEditContent={handleEditPost}
@@ -334,6 +336,16 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
           onSaved={fetchData}
         />
       )}
+      <DeleteConfirmDialog
+        open={postToDelete !== null}
+        title="确认删除文章？"
+        description={`确定删除文章“${data?.posts.find((post) => post.id === postToDelete)?.title ?? '这篇文章'}”吗？此操作无法撤销。`}
+        onOpenChange={(open) => !open && setPostToDelete(null)}
+        onConfirm={() => {
+          if (postToDelete) void handleDeletePost(postToDelete);
+          setPostToDelete(null);
+        }}
+      />
     </>
   );
 }

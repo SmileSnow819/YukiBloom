@@ -18,12 +18,14 @@ interface Props {
   className?: string;
   isDrawer?: boolean;
   frontmatter?: BlogSchema;
+  useBackendData?: boolean;
 }
 
+const { useBackendData = true } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const isNotFoundPage = Astro.url.pathname.replace(/\/$/, '') === '/404';
-const { countMap, posts } = isNotFoundPage ? { countMap: {}, posts: [] } : await getPublicTaxonomy(locale);
-const siteContent = isNotFoundPage ? undefined : await getPublicSiteContent();
+const { countMap, posts } = isNotFoundPage || !useBackendData ? { countMap: {}, posts: [] } : await getPublicTaxonomy(locale);
+const siteContent = isNotFoundPage || !useBackendData ? undefined : await getPublicSiteContent();
 const profile = siteContent?.profile;
 const postCount = posts.length;
 const tags = getPublicTagCounts(posts);
@@ -74,7 +76,7 @@ const strippedPath = stripLocaleFromPath(Astro.url.pathname);
       {t(locale, 'homeInfo.tags')}
     </a>
   </div>
-  <TimelineWrapper />
+  <TimelineWrapper useBackendData={useBackendData} />
   <div class="mt-6 flex w-full flex-col items-center gap-2.5">
     {
       filteredRouters.map((item, index) => {

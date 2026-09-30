@@ -213,7 +213,38 @@ export const seoConfig = {
   url: siteConfig.site,
 };
 
-const BUILT_IN_COVERS = Array.from({ length: 21 }, (_, i) => `/img/cover/${i + 1}.webp`);
+const BUILT_IN_COVERS = [
+  '/img/cover/algorithm.webp',
+  '/img/cover/blog1.jpg',
+  '/img/cover/blog2.jpg',
+  '/img/cover/blog3.jpg',
+  '/img/cover/blog4.jpg',
+  '/img/cover/blog5.jpg',
+  '/img/cover/blog6.jpg',
+  '/img/cover/blog7.jpg',
+  '/img/cover/blog8.jpg',
+  '/img/cover/blog9.jpg',
+  '/img/cover/blog10.png',
+  '/img/cover/bytedance.webp',
+  '/img/cover/essay.webp',
+  '/img/cover/front-end.webp',
+  '/img/cover/interview.jpg',
+  '/img/cover/interview.webp',
+  '/img/cover/life.webp',
+  '/img/cover/note.webp',
+  '/img/cover/note1.webp',
+  '/img/cover/note2.webp',
+  '/img/cover/note3.webp',
+  '/img/cover/note4.webp',
+  '/img/cover/note5.webp',
+  '/img/cover/note6.webp',
+  '/img/cover/note7.webp',
+  '/img/cover/project.webp',
+  '/img/cover/project1.webp',
+  '/img/cover/project-yuki-agent-kit.webp',
+  '/img/cover/reading.webp',
+  '/img/cover/tools.webp',
+];
 export const defaultCoverList = yamlConfig?.defaultCoverList?.length ? yamlConfig.defaultCoverList : BUILT_IN_COVERS;
 
 // Analytics config types

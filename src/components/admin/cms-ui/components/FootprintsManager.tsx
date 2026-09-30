@@ -1,3 +1,4 @@
+import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { IconField, IconPreview } from '@admin-ui/components/IconField';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
 import { RecordId } from '@admin-ui/components/RecordId';
@@ -59,9 +60,9 @@ const emptyRoute = (): PublicRoute => ({
 export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actions: ReactNode | null) => void }) {
   const [footprints, setFootprints] = useState<FootprintsContent | null>(null);
   const [editor, setEditor] = useState<FootprintEditor | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [dirty, setDirty] = useState(false);
   const [error, setError] = useState('');
 
   const reload = useCallback(async () => {
@@ -75,7 +76,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         stays: sortBySortOrder(data.stays),
         routes: sortBySortOrder(data.routes),
       });
-      setDirty(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : '读取足迹失败');
     } finally {
@@ -87,8 +87,8 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
     void reload();
   }, [reload]);
 
-  function applyEditor() {
-    if (!footprints || !editor) return;
+  async function applyEditor() {
+    if (!footprints || !editor || saving) return;
     if (!Number.isInteger(editor.item.sortOrder) || editor.item.sortOrder < 0) {
       toast.error('排序值必须是大于等于 0 的整数。');
       return;
@@ -126,55 +126,18 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
       else routes[editor.index] = editor.item;
       next = { ...footprints, routes: sortBySortOrder(routes) };
     }
-    setFootprints(next);
-    setDirty(true);
-    setEditor(null);
-  }
-
-  function removeItem(kind: CollectionKey, index: number) {
-    if (!footprints) return;
-    if (kind === 'locations') {
-      const location = footprints.locations[index];
-      const linkedStays = footprints.stays.filter((stay) => stay.locationId === location.id);
-      const message = linkedStays.length
-        ? `“${location.name}”关联 ${linkedStays.length} 条停留记录，删除地点也会删除这些记录。继续吗？`
-        : `确定删除地点“${location.name}”吗？`;
-      if (!window.confirm(message)) return;
-      setFootprints({
-        ...footprints,
-        locations: sortBySortOrder(footprints.locations.filter((_, itemIndex) => itemIndex !== index)),
-        stays: sortBySortOrder(footprints.stays.filter((stay) => stay.locationId !== location.id)),
-      });
-    } else if (kind === 'stays') {
-      if (!window.confirm(`确定删除停留记录“${footprints.stays[index].title}”吗？`)) return;
-      setFootprints({
-        ...footprints,
-        stays: sortBySortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)),
-      });
-    } else {
-      if (!window.confirm(`确定删除路线“${footprints.routes[index].from} → ${footprints.routes[index].to}”吗？`)) return;
-      setFootprints({
-        ...footprints,
-        routes: sortBySortOrder(footprints.routes.filter((_, itemIndex) => itemIndex !== index)),
-      });
-    }
-    setDirty(true);
-  }
-
-  const save = useCallback(async () => {
-    if (!footprints) return;
-    const validationError = getFootprintsValidationError(footprints);
+    const validationError = getFootprintsValidationError(next);
     if (validationError) {
       toast.error(validationError);
       return;
     }
     setSaving(true);
     try {
-      const saved = await saveAdminFootprints({
-        ...footprints,
-        locations: sortBySortOrder(footprints.locations),
-        stays: sortBySortOrder(footprints.stays),
-        routes: sortBySortOrder(footprints.routes),
+      const { data: saved, message } = await saveAdminFootprints({
+        ...next,
+        locations: sortBySortOrder(next.locations),
+        stays: sortBySortOrder(next.stays),
+        routes: sortBySortOrder(next.routes),
       });
       setFootprints({
         ...saved,
@@ -182,14 +145,97 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         stays: sortBySortOrder(saved.stays),
         routes: sortBySortOrder(saved.routes),
       });
-      setDirty(false);
-      toast.success('足迹已保存');
+      setEditor(null);
+      const kind = editor.kind === 'location' ? '地点' : editor.kind === 'stay' ? '停留记录' : '路线';
+      toast.success(message || `${kind}已${editor.index === null ? '创建' : '更新'}`);
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '保存足迹失败');
     } finally {
       setSaving(false);
     }
-  }, [footprints]);
+  }
+
+  async function removeItem(kind: CollectionKey, index: number) {
+    if (!footprints || saving) return;
+    let nextFootprints: FootprintsContent;
+    if (kind === 'locations') {
+      const location = footprints.locations[index];
+      if (!location) return;
+      nextFootprints = {
+        ...footprints,
+        locations: sortBySortOrder(footprints.locations.filter((_, itemIndex) => itemIndex !== index)),
+        stays: sortBySortOrder(footprints.stays.filter((stay) => stay.locationId !== location.id)),
+      };
+    } else if (kind === 'stays') {
+      if (!footprints.stays[index]) return;
+      nextFootprints = {
+        ...footprints,
+        stays: sortBySortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)),
+      };
+    } else {
+      if (!footprints.routes[index]) return;
+      nextFootprints = {
+        ...footprints,
+        routes: sortBySortOrder(footprints.routes.filter((_, itemIndex) => itemIndex !== index)),
+      };
+    }
+    const validationError = getFootprintsValidationError(nextFootprints);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data: saved, message } = await saveAdminFootprints({
+        ...nextFootprints,
+        locations: sortBySortOrder(nextFootprints.locations),
+        stays: sortBySortOrder(nextFootprints.stays),
+        routes: sortBySortOrder(nextFootprints.routes),
+      });
+      setFootprints({
+        ...saved,
+        locations: sortBySortOrder(saved.locations),
+        stays: sortBySortOrder(saved.stays),
+        routes: sortBySortOrder(saved.routes),
+      });
+      toast.success(message || '记录已删除');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '删除足迹记录失败');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function requestRemoveItem(kind: CollectionKey, index: number) {
+    if (!footprints || saving) return;
+    if (kind === 'locations') {
+      const location = footprints.locations[index];
+      if (!location) return;
+      const linkedStays = footprints.stays.filter((stay) => stay.locationId === location.id);
+      setPendingDelete({
+        description: `${
+          linkedStays.length
+            ? `“${location.name}”关联 ${linkedStays.length} 条停留记录，删除地点也会删除这些记录。继续吗？`
+            : `确定删除地点“${location.name}”吗？`
+        }`,
+        onConfirm: () => void removeItem(kind, index),
+      });
+    } else if (kind === 'stays') {
+      const stay = footprints.stays[index];
+      if (!stay) return;
+      setPendingDelete({
+        description: `确定删除停留记录“${stay.title}”吗？`,
+        onConfirm: () => void removeItem(kind, index),
+      });
+    } else {
+      const route = footprints.routes[index];
+      if (!route) return;
+      setPendingDelete({
+        description: `确定删除路线“${route.from} → ${route.to}”吗？`,
+        onConfirm: () => void removeItem(kind, index),
+      });
+    }
+  }
 
   useEffect(() => {
     if (!footprints) {
@@ -199,10 +245,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
 
     onToolbarChange(
       <div className="flex items-center gap-2">
-        {dirty && <span className="mr-2 text-amber-600 text-sm">有未保存更改</span>}
         <Button
           variant="outline"
           size="sm"
+          disabled={saving}
           onClick={() =>
             setEditor({
               kind: 'location',
@@ -220,6 +266,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         <Button
           variant="outline"
           size="sm"
+          disabled={saving}
           onClick={() =>
             setEditor({
               kind: 'stay',
@@ -237,6 +284,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         <Button
           variant="outline"
           size="sm"
+          disabled={saving}
           onClick={() =>
             setEditor({
               kind: 'route',
@@ -251,14 +299,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           <Icon icon="ri:add-line" className="mr-1 size-4" />
           路线
         </Button>
-        <Button size="sm" onClick={save} disabled={saving || !dirty}>
-          <Icon icon={saving ? 'ri:loader-4-line' : 'ri:save-line'} className={`mr-1 size-4 ${saving ? 'animate-spin' : ''}`} />
-          {saving ? '保存中…' : '保存'}
-        </Button>
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [dirty, footprints, onToolbarChange, save, saving]);
+  }, [footprints, onToolbarChange, saving]);
 
   if (loading) return <ManagerMessage>正在读取足迹…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -305,7 +349,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
             },
           ]}
           onEdit={(item, index) => setEditor({ kind: 'location', index, item: { ...item } })}
-          onDelete={(_, index) => removeItem('locations', index)}
+          onDelete={(_, index) => requestRemoveItem('locations', index)}
         />
       </ListSection>
 
@@ -345,7 +389,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
             },
           ]}
           onEdit={(item, index) => setEditor({ kind: 'stay', index, item: { ...item } })}
-          onDelete={(_, index) => removeItem('stays', index)}
+          onDelete={(_, index) => requestRemoveItem('stays', index)}
         />
       </ListSection>
 
@@ -391,11 +435,11 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
               item: { ...item, images: [...item.images] },
             })
           }
-          onDelete={(_, index) => removeItem('routes', index)}
+          onDelete={(_, index) => requestRemoveItem('routes', index)}
         />
       </ListSection>
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && setEditor(null)}>
+      <Dialog open={editor !== null} onOpenChange={(open) => !open && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -403,17 +447,33 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
                 ? `${editor.index === null ? '新增' : '编辑'}${editor.kind === 'location' ? '地点' : editor.kind === 'stay' ? '停留记录' : '路线'}`
                 : ''}
             </DialogTitle>
-            <DialogDescription>更改会先应用到列表，最后点击“保存全部更改”写入后端。</DialogDescription>
+            <DialogDescription>保存后会立即写入足迹数据。</DialogDescription>
           </DialogHeader>
-          {editor && <EditorFields editor={editor} locations={footprints.locations} onChange={setEditor} />}
+          {editor && (
+            <fieldset disabled={saving} className="contents">
+              <EditorFields editor={editor} locations={footprints.locations} onChange={setEditor} />
+            </fieldset>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditor(null)}>
+            <Button variant="outline" onClick={() => setEditor(null)} disabled={saving}>
               取消
             </Button>
-            <Button onClick={applyEditor}>应用到列表</Button>
+            <Button onClick={() => void applyEditor()} disabled={saving}>
+              {saving ? '保存中…' : editor?.index === null ? '保存并创建' : '保存修改'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <DeleteConfirmDialog
+        open={pendingDelete !== null}
+        title="确认删除足迹记录？"
+        description={pendingDelete?.description ?? ''}
+        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onConfirm={() => {
+          pendingDelete?.onConfirm();
+          setPendingDelete(null);
+        }}
+      />
     </section>
   );
 }
