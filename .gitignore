@@ -36,6 +36,10 @@ pnpm-debug.log*
 # Keep OG data cache for Vercel builds
 !.cache/og-data.json
 
+# Local deployment archives
+/astro-koharu.tar
+/astro-koharu-nginx.tar
+
 # Backup files
 backups/
 pnpm-workspace.yaml
