@@ -153,6 +153,7 @@ export async function createPost(params: CreatePostParams): Promise<CreatePostRe
       locale: 'zh-CN',
       slug,
       title: params.title,
+      coverMediaId: params.coverMediaId,
       description: '',
       bodyMarkdown: '',
       displayDate: new Date().toISOString(),

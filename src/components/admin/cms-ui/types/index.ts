@@ -116,6 +116,7 @@ export interface ListPostsParams {
  */
 export interface CreatePostParams {
   title: string;
+  coverMediaId: string;
   categories?: string[];
   tags?: string[];
   draft?: boolean;

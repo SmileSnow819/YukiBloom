@@ -12,6 +12,7 @@ import { z } from 'zod';
  */
 export const createPostSchema = z.object({
   title: z.string().min(1, '标题不能为空'),
+  coverMediaId: z.string().min(1, '请上传文章封面'),
   categories: z.array(z.string()).optional(),
   tags: z.string().optional(),
   draft: z.boolean(),
