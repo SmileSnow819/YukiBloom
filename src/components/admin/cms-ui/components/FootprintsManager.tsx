@@ -17,7 +17,7 @@ import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getFootprintsValidationError } from '@/lib/admin/content-validation';
 import { type FootprintsContent, getAdminFootprints, saveAdminFootprints } from '@/lib/admin/footprints';
-import { getNextSortOrder, sortBySortOrder } from '@/lib/admin/ordered-list';
+import { moveItem, sortBySortOrder, withSortOrder } from '@/lib/admin/ordered-list';
 import type { PublicLocation, PublicRoute, PublicStay } from '@/lib/public-api/types';
 
 type CollectionKey = 'locations' | 'stays' | 'routes';
@@ -97,10 +97,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
 
   async function applyEditor() {
     if (!footprints || !editor || saving) return;
-    if (!Number.isInteger(editor.item.sortOrder) || editor.item.sortOrder < 0) {
-      toast.error('排序值必须是大于等于 0 的整数。');
-      return;
-    }
     let next: FootprintsContent;
     if (editor.kind === 'location') {
       if (!editor.item.name.trim() || !Number.isFinite(editor.item.lat) || !Number.isFinite(editor.item.lng)) {
@@ -108,9 +104,9 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         return;
       }
       const locations = [...footprints.locations];
-      if (editor.index === null) locations.push(editor.item);
+      if (editor.index === null) locations.unshift(editor.item);
       else locations[editor.index] = editor.item;
-      next = { ...footprints, locations: sortBySortOrder(locations) };
+      next = { ...footprints, locations: withSortOrder(locations) };
     } else if (editor.kind === 'stay') {
       if (
         !editor.item.title.trim() ||
@@ -121,18 +117,18 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         return;
       }
       const stays = [...footprints.stays];
-      if (editor.index === null) stays.push(editor.item);
+      if (editor.index === null) stays.unshift(editor.item);
       else stays[editor.index] = editor.item;
-      next = { ...footprints, stays: sortBySortOrder(stays) };
+      next = { ...footprints, stays: withSortOrder(stays) };
     } else {
       if (!editor.item.from.trim() || !editor.item.to.trim()) {
         toast.error('请填写路线的出发地和目的地。');
         return;
       }
       const routes = [...footprints.routes];
-      if (editor.index === null) routes.push(editor.item);
+      if (editor.index === null) routes.unshift(editor.item);
       else routes[editor.index] = editor.item;
-      next = { ...footprints, routes: sortBySortOrder(routes) };
+      next = { ...footprints, routes: withSortOrder(routes) };
     }
     const validationError = getFootprintsValidationError(next);
     if (validationError) {
@@ -143,9 +139,9 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
     try {
       const { data: saved, message } = await saveAdminFootprints({
         ...next,
-        locations: sortBySortOrder(next.locations),
-        stays: sortBySortOrder(next.stays),
-        routes: sortBySortOrder(next.routes),
+        locations: withSortOrder(sortBySortOrder(next.locations)),
+        stays: withSortOrder(sortBySortOrder(next.stays)),
+        routes: withSortOrder(sortBySortOrder(next.routes)),
       });
       setFootprints({
         ...saved,
@@ -163,6 +159,31 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
     }
   }
 
+  async function reorderItems(kind: CollectionKey, fromIndex: number, toIndex: number) {
+    if (!footprints || saving || fromIndex === toIndex) return;
+    const nextFootprints: FootprintsContent =
+      kind === 'locations'
+        ? { ...footprints, locations: withSortOrder(moveItem(footprints.locations, fromIndex, toIndex)) }
+        : kind === 'stays'
+          ? { ...footprints, stays: withSortOrder(moveItem(footprints.stays, fromIndex, toIndex)) }
+          : { ...footprints, routes: withSortOrder(moveItem(footprints.routes, fromIndex, toIndex)) };
+    setSaving(true);
+    try {
+      const { data: saved, message } = await saveAdminFootprints(nextFootprints);
+      setFootprints({
+        ...saved,
+        locations: sortBySortOrder(saved.locations),
+        stays: sortBySortOrder(saved.stays),
+        routes: sortBySortOrder(saved.routes),
+      });
+      toast.success(message || '顺序已更新');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '更新足迹顺序失败');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function removeItem(kind: CollectionKey, index: number) {
     if (!footprints || saving) return;
     let nextFootprints: FootprintsContent;
@@ -171,20 +192,20 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
       if (!location) return;
       nextFootprints = {
         ...footprints,
-        locations: sortBySortOrder(footprints.locations.filter((_, itemIndex) => itemIndex !== index)),
+        locations: withSortOrder(footprints.locations.filter((_, itemIndex) => itemIndex !== index)),
         stays: sortBySortOrder(footprints.stays.filter((stay) => stay.locationId !== location.id)),
       };
     } else if (kind === 'stays') {
       if (!footprints.stays[index]) return;
       nextFootprints = {
         ...footprints,
-        stays: sortBySortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)),
+        stays: withSortOrder(footprints.stays.filter((_, itemIndex) => itemIndex !== index)),
       };
     } else {
       if (!footprints.routes[index]) return;
       nextFootprints = {
         ...footprints,
-        routes: sortBySortOrder(footprints.routes.filter((_, itemIndex) => itemIndex !== index)),
+        routes: withSortOrder(footprints.routes.filter((_, itemIndex) => itemIndex !== index)),
       };
     }
     const validationError = getFootprintsValidationError(nextFootprints);
@@ -196,9 +217,9 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
     try {
       const { data: saved, message } = await saveAdminFootprints({
         ...nextFootprints,
-        locations: sortBySortOrder(nextFootprints.locations),
-        stays: sortBySortOrder(nextFootprints.stays),
-        routes: sortBySortOrder(nextFootprints.routes),
+        locations: withSortOrder(sortBySortOrder(nextFootprints.locations)),
+        stays: withSortOrder(sortBySortOrder(nextFootprints.stays)),
+        routes: withSortOrder(sortBySortOrder(nextFootprints.routes)),
       });
       setFootprints({
         ...saved,
@@ -263,7 +284,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
               index: null,
               item: {
                 ...emptyLocation(),
-                sortOrder: getNextSortOrder(footprints.locations),
               },
             })
           }
@@ -281,7 +301,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
               index: null,
               item: {
                 ...emptyStay(footprints.locations[0]?.id),
-                sortOrder: getNextSortOrder(footprints.stays),
               },
             })
           }
@@ -299,7 +318,6 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
               index: null,
               item: {
                 ...emptyRoute(),
-                sortOrder: getNextSortOrder(footprints.routes),
               },
             })
           }
@@ -323,12 +341,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           items={footprints.locations}
           getKey={(item) => item.id}
           emptyMessage="暂无地点"
+          onReorder={(fromIndex, toIndex) => void reorderItems('locations', fromIndex, toIndex)}
+          reorderDisabled={saving}
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            {
-              label: '排序',
-              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
-            },
             {
               label: '图标',
               render: (item) => (
@@ -366,12 +382,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           items={footprints.stays}
           getKey={(item) => item.id}
           emptyMessage="暂无停留记录"
+          onReorder={(fromIndex, toIndex) => void reorderItems('stays', fromIndex, toIndex)}
+          reorderDisabled={saving}
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            {
-              label: '排序',
-              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
-            },
             {
               label: '标题 / 地点',
               render: (item) => (
@@ -406,12 +420,10 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
           items={footprints.routes}
           getKey={(item) => item.id}
           emptyMessage="暂无路线"
+          onReorder={(fromIndex, toIndex) => void reorderItems('routes', fromIndex, toIndex)}
+          reorderDisabled={saving}
           columns={[
             { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-            {
-              label: '排序',
-              render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span>,
-            },
             {
               label: '路线',
               render: (item) => (
@@ -525,13 +537,6 @@ function EditorFields({
           onChange={(icon) => onChange({ ...editor, item: { ...editor.item, icon } })}
           placeholder="ri:map-pin-line"
         />
-        <NumberField
-          label="排序值（越小越靠前）"
-          value={editor.item.sortOrder}
-          onChange={(sortOrder) => onChange({ ...editor, item: { ...editor.item, sortOrder } })}
-          min={0}
-          step={1}
-        />
       </div>
     );
   }
@@ -567,13 +572,6 @@ function EditorFields({
           label="类型"
           value={editor.item.type}
           onChange={(type) => onChange({ ...editor, item: { ...editor.item, type } })}
-        />
-        <NumberField
-          label="排序值（越小越靠前）"
-          value={editor.item.sortOrder}
-          onChange={(sortOrder) => onChange({ ...editor, item: { ...editor.item, sortOrder } })}
-          min={0}
-          step={1}
         />
         <Field
           label="开始日期"
@@ -631,13 +629,6 @@ function EditorFields({
         label="标签"
         value={editor.item.label}
         onChange={(label) => onChange({ ...editor, item: { ...editor.item, label } })}
-      />
-      <NumberField
-        label="排序值（越小越靠前）"
-        value={editor.item.sortOrder}
-        onChange={(sortOrder) => onChange({ ...editor, item: { ...editor.item, sortOrder } })}
-        min={0}
-        step={1}
       />
       <Field
         label="交通方式"

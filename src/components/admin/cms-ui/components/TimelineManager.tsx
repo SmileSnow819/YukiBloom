@@ -17,7 +17,7 @@ import * as Popover from '@radix-ui/react-popover';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { getTimelineValidationError } from '@/lib/admin/content-validation';
-import { getNextSortOrder, sortBySortOrder } from '@/lib/admin/ordered-list';
+import { moveItem, sortBySortOrder, withSortOrder } from '@/lib/admin/ordered-list';
 import { getAdminTimeline, saveAdminTimeline, type TimelineContent } from '@/lib/admin/timeline';
 import type { PublicInternship } from '@/lib/public-api/types';
 
@@ -85,12 +85,8 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
     }
     const items =
       editor.index === null
-        ? [...timeline.items, item]
-        : timeline.items.map((entry, index) => (index === editor.index ? item : entry));
-    if (!Number.isInteger(item.sortOrder) || item.sortOrder < 0) {
-      toast.error('排序值必须是大于等于 0 的整数。');
-      return;
-    }
+        ? withSortOrder([item, ...timeline.items])
+        : withSortOrder(timeline.items.map((entry, index) => (index === editor.index ? item : entry)));
     setSaving(true);
     try {
       const { data: saved, message } = await saveAdminTimeline({ ...timeline, items: sortBySortOrder(items) });
@@ -104,11 +100,26 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
     }
   }
 
+  async function reorderItems(fromIndex: number, toIndex: number) {
+    if (!timeline || saving || fromIndex === toIndex) return;
+    const items = withSortOrder(moveItem(timeline.items, fromIndex, toIndex));
+    setSaving(true);
+    try {
+      const { data: saved, message } = await saveAdminTimeline({ ...timeline, items });
+      setTimeline({ ...saved, items: sortBySortOrder(saved.items) });
+      toast.success(message || '经历顺序已更新');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : '更新经历顺序失败');
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function removeItem(item: PublicInternship) {
     if (!timeline || saving) return;
     const nextTimeline = {
       ...timeline,
-      items: sortBySortOrder(timeline.items.filter((entry) => entry.id !== item.id)),
+      items: withSortOrder(timeline.items.filter((entry) => entry.id !== item.id)),
     };
     setSaving(true);
     try {
@@ -134,9 +145,7 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
           variant="outline"
           size="sm"
           disabled={saving}
-          onClick={() =>
-            setEditor({ index: null, item: { ...emptyInternship(), sortOrder: getNextSortOrder(timeline.items) } })
-          }
+          onClick={() => setEditor({ index: null, item: emptyInternship() })}
         >
           <Icon icon="ri:add-line" className="mr-1.5 size-4" />
           新增经历
@@ -156,9 +165,10 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
         items={timeline.items}
         getKey={(item) => item.id}
         emptyMessage="暂无实习经历"
+        onReorder={reorderItems}
+        reorderDisabled={saving}
         columns={[
           { label: 'ID', render: (item) => <RecordId id={item.id} /> },
-          { label: '排序', render: (item) => <span className="text-muted-foreground">{item.sortOrder}</span> },
           {
             label: '图标',
             render: (item) => (
@@ -249,11 +259,6 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
                       },
                     })
                   }
-                />
-                <NumberField
-                  label="排序值（越小越靠前）"
-                  value={editor.item.sortOrder}
-                  onChange={(sortOrder) => setEditor({ ...editor, item: { ...editor.item, sortOrder } })}
                 />
                 <IconField
                   label="公司图标"
@@ -474,22 +479,6 @@ function TextArea({ label, value, onChange }: { label: string; value: string; on
         value={value}
         onChange={(event) => onChange(event.target.value)}
         rows={4}
-        className="w-full rounded-lg border border-input bg-background px-3 py-2"
-      />
-    </label>
-  );
-}
-
-function NumberField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return (
-    <label className="block space-y-1.5 text-sm">
-      <span className="font-medium">{label}</span>
-      <input
-        type="number"
-        min={0}
-        step={1}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
         className="w-full rounded-lg border border-input bg-background px-3 py-2"
       />
     </label>

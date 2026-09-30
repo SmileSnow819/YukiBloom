@@ -19,6 +19,7 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { toast } from 'sonner';
 import { uploadAdminMedia } from '@/lib/admin/api';
 import { getManagedCategoryNames } from '@/lib/admin/category-settings';
+import { moveItem, withSortOrder } from '@/lib/admin/ordered-list';
 import { type AdminSiteContent, getAdminSiteContent, saveAdminSiteContent } from '@/lib/admin/site-content';
 import type { PublicCategory } from '@/lib/public-api/types';
 
@@ -237,6 +238,15 @@ export function CategoryManager({
     setEditor(null);
   }
 
+  async function reorderCategories(fromIndex: number, toIndex: number) {
+    if (!content || saving || fromIndex === toIndex) return;
+    await persistContent(
+      { ...content, categories: withSortOrder(moveItem(managedCategories, fromIndex, toIndex)) },
+      '分类顺序已更新',
+      '更新分类顺序失败，请重试',
+    );
+  }
+
   function editCategory(category: ManagedCategory) {
     const featureIndex =
       content?.categories.filter((item) => item.showOnHome).findIndex((item) => item.slug === category.slug) ?? -1;
@@ -330,6 +340,8 @@ export function CategoryManager({
         items={managedCategories}
         getKey={(item) => item.name}
         emptyMessage="暂无分类，请先新增分类"
+        onReorder={reorderCategories}
+        reorderDisabled={saving || editorOpen || isImageUploading}
         columns={[
           {
             label: '分类名称 / 链接标识',
