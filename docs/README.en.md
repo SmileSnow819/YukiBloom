@@ -103,19 +103,17 @@ pnpm dev
 - [Toggleable] Christmas special: snowfall, Christmas colors, Santa hats, string lights, and other festive effects
 - Serverless site announcement system: Manage announcements via config file with time controls, stacking, custom colors, and hover-to-read
 - Styled [RSS](https://blog.cosine.ren/rss.xml) feed page
-- **Local lightweight CMS app**: Run `pnpm cms` to launch a standalone CMS interface with article management, in-browser editing, and Markdown preview. The edit button on article pages supports one-click jump to local editors (VS Code / Cursor / Zed), configured in the `dev` section of `config/site.yaml`. (A backend version may be considered later; this version is static)
+- **Backend content management**: Manage posts and pages in the integrated `/admin` interface. The frontend requires `BACKEND_API_URL`.
 
 ## Content Asset Generation
 
-Generate content assets as needed with the existing scripts:
+Regenerate image placeholders after changing local site images:
 
 ```bash
 pnpm generate:lqips         # Image placeholders
-pnpm generate:summaries     # AI summaries
-pnpm generate:all           # Run all generators in sequence
 ```
 
-Manage posts and friend links in their content files and `config/site.yaml`. Use Git to update the theme and back up personal content before updating.
+Posts are managed through `/admin`; site appearance and friend links remain in `config/site.yaml`.
 
 ## Configuration
 
@@ -165,16 +163,7 @@ en:
       fullName: My Tech Weekly
 ```
 
-**Adding translated posts**: Place translated posts under `src/content/blog/<locale>/`, mirroring the default locale's directory structure:
-
-```plain
-src/content/blog/
-├── tools/getting-started.md        # Default locale (zh)
-├── en/tools/getting-started.md     # English translation
-└── en/life/hello-world.md          # English translation
-```
-
-Posts without a translation will automatically fall back to the default locale content, with a notice displayed.
+**Translated posts**: Manage language variants in `/admin`. Locale fallback is provided by the backend public API.
 
 **Adding a new language**:
 
@@ -195,13 +184,13 @@ comment:
     # ... other config
 ```
 
-**Waline is recommended**: Easy self-deployment, feature-rich (Markdown, emoji, email notifications), with built-in pageview stats. See the [full usage guide](/src/content/blog/tools/astro-koharu-guide.md#如何添加评论功能) for detailed configuration.
+**Waline is recommended**: Easy self-deployment, feature-rich (Markdown, emoji, email notifications), with built-in pageview stats. Configure it in `config/site.yaml`.
 
 ## Documentation
 
 - **[Getting Started](../GETTING-STARTED.md)** - Launch your blog
 - **[Updating the Theme](../GETTING-STARTED.md#7-更新主题)** - How to safely update to a new version
-- **[Full Usage Guide](../src/content/blog/tools/astro-koharu-guide.md)** - Detailed configuration and usage for all features
+- **[Getting Started](../GETTING-STARTED.md)** - Local setup and deployment
 
 ## Feature Showcase
 

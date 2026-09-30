@@ -3,34 +3,6 @@
  */
 
 /**
- * Configuration for a single editor
- */
-export interface EditorConfig {
-  /** Unique identifier for the editor */
-  id: string;
-  /** Display name */
-  name: string;
-  /** Iconify icon identifier (e.g., 'ri:vscode-line') */
-  icon: string;
-  /** URL template with placeholders: {path}, {line}, {column} */
-  urlTemplate: string;
-}
-
-/**
- * CMS configuration from cms.yaml
- */
-export interface CMSConfig {
-  /** Whether CMS features are enabled (dev only) */
-  enabled: boolean;
-  /** Absolute path to the local project directory */
-  localProjectPath: string;
-  /** Relative path from project root to content directory (default: 'src/content/blog') */
-  contentRelativePath: string;
-  /** List of configured editors */
-  editors: EditorConfig[];
-}
-
-/**
  * Blog post frontmatter schema
  */
 export interface BlogSchema {

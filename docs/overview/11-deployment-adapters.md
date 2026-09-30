@@ -42,7 +42,7 @@ node dist/server/entry.mjs
 #### 前置要求
 
 - Docker Engine 20.10+
-- Docker Compose V2 (`docker compose` 命令)
+- Docker Compose V2 (`docker compose` 命令）
 
 #### 快速开始
 
@@ -83,17 +83,14 @@ pnpm docker:rebuild   # 完整重建（停旧容器 → 重新构建 → 启动�
 
 #### 更新内容后重新部署
 
-当修改了博客内容、`config/site.yaml` 或 `.env` 后：
+当修改了 `config/site.yaml`、前端代码或 `.env` 后：
 
 ```bash
-# 建议先生成内容资产（LQIP、相似度、AI 摘要）
-pnpm generate:all
-
-# 然后重新构建部署
+# 重新构建部署
 pnpm docker:rebuild
 ```
 
-`rebuild.sh` 会自动检查 `.env` 是否存在，并提示是否需要运行内容生成脚本。
+文章等动态内容由后端 API 提供，发布后无需重建前端。
 
 #### 目录结构
 

@@ -4,7 +4,6 @@ import type {
   BangumiConfig,
   BgmAudioGroup,
   CommentConfig,
-  DevConfig,
   FeaturedCategory,
   FeaturedSeriesItem,
   I18nConfig,
@@ -329,13 +328,6 @@ export const routers: RouterItem[] = bangumiConfig
       },
     ]
   : baseRouters;
-
-// Map YAML dev tools config with defaults (dev only)
-export const devConfig: DevConfig = {
-  localProjectPath: yamlConfig.dev?.localProjectPath ?? '',
-  contentRelativePath: yamlConfig.dev?.contentRelativePath ?? 'src/content/blog',
-  editors: yamlConfig.dev?.editors ?? [],
-};
 
 // =============================================================================
 // i18n Configuration

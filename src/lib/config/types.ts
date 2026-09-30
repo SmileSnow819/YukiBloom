@@ -497,32 +497,6 @@ export interface ChristmasConfig {
 // Dev Tools Configuration (Dev Only - Local Editor Integration)
 // =============================================================================
 
-/**
- * Configuration for a single editor
- */
-export interface EditorConfig {
-  /** Unique identifier for the editor */
-  id: string;
-  /** Display name */
-  name: string;
-  /** Iconify icon identifier (e.g., 'devicon-plain:vscode') */
-  icon: string;
-  /** URL template with placeholder: {path} for file absolute path */
-  urlTemplate: string;
-}
-
-/**
- * Development tools configuration from site.yaml
- */
-export interface DevConfig {
-  /** Absolute path to the local project directory */
-  localProjectPath: string;
-  /** Relative path from project root to content directory (default: 'src/content/blog') */
-  contentRelativePath: string;
-  /** List of configured editors */
-  editors: EditorConfig[];
-}
-
 // =============================================================================
 // BGM (Background Music) Configuration
 // =============================================================================
@@ -597,8 +571,6 @@ export interface SiteYamlConfig {
   /** Bangumi media tracking page — comment out to disable */
   bangumi?: BangumiConfig;
   christmas?: ChristmasConfig;
-  /** Development tools configuration (dev only) */
-  dev?: DevConfig;
   /** Internationalization configuration */
   i18n?: I18nConfig;
 }

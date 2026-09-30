@@ -100,23 +100,20 @@ pnpm dev
 - **多语言支持（i18n）**：内置中英文 UI 翻译，支持自定义语言包、内容级翻译（分类名/系列名）、语言切换器、hreflang SEO 标签、locale-aware RSS 订阅。默认语言 URL 无前缀，其他语言自动加前缀（如 `/en/post/xxx`）
 - RSS 订阅支持
 - 支持 LQIP：图片加载前显示渐变色占位，提升视觉体验
-- [可开关] AI 自动摘要生成，自动生成摘要。
 - [可开关] 圣诞特辑：包含雪花飘落、圣诞配色、圣诞帽装饰、灯串装饰等节日氛围效果
 - 无后端站点公告系统：可通过配置文件管理公告，支持时间控制、多条公告堆叠、自定义颜色、hover 已读
 - 有样式的 [RSS](https://blog.cosine.ren/rss.xml) 订阅源链接
-- **本地轻 CMS 应用**：运行 `pnpm cms` 启动独立的 CMS 管理界面，支持文章管理、浏览器内编辑、Markdown 预览等功能。文章页的编辑按钮支持一键跳转到本地编辑器（VS Code / Cursor / Zed），配置见 `config/site.yaml` 的 `dev` 部分。（后期会考虑做个有后端的版本，这期先静态）
+- **后端内容管理**：文章、页面、足迹和站点内容由后端 API 提供；访问 `/admin` 使用集成的管理界面编辑内容。部署时需配置 `BACKEND_API_URL`。
 
 ## 内容资产生成
 
-内容资产可按需生成。命令分别写入 LQIP 图片占位数据和 AI 摘要：
+图片资源调整后，可重新生成 LQIP 图片占位数据：
 
 ```bash
 pnpm generate:lqips         # 生成图片占位数据
-pnpm generate:summaries     # 生成文章摘要
-pnpm generate:all           # 依次执行全部生成任务
 ```
 
-文章内容和友链在对应内容文件与 `config/site.yaml` 中管理；主题更新使用 Git，更新前请自行备份个人内容。
+文章内容由后端管理；站点外观和友链等配置仍在 `config/site.yaml` 中管理。
 
 ### 后端 API 文档缓存
 
@@ -179,16 +176,7 @@ en:
       fullName: My Tech Weekly
 ```
 
-**添加翻译文章**：将翻译文章放在 `src/content/blog/<locale>/` 目录下，保持与默认语言相同的路径结构：
-
-```plain
-src/content/blog/
-├── tools/getting-started.md        # 默认语言 (zh)
-├── en/tools/getting-started.md     # 英文翻译
-└── en/life/hello-world.md          # 英文翻译
-```
-
-没有对应翻译的文章会自动回退显示默认语言内容，并标注提示。
+文章及其翻译在 `/admin` 中管理，语言回退由后端公开内容 API 提供。
 
 **添加新语言**：
 
@@ -209,13 +197,13 @@ comment:
     # ... 其他配置
 ```
 
-**推荐使用 Waline**：自部署简单、功能丰富（Markdown、表情、邮件通知）、带访问量统计。详细配置请参考[完整使用指南](/src/content/blog/tools/astro-koharu-guide.md#如何添加评论功能)。
+**推荐使用 Waline**：自部署简单、功能丰富（Markdown、表情、邮件通知）、带访问量统计。配置项见 `config/site.yaml`。
 
 ## 文档
 
 - **[快速开始](./GETTING-STARTED.md)** - 启动你的博客
 - **[更新主题](./GETTING-STARTED.md#7-更新主题)** - 如何安全地更新到新版本
-- **[完整使用指南](./src/content/blog/tools/astro-koharu-guide.md)** - 所有功能的详细配置和使用方法
+- **[快速开始](./GETTING-STARTED.md)** - 本地启动与部署说明
 
 ## 特色功能演示图片
 

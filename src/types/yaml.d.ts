@@ -10,12 +10,6 @@ declare module '*/config/site.yaml' {
   export default value;
 }
 
-declare module '*/config/cms.yaml' {
-  import type { CMSConfig } from '@/types/cms';
-  const value: CMSConfig;
-  export default value;
-}
-
 declare module '*/config/i18n-content.yaml' {
   import type { I18nContentConfig } from '@/i18n/content-types';
   const value: I18nContentConfig;

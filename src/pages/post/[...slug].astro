@@ -17,7 +17,6 @@ import { encodeSlug } from '@lib/route';
 import { getOgImageUrl } from '@lib/seo/og-image';
 import { Icon } from 'astro-icon/components';
 import { Comment } from '@/components/comment';
-import EditButton from '@/components/EditButton';
 import { defaultLocale, getLocaleFromUrl, getLocaleLabel, localizedPath, t } from '@/i18n';
 import {
   getPublicPost,
@@ -150,7 +149,6 @@ if (post?.protectedContent) {
                 </>
               ))}
             </div>
-            {import.meta.env.DEV && <EditButton client:only="react" postId={post.id} />}
           </nav>
           {isFallback && (
             <div class="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">

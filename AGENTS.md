@@ -87,7 +87,6 @@ pnpm generate:lqips       # Generate LQIP image placeholders
 ```plain
 src/
 ├── components/   # React & Astro components
-├── content/      # Legacy Astro collection schema kept for type compatibility
 ├── i18n/         # Internationalization (translations, config, utils)
 ├── layouts/      # Page layouts
 ├── pages/        # File-based routing ([lang]/ mirrors for non-default locales)

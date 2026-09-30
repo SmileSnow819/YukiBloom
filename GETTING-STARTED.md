@@ -93,24 +93,11 @@ social:
 
 ## 4. 写第一篇文章
 
-在 `src/content/blog/` 目录下创建 Markdown 文件。
+登录站点 `/admin` 后，在文章管理页面新建 Markdown 文章。前端需配置可访问的 `BACKEND_API_URL`。
 
 ### 基础模板
 
-```markdown
----
-title: 我的第一篇文章
-date: 2024-01-01 12:00:00
-tags:
-  - 标签1
-  - 标签2
-categories:
-  - 分类名
-cover: /img/cover/1.webp
----
-
-文章正文内容...
-```
+在编辑器填写标题、分类、标签和正文，保存后由后端保存并发布。
 
 ### Frontmatter 字段说明
 
@@ -172,11 +159,11 @@ docker compose --env-file ./.env -f docker/docker-compose.yml up -d --build
 open http://localhost:4321
 ```
 
-**重要**: 生成脚本需要在本地运行：
+**重要**: 修改站点图片资源后可重新生成 LQIP 占位数据：
 
 ```bash
-# 添加新图片/文章后，先本地运行：
-pnpm generate:all
+# 添加或替换图片后：
+pnpm generate:lqips
 
 # 然后提交更改
 git add src/assets/*.json
@@ -186,7 +173,7 @@ git commit -m "chore: update generated assets"
 ./docker/rebuild.sh
 ```
 
-详细说明请参考[使用指南的 Docker 部署章节](./src/content/blog/tools/astro-koharu-guide.md)。
+文章通过 `/admin` 管理；部署需在运行环境配置 `BACKEND_API_URL`。
 
 ## 6. 进阶功能
 
@@ -207,7 +194,7 @@ featuredSeries:
     rss: /rss.xml
 ```
 
-然后在 `src/content/blog/` 目录创建周刊文章。
+然后在 `/admin` 的文章管理页面创建周刊文章。
 
 ### 多语言支持（i18n）
 
@@ -225,15 +212,7 @@ i18n:
 
 配置后，博客会自动生成带语言前缀的页面（如 `/en/post/xxx`），导航栏和移动端抽屉中会出现语言切换器。
 
-**添加翻译文章**：将翻译文章放在 `src/content/blog/<locale>/` 目录下，保持与默认语言相同的路径结构：
-
-```plain
-src/content/blog/
-├── tools/getting-started.md        # 默认语言 (zh)
-└── en/tools/getting-started.md     # 英文翻译
-```
-
-没有对应翻译的文章会自动回退显示默认语言内容，并标注提示。
+**添加翻译文章**：在 `/admin` 编辑文章并选择对应语言。未翻译的内容回退规则由后端 API 提供。
 
 更多详细配置（内容翻译、添加新语言等）请参考 [README 的多语言配置章节](./README.md#多语言配置i18n)。
 
@@ -255,12 +234,10 @@ bgm:
 
 ### 内容生成（可选）
 
-按需运行内容资产生成任务：
+修改站点图片资源后，可重新生成图片占位数据：
 
 ```bash
 pnpm generate:lqips         # 生成 LQIP 图片占位符
-pnpm generate:summaries     # 生成 AI 摘要
-pnpm generate:all           # 依次执行以上全部任务
 ```
 
 ## 常用命令
@@ -271,7 +248,7 @@ pnpm generate:all           # 依次执行以上全部任务
 | `pnpm build` | 构建生产版本 |
 | `pnpm preview` | 预览生产构建 |
 | `pnpm lint` | 代码检查 |
-| `pnpm generate:all` | 生成全部内容资产 |
+| `pnpm generate:lqips` | 生成图片占位数据 |
 
 ## 7. 更新主题
 
@@ -309,7 +286,7 @@ pnpm build
 
 ## 获取帮助
 
-- 📖 [详细使用指南](./src/content/blog/tools/astro-koharu-guide.md)
+- 📖 [项目文档（中文）](./README.md)
 - 🐛 [提交 Issue](https://github.com/cosZone/astro-koharu/issues)
 - ⭐ [GitHub 仓库](https://github.com/cosZone/astro-koharu)
 

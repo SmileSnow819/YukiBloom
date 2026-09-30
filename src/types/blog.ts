@@ -1,9 +1,4 @@
-import type { CollectionEntry } from 'astro:content';
-
-/**
- * Blog post schema - matches the schema defined in content/config.ts
- * This is the OUTPUT type after Zod transforms are applied.
- */
+/** Article data shape used by the public API adapter and presentation components. */
 export interface BlogSchema {
   title: string;
   description?: string;
@@ -18,8 +13,6 @@ export interface BlogSchema {
   sticky?: boolean;
   draft?: boolean;
   tocNumbering?: boolean;
-  /** Exclude this post from AI summary generation */
-  excludeFromSummary?: boolean;
   /** Enable KaTeX math rendering for this post */
   math?: boolean;
   /** Enable quiz interaction for this post */
@@ -29,18 +22,16 @@ export interface BlogSchema {
 }
 
 /**
- * Blog post schema INPUT type - before Zod transforms.
- * gray-matter parses YAML dates as Date objects, so date fields accept both.
+ * Compatibility shape for components that can still render legacy post data.
  */
-export interface BlogSchemaInput extends Omit<BlogSchema, 'date' | 'updated'> {
-  date: string | Date;
-  updated?: string | Date;
+export interface BlogPost {
+  collection: 'blog';
+  id: string;
+  slug: string;
+  body: string;
+  data: BlogSchema;
+  rendered?: { html: string };
 }
-
-/**
- * Blog post type from Astro content collections
- */
-export type BlogPost = CollectionEntry<'blog'>;
 
 /**
  * 最小文章引用 - 用于导航（3 字段）

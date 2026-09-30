@@ -103,19 +103,17 @@ pnpm dev
 - [切り替え可能] クリスマス特集：雪降り、クリスマスカラー、サンタ帽、イルミネーションなど季節エフェクト
 - サーバーレスサイトお知らせシステム：設定ファイルで管理、時間制御・複数お知らせスタック・カスタムカラー・ホバーで既読
 - スタイル付き [RSS](https://blog.cosine.ren/rss.xml) フィードページ
-- **ローカル軽量 CMS アプリ**：`pnpm cms` で独立した CMS インターフェースを起動、記事管理・ブラウザ内編集・Markdown プレビューに対応。記事ページの編集ボタンからローカルエディター（VS Code / Cursor / Zed）へワンクリックジャンプ、`config/site.yaml` の `dev` セクションで設定（バックエンド版は今後検討、現在は静的版）
+- **バックエンドコンテンツ管理**：統合管理画面 `/admin` で記事とページを管理します。フロントエンドには `BACKEND_API_URL` の設定が必要です。
 
 ## コンテンツアセットの生成
 
-必要に応じて、既存のスクリプトでコンテンツアセットを生成できます：
+サイト画像を変更した場合、プレースホルダーを再生成します：
 
 ```bash
 pnpm generate:lqips         # 画像プレースホルダー
-pnpm generate:summaries     # AI 要約
-pnpm generate:all           # すべての生成処理を順に実行
 ```
 
-記事とフレンドリンクはコンテンツファイルおよび `config/site.yaml` で管理します。テーマの更新には Git を使用し、更新前に個人コンテンツをバックアップしてください。
+記事は `/admin` で管理し、サイト設定とフレンドリンクは `config/site.yaml` で管理します。
 
 ## 設定
 
@@ -165,16 +163,7 @@ en:
       fullName: My Tech Weekly
 ```
 
-**翻訳記事の追加**：翻訳記事を `src/content/blog/<locale>/` に配置し、デフォルトロケールのディレクトリ構造を反映：
-
-```plain
-src/content/blog/
-├── tools/getting-started.md        # デフォルトロケール (zh)
-├── en/tools/getting-started.md     # 英語翻訳
-└── en/life/hello-world.md          # 英語翻訳
-```
-
-翻訳がない投稿は自動的にデフォルトロケールのコンテンツにフォールバックし、通知が表示されます。
+**翻訳記事**：`/admin` で言語別の記事を管理します。言語フォールバックはバックエンド API が処理します。
 
 **新しい言語の追加**：
 
@@ -195,13 +184,13 @@ comment:
     # ... その他の設定
 ```
 
-**Waline 推奨**：セルフデプロイが簡単で機能が豊富（Markdown、絵文字、メール通知）、ページビュー統計付き。詳しい設定は[完全使用ガイド](/src/content/blog/tools/astro-koharu-guide.md#如何添加评论功能)をご覧ください。
+**Waline 推奨**：セルフデプロイが簡単で機能が豊富（Markdown、絵文字、メール通知）、ページビュー統計付き。設定は `config/site.yaml` を参照してください。
 
 ## ドキュメント
 
 - **[はじめに](../GETTING-STARTED.md)** - ブログを始める
 - **[テーマの更新](../GETTING-STARTED.md#7-更新主题)** - 安全に新バージョンに更新する方法
-- **[完全使用ガイド](../src/content/blog/tools/astro-koharu-guide.md)** - すべての機能の詳しい設定と使い方
+- **[Getting Started](../GETTING-STARTED.md)** - ローカル起動とデプロイ
 
 ## 機能ショーケース
 

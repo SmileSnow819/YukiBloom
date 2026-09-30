@@ -6,7 +6,7 @@
  */
 
 import { siteTimezone } from '@constants/site-config';
-import { formatInTimeZone, fromZonedTime, toDate } from 'date-fns-tz';
+import { formatInTimeZone } from 'date-fns-tz';
 
 /**
  * Standard date formats used across the site
@@ -73,55 +73,4 @@ export const displayDate = {
  */
 export function formatForSeo(date: Date | string): string {
   return formatDate(date, DateFormats.DATE);
-}
-
-/**
- * Parse a date string assuming it's in the site's configured timezone.
- * Ensures consistent parsing regardless of build environment.
- *
- * This solves the issue where `new Date("2025-12-29 21:55:00")` produces
- * different results depending on the system timezone of the build server.
- *
- * @param dateString - Date string to parse (e.g., "2025-12-29 21:55:00")
- * @returns Date object representing the correct moment in time
- * @throws {Error} If dateString is empty or results in invalid date
- */
-export function parseDateInSiteTimezone(dateString: string): Date {
-  if (!dateString || !dateString.trim()) {
-    throw new Error('Date string cannot be empty');
-  }
-
-  // toDate will parse strings without timezone offset as if they were in the specified timezone
-  const result = toDate(dateString, { timeZone: siteTimezone });
-
-  // Validate the parsed date
-  if (Number.isNaN(result.getTime())) {
-    throw new Error(`Failed to parse date string: ${dateString}`);
-  }
-
-  return result;
-}
-
-/**
- * Reinterpret a Date object that was incorrectly parsed as UTC.
- *
- * gray-matter (used by Astro to parse frontmatter) automatically parses YAML dates
- * like "2025-12-29 21:55:00" as UTC, creating Date(2025-12-29T21:55:00.000Z).
- * However, the user intended this to be in the site timezone.
- *
- * This function extracts the UTC time values and reinterprets them as site timezone,
- * producing the correct UTC timestamp.
- *
- * Example:
- * - Input: Date(2025-12-29T21:55:00.000Z) ← gray-matter's incorrect UTC parse
- * - Output: Date(2025-12-29T13:55:00.000Z) ← correct UTC for Asia/Shanghai 21:55
- *
- * @param date - Date object incorrectly parsed as UTC by gray-matter
- * @returns Date object with correct UTC timestamp
- */
-export function reinterpretUtcAsTimezone(date: Date): Date {
-  // Extract the "wrong" UTC time as a string (e.g., "2025-12-29 21:55:00")
-  const dateStr = formatInTimeZone(date, 'UTC', 'yyyy-MM-dd HH:mm:ss');
-  // Re-parse this string as if it were in the site timezone
-  return fromZonedTime(dateStr, siteTimezone);
 }
