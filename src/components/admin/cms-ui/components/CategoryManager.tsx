@@ -1,6 +1,7 @@
 import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { ImageCropDialog } from '@admin-ui/components/ImageCropDialog';
 import { ImagePreviewDialog } from '@admin-ui/components/ImagePreviewDialog';
+import { ImageUploadField } from '@admin-ui/components/ImageUploadField';
 import { ManagerTable } from '@admin-ui/components/ManagerTable';
 import { Button } from '@admin-ui/components/ui/button';
 import {
@@ -11,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { generateCategorySlug } from '@admin-ui/lib/category';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import { Icon } from '@iconify/react';
@@ -43,14 +45,25 @@ export function CategoryManager({
   onToolbarChange: (actions: ReactNode | null) => void;
 }) {
   const [content, setContent] = useState<AdminSiteContent | null>(null);
-  const [editor, setEditor] = useState<CategoryEditor | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
+  const {
+    value: editor,
+    open: editorOpen,
+    setDialogValue: setEditor,
+    updateDialogValue: updateEditor,
+  } = useDialogValue<CategoryEditor>();
+  const {
+    value: pendingDelete,
+    open: deleteOpen,
+    setDialogValue: setPendingDelete,
+  } = useDialogValue<{
+    description: string;
+    onConfirm: () => void;
+  }>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [cropFile, setCropFile] = useState<File | null>(null);
+  const { value: cropFile, open: cropOpen, setDialogValue: setCropFile } = useDialogValue<File>();
   const [isImageUploading, setIsImageUploading] = useState(false);
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const savedContentRef = useRef<AdminSiteContent | null>(null);
   const categoryNames = useMemo(
     () => (content ? getManagedCategoryNames(categories, content.categoryMappings) : categories),
@@ -156,7 +169,6 @@ export function CategoryManager({
       return;
     }
     setCropFile(file);
-    if (imageInputRef.current) imageInputRef.current.value = '';
   }
 
   async function uploadFeaturedImage(file: File) {
@@ -168,7 +180,7 @@ export function CategoryManager({
     setIsImageUploading(true);
     try {
       const media = await uploadAdminMedia(file);
-      setEditor((current) => (current ? { ...current, item: { ...current.item, image: media.url } } : current));
+      updateEditor((current) => (current ? { ...current, item: { ...current.item, image: media.url } } : current));
       toast.success('封面已上传，确认分类后立即保存配置');
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '分类封面上传失败');
@@ -208,7 +220,7 @@ export function CategoryManager({
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [content, onToolbarChange, saving]);
+  }, [content, onToolbarChange, saving, setEditor]);
 
   if (loading) return <ManagerMessage>正在读取分类配置…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -318,7 +330,7 @@ export function CategoryManager({
         />
       </section>
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && !isImageUploading && !saving && setEditor(null)}>
+      <Dialog open={editorOpen} onOpenChange={(open) => !open && !isImageUploading && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{`${editor?.index === null ? '新增' : '编辑'}精选分类`}</DialogTitle>
@@ -353,25 +365,13 @@ export function CategoryManager({
                   value={editor.item.image}
                   onChange={(image) => setEditor({ ...editor, item: { ...editor.item, image } })}
                 />
-                <input
-                  ref={imageInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={(event) => handleImageSelection(event.currentTarget.files?.[0])}
+                <ImageUploadField
+                  label="预览图片"
+                  imageUrl={editor.item.image}
+                  alt={`${editor.item.label || '精选分类'}封面预览`}
+                  uploading={isImageUploading}
+                  onFileSelect={handleImageSelection}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isImageUploading}
-                  onClick={() => imageInputRef.current?.click()}
-                >
-                  <Icon
-                    icon={isImageUploading ? 'ri:loader-4-line' : 'ri:image-add-line'}
-                    className={`mr-1.5 size-4 ${isImageUploading ? 'animate-spin' : ''}`}
-                  />
-                  {isImageUploading ? '上传中…' : editor.item.image ? '上传并更换封面' : '上传封面'}
-                </Button>
               </div>
               <label className="flex items-center gap-2 self-end pb-2 text-sm">
                 <input
@@ -396,14 +396,6 @@ export function CategoryManager({
                   })
                 }
               />
-              {editor.item.image && (
-                <img
-                  src={editor.item.image}
-                  alt=""
-                  className="aspect-video w-full rounded-lg border border-border object-cover sm:col-span-2"
-                  loading="lazy"
-                />
-              )}
             </div>
           )}
           <DialogFooter>
@@ -418,6 +410,7 @@ export function CategoryManager({
         {cropFile && (
           <ImageCropDialog
             file={cropFile}
+            open={cropOpen}
             onOpenChange={(open) => !open && setCropFile(null)}
             onCrop={(file) => {
               setCropFile(null);
@@ -427,7 +420,7 @@ export function CategoryManager({
         )}
       </Dialog>
       <DeleteConfirmDialog
-        open={pendingDelete !== null}
+        open={deleteOpen}
         title="确认删除精选分类？"
         description={pendingDelete?.description ?? ''}
         onOpenChange={(open) => !open && setPendingDelete(null)}

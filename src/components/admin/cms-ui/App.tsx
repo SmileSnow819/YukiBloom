@@ -16,7 +16,7 @@ import { PostTable } from '@admin-ui/components/PostTable';
 import { RecentUpdates } from '@admin-ui/components/RecentUpdates';
 import { TimelineManager } from '@admin-ui/components/TimelineManager';
 import { Button } from '@admin-ui/components/ui/button';
-import { type StatusFilter, useDashboardState } from '@admin-ui/hooks';
+import { type StatusFilter, useDashboardState, useDialogValue } from '@admin-ui/hooks';
 import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
 import { type ReactNode, useEffect, useState } from 'react';
@@ -97,8 +97,8 @@ function AppContent() {
 
 function CMSDashboard({ onLogout }: { onLogout: () => void }) {
   const [pageActions, setPageActions] = useState<ReactNode>(null);
-  const [metadataPostId, setMetadataPostId] = useState<string | null>(null);
-  const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const { value: metadataPostId, open: metadataOpen, setDialogValue: setMetadataPostId } = useDialogValue<string>();
+  const { value: postToDelete, open: deleteOpen, setDialogValue: setPostToDelete } = useDialogValue<string>();
   const {
     activeTab,
     setActiveTab,
@@ -207,7 +207,7 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
           </header>
 
           <main className="admin-content flex-1 bg-background">
-            <div className="mx-auto max-w-7xl p-6">
+            <div key={activeTab} className="admin-page-enter mx-auto max-w-7xl p-6">
               {activeTab === 'timeline' ? (
                 <TimelineManager onToolbarChange={setPageActions} />
               ) : activeTab === 'footprints' ? (
@@ -332,12 +332,13 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
         <PostMetadataDialog
           key={metadataPostId}
           postId={metadataPostId}
+          open={metadataOpen}
           onOpenChange={(open) => !open && setMetadataPostId(null)}
           onSaved={fetchData}
         />
       )}
       <DeleteConfirmDialog
-        open={postToDelete !== null}
+        open={deleteOpen}
         title="确认删除文章？"
         description={`确定删除文章“${data?.posts.find((post) => post.id === postToDelete)?.title ?? '这篇文章'}”吗？此操作无法撤销。`}
         onOpenChange={(open) => !open && setPostToDelete(null)}

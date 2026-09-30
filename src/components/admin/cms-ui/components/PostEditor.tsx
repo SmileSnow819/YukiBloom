@@ -1,19 +1,29 @@
 /**
  * Post Editor
  *
- * Full-screen editor for blog posts with BlockNote editor and frontmatter panel.
+ * Full-screen editor for blog posts with a Vditor Markdown editor and frontmatter panel.
  * Supports Cmd+S save, new category detection, and unsaved changes warning.
  */
 
-import { BlockNoteSchema, createCodeBlockSpec, defaultBlockSpecs } from '@blocknote/core';
-import { zh } from '@blocknote/core/locales';
-import { useCreateBlockNote } from '@blocknote/react';
-import { BlockNoteView } from '@blocknote/shadcn';
-import '@blocknote/shadcn/style.css';
 import { EditorTOC } from '@admin-ui/components/EditorTOC';
 import { MarkdownPreview } from '@admin-ui/components/MarkdownPreview';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@admin-ui/components/ui/alert-dialog';
 import { Button } from '@admin-ui/components/ui/button';
-import { useEditorHeadings } from '@admin-ui/hooks';
+import {
+  type EditorHeading,
+  type UploadedMarkdownImage,
+  VditorMarkdownEditor,
+  type VditorMarkdownEditorHandle,
+} from '@admin-ui/components/VditorMarkdownEditor';
 import { readPost, writePostContent } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import { cn } from '@admin-ui/lib/utils';
@@ -23,44 +33,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ErrorBoundary, type FallbackProps } from 'react-error-boundary';
 import { toast } from 'sonner';
 import { adminRequest } from '@/lib/admin/api';
-
-// Supported languages for code blocks
-const CODE_BLOCK_LANGUAGES = {
-  typescript: { name: 'TypeScript', aliases: ['ts'] },
-  javascript: { name: 'JavaScript', aliases: ['js'] },
-  tsx: { name: 'TSX' },
-  jsx: { name: 'JSX' },
-  html: { name: 'HTML' },
-  css: { name: 'CSS' },
-  json: { name: 'JSON' },
-  yaml: { name: 'YAML', aliases: ['yml'] },
-  markdown: { name: 'Markdown', aliases: ['md'] },
-  bash: { name: 'Bash', aliases: ['sh', 'shell'] },
-  python: { name: 'Python', aliases: ['py'] },
-  go: { name: 'Go' },
-  rust: { name: 'Rust', aliases: ['rs'] },
-  sql: { name: 'SQL' },
-  c: { name: 'C' },
-  cpp: { name: 'C++', aliases: ['c++'] },
-  java: { name: 'Java' },
-  php: { name: 'PHP' },
-  ruby: { name: 'Ruby', aliases: ['rb'] },
-  swift: { name: 'Swift' },
-  kotlin: { name: 'Kotlin', aliases: ['kt'] },
-  text: { name: 'Plain Text' },
-};
-
-// Create schema with built-in code block using predefined languages
-const schema = BlockNoteSchema.create({
-  blockSpecs: {
-    ...defaultBlockSpecs, // Keep all default blocks (paragraph, heading, list, etc.)
-    codeBlock: createCodeBlockSpec({
-      indentLineWithTab: true,
-      defaultLanguage: 'text',
-      supportedLanguages: CODE_BLOCK_LANGUAGES,
-    }),
-  },
-});
 
 interface PostEditorProps {
   postId: string;
@@ -86,21 +58,6 @@ function EditorErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
   );
 }
 
-/**
- * Converts BlockNote blocks to markdown
- */
-async function blocksToMarkdown(editor: ReturnType<typeof useCreateBlockNote>): Promise<string> {
-  return await editor.blocksToMarkdownLossy(editor.document);
-}
-
-/**
- * Converts markdown to BlockNote blocks
- */
-async function markdownToBlocks(editor: ReturnType<typeof useCreateBlockNote>, markdown: string): Promise<void> {
-  const blocks = await editor.tryParseMarkdownToBlocks(markdown);
-  editor.replaceBlocks(editor.document, blocks);
-}
-
 type SidebarTab = 'toc' | 'preview';
 
 const SIDEBAR_WIDTH_KEY = 'cms-sidebar-width';
@@ -110,6 +67,8 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [selectedImageMarkdown, setSelectedImageMarkdown] = useState('');
+  const [isImageDragActive, setIsImageDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
@@ -121,37 +80,34 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     return saved ? Number(saved) : SIDEBAR_DEFAULT_WIDTH;
   });
   const [isResizing, setIsResizing] = useState(false);
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
 
   // Frontmatter state
   const [frontmatter, setFrontmatter] = useState<BlogSchema>({ title: '' });
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const imageInsertAnchorRef = useRef<string | null>(null);
+  const selectedImageMarkdownRef = useRef('');
+  const editorRef = useRef<VditorMarkdownEditorHandle>(null);
 
   // Preview state
   const [previewContent, setPreviewContent] = useState('');
-
-  // BlockNote editor with code block language support
-  const editor = useCreateBlockNote({ schema, dictionary: zh });
+  const [markdownContent, setMarkdownContent] = useState('');
+  const [headings, setHeadings] = useState<EditorHeading[]>([]);
   const initialContentLoaded = useRef(false);
-
-  // Extract headings for TOC
-  const headings = useEditorHeadings(editor);
 
   // Load post data
   useEffect(() => {
     async function loadPost() {
       setIsLoading(true);
       setError(null);
+      initialContentLoaded.current = false;
+      setHasUnsavedChanges(false);
 
       try {
         const data = await readPost(postId);
         setFrontmatter(data.frontmatter);
 
-        // Load content into editor
-        if (editor) {
-          if (data.content) await markdownToBlocks(editor, data.content);
-          initialContentLoaded.current = true;
-        }
+        setMarkdownContent(data.content || '');
+        initialContentLoaded.current = true;
       } catch (err) {
         setError(err instanceof Error ? err.message : '加载文章失败');
       } finally {
@@ -160,29 +116,14 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     }
 
     loadPost();
-  }, [postId, editor]);
-
-  // Track content changes
-  useEffect(() => {
-    if (!editor) return;
-
-    const unsubscribe = editor.onChange(() => {
-      // Only mark as changed after initial content is loaded
-      if (initialContentLoaded.current) {
-        setHasUnsavedChanges(true);
-      }
-    });
-
-    return unsubscribe;
-  }, [editor]);
+  }, [postId]);
 
   const performSave = useCallback(async () => {
-    if (!editor) return;
-
     setIsSaving(true);
     try {
-      const content = await blocksToMarkdown(editor);
+      const content = editorRef.current?.getValue() ?? markdownContent;
       await writePostContent(postId, content);
+      setMarkdownContent(content);
 
       setHasUnsavedChanges(false);
       toast.success('正文已保存');
@@ -192,49 +133,67 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     } finally {
       setIsSaving(false);
     }
-  }, [editor, postId, onSaved]);
+  }, [markdownContent, postId, onSaved]);
 
   const handleSave = useCallback(async () => await performSave(), [performSave]);
 
-  const handleImageUpload = useCallback(
-    async (file: File) => {
-      if (!editor) return;
-      const validationError = validateImageUpload(file);
-      if (validationError) {
-        toast.error(validationError);
+  const handleImageUpload = useCallback(async (files: File[]): Promise<UploadedMarkdownImage[] | string> => {
+    const validationError = files.map(validateImageUpload).find(Boolean);
+    if (validationError) return validationError;
+    setIsUploadingImage(true);
+    try {
+      const uploaded = await Promise.all(
+        files.map(async (file) => {
+          const body = new FormData();
+          body.set('file', file);
+          const media = await adminRequest<{ url: string }>('/media', { method: 'POST', body });
+          return { name: file.name.replace(/\.[^.]+$/, ''), url: media.url };
+        }),
+      );
+      toast.success(uploaded.length > 1 ? `已上传 ${uploaded.length} 张图片` : '图片已上传');
+      return uploaded;
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : '图片上传失败';
+      return message;
+    } finally {
+      setIsUploadingImage(false);
+    }
+  }, []);
+
+  const handleImageFiles = useCallback(
+    async (files: File[], replaceSelection = false) => {
+      const result = await handleImageUpload(files);
+      if (typeof result === 'string') {
+        toast.error(result);
+        if (imageInputRef.current) imageInputRef.current.value = '';
         return;
       }
 
-      setIsUploadingImage(true);
-      const body = new FormData();
-      body.set('file', file);
-      try {
-        const media = await adminRequest<{ url: string }>('/media', { method: 'POST', body });
-        const anchor = imageInsertAnchorRef.current || editor.getTextCursorPosition().block.id;
-        const [imageBlock] = editor.insertBlocks(
-          [{ type: 'image', props: { url: media.url, name: file.name } }],
-          anchor,
-          'after',
-        );
-        editor.setTextCursorPosition(imageBlock.id, 'end');
-        setHasUnsavedChanges(true);
-        toast.success('图片已上传并插入文章');
-      } catch (cause) {
-        toast.error(cause instanceof Error ? cause.message : '图片上传失败');
-      } finally {
-        setIsUploadingImage(false);
-        imageInsertAnchorRef.current = null;
-        if (imageInputRef.current) imageInputRef.current.value = '';
-      }
+      const markdown = result.map((image) => `![${image.name}](${image.url})`).join('\n');
+      if (replaceSelection && result.length === 1) editorRef.current?.updateSelection(markdown);
+      else editorRef.current?.insertValue(markdown);
+      setMarkdownContent(editorRef.current?.getValue() ?? markdownContent);
+      setHasUnsavedChanges(true);
+      if (imageInputRef.current) imageInputRef.current.value = '';
     },
-    [editor],
+    [handleImageUpload, markdownContent],
   );
 
   const openImagePicker = useCallback(() => {
-    if (!editor) return;
-    imageInsertAnchorRef.current = editor.getTextCursorPosition().block.id;
     imageInputRef.current?.click();
-  }, [editor]);
+  }, []);
+
+  const handleEditorChange = useCallback((value: string) => {
+    setMarkdownContent(value);
+    if (initialContentLoaded.current) setHasUnsavedChanges(true);
+  }, []);
+
+  const handleSelectionChange = useCallback((value: string) => {
+    const match = value.trim().match(/^!\[[^\]]*\]\([^\n)]*\)$/);
+    const selected = match ? match[0] : '';
+    selectedImageMarkdownRef.current = selected;
+    setSelectedImageMarkdown(selected);
+  }, []);
 
   // Keyboard shortcut for save
   useEffect(() => {
@@ -295,15 +254,18 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
   // Handle close with unsaved changes check
   const handleClose = useCallback(() => {
     if (hasUnsavedChanges) {
-      const confirmed = window.confirm('正文尚未保存，确定关闭吗？');
-      if (!confirmed) return;
+      setIsDiscardDialogOpen(true);
+      return;
     }
     onClose();
   }, [hasUnsavedChanges, onClose]);
 
-  // Get post preview URL (points to Astro dev server)
+  const handleDiscardAndClose = useCallback(() => {
+    setIsDiscardDialogOpen(false);
+    onClose();
+  }, [onClose]);
+
   const getPreviewUrl = () => {
-    // Use frontmatter.link if available, otherwise extract filename from postId
     const slug =
       frontmatter.link ||
       postId
@@ -313,38 +275,19 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
     return `${window.location.origin}/post/${slug}`;
   };
 
-  // Handle TOC navigation
-  const handleTOCNavigate = useCallback(
-    (blockId: string) => {
-      if (!editor) return;
-
-      // Set cursor position and focus
-      editor.setTextCursorPosition(blockId);
-      editor.focus();
-
-      // Scroll block into view after cursor position is set
-      // BlockNote renders blocks with data-id attribute
-      requestAnimationFrame(() => {
-        const blockElement = document.querySelector(`[data-id="${blockId}"]`);
-        if (blockElement) {
-          blockElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      });
-    },
-    [editor],
-  );
+  const handleTOCNavigate = useCallback((headingId: string) => {
+    editorRef.current?.scrollToHeading(headingId);
+  }, []);
 
   // Handle sidebar tab change
   const handleTabChange = useCallback(
     async (tab: SidebarTab) => {
-      if (tab === 'preview' && editor) {
-        // Convert blocks to markdown when switching to preview
-        const md = await blocksToMarkdown(editor);
-        setPreviewContent(md);
+      if (tab === 'preview') {
+        setPreviewContent(editorRef.current?.getValue() ?? markdownContent);
       }
       setSidebarTab(tab);
     },
-    [editor],
+    [markdownContent],
   );
 
   if (isLoading) {
@@ -374,7 +317,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
-      {/* Header */}
       <header className="flex items-center justify-between border-border border-b px-4 py-2">
         <div className="flex items-center gap-3">
           <button
@@ -400,18 +342,27 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
             className="hidden"
             onChange={(event) => {
               const file = event.currentTarget.files?.[0];
-              if (file) void handleImageUpload(file);
+              if (file) void handleImageFiles([file], Boolean(selectedImageMarkdownRef.current));
             }}
           />
-          <Button variant="outline" onClick={openImagePicker} disabled={isUploadingImage}>
+          <Button
+            variant="outline"
+            onClick={openImagePicker}
+            onMouseDown={(event) => event.preventDefault()}
+            disabled={isUploadingImage}
+            className={
+              selectedImageMarkdown
+                ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300'
+                : undefined
+            }
+          >
             <Icon
-              icon={isUploadingImage ? 'ri:loader-4-line' : 'ri:image-add-line'}
+              icon={isUploadingImage ? 'ri:loader-4-line' : selectedImageMarkdown ? 'ri:image-line' : 'ri:image-add-line'}
               className={cn('mr-1.5 size-4', isUploadingImage && 'animate-spin')}
             />
-            {isUploadingImage ? '上传中…' : '插入图片'}
+            {isUploadingImage ? '上传中…' : selectedImageMarkdown ? '更改图片' : '插入图片'}
           </Button>
 
-          {/* Preview link */}
           <a
             href={getPreviewUrl()}
             target="_blank"
@@ -422,7 +373,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
             预览
           </a>
 
-          {/* Toggle sidebar */}
           <button
             type="button"
             onClick={() => setShowSidebar(!showSidebar)}
@@ -435,7 +385,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
             <Icon icon="ri:sidebar-unfold-line" className="size-5" />
           </button>
 
-          {/* Save button */}
           <Button onClick={handleSave} disabled={isSaving || !hasUnsavedChanges}>
             {isSaving ? (
               <>
@@ -452,18 +401,53 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
         </div>
       </header>
 
-      {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Editor */}
         <main className="flex-1 overflow-auto">
-          <div className="mx-auto max-w-3xl p-6">
+          <section
+            aria-label="文章编辑区，可拖拽图片上传"
+            className={cn(
+              'relative mx-auto min-h-full max-w-5xl p-6',
+              isImageDragActive && 'rounded-lg bg-primary/5 ring-2 ring-primary',
+            )}
+            onDragEnter={(event) => {
+              if ([...event.dataTransfer.types].includes('Files')) {
+                event.preventDefault();
+                setIsImageDragActive(true);
+              }
+            }}
+            onDragOver={(event) => {
+              if ([...event.dataTransfer.types].includes('Files')) event.preventDefault();
+            }}
+            onDragLeave={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setIsImageDragActive(false);
+            }}
+            onDropCapture={(event) => {
+              const files = [...event.dataTransfer.files].filter((item) => item.type.startsWith('image/'));
+              setIsImageDragActive(false);
+              if (!files.length) return;
+              event.preventDefault();
+              event.stopPropagation();
+              void handleImageFiles(files, Boolean(selectedImageMarkdownRef.current));
+            }}
+          >
+            {isImageDragActive && (
+              <div className="pointer-events-none absolute inset-6 z-10 grid place-items-center rounded-lg border-2 border-primary border-dashed bg-background/85 font-medium text-primary">
+                松开放入图片
+              </div>
+            )}
             <ErrorBoundary FallbackComponent={EditorErrorFallback}>
-              <BlockNoteView editor={editor} theme="light" />
+              <VditorMarkdownEditor
+                ref={editorRef}
+                initialValue={markdownContent}
+                onChange={handleEditorChange}
+                onHeadingsChange={setHeadings}
+                onSelectionChange={handleSelectionChange}
+                onUpload={handleImageUpload}
+              />
             </ErrorBoundary>
-          </div>
+          </section>
         </main>
 
-        {/* Resize Handle */}
         {showSidebar && (
           <hr
             tabIndex={0}
@@ -478,10 +462,8 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
           />
         )}
 
-        {/* Sidebar */}
         {showSidebar && (
           <aside style={{ width: sidebarWidth }} className="flex shrink-0 flex-col border-border border-l bg-card">
-            {/* Tab buttons */}
             <div className="flex border-border border-b">
               <button
                 type="button"
@@ -511,7 +493,6 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
               </button>
             </div>
 
-            {/* Tab content */}
             <div className="flex-1 overflow-auto">
               {sidebarTab === 'toc' && (
                 <div className="p-4">
@@ -527,6 +508,23 @@ export function PostEditor({ postId, onClose, onSaved }: PostEditorProps) {
           </aside>
         )}
       </div>
+      <AlertDialog open={isDiscardDialogOpen} onOpenChange={setIsDiscardDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>放弃未保存的正文？</AlertDialogTitle>
+            <AlertDialogDescription>正文尚未保存，关闭后本次修改将丢失。</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>继续编辑</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDiscardAndClose}
+            >
+              放弃修改并关闭
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

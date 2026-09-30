@@ -17,6 +17,7 @@ const OUTPUT_HEIGHT = 675;
 
 interface ImageCropDialogProps {
   file: File;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   onCrop: (file: File) => void;
 }
@@ -42,7 +43,7 @@ async function createCroppedFile(imageUrl: string, area: Area, sourceFile: File)
   return new File([blob], `${baseName}-cover.${extension}`, { type: blob.type });
 }
 
-export function ImageCropDialog({ file, onOpenChange, onCrop }: ImageCropDialogProps) {
+export function ImageCropDialog({ file, open, onOpenChange, onCrop }: ImageCropDialogProps) {
   const [imageUrl, setImageUrl] = useState('');
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -71,8 +72,8 @@ export function ImageCropDialog({ file, onOpenChange, onCrop }: ImageCropDialogP
   }
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
-      <DialogContent className="data-[state=closed]:zoom-out-100 data-[state=open]:zoom-in-100 max-h-[90vh] max-w-3xl overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>裁剪文章封面</DialogTitle>
           <DialogDescription>输出比例固定为 16:9。拖动图片调整位置，使用缩放滑块或滚轮调整取景范围。</DialogDescription>

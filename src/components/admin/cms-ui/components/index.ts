@@ -15,8 +15,14 @@ export { ErrorFallback } from './ErrorFallback';
 export { FrontmatterEditor, type FrontmatterEditorRef } from './FrontmatterEditor';
 export { ImageCropDialog } from './ImageCropDialog';
 export { ImagePreviewDialog } from './ImagePreviewDialog';
+export { ImageUploadField } from './ImageUploadField';
 export { MarkdownPreview } from './MarkdownPreview';
 export { PostEditor } from './PostEditor';
 export { PostMetadataDialog } from './PostMetadataDialog';
 export { PostTable } from './PostTable';
 export { RecentUpdates } from './RecentUpdates';
+export {
+  type UploadedMarkdownImage,
+  VditorMarkdownEditor,
+  type VditorMarkdownEditorHandle,
+} from './VditorMarkdownEditor';

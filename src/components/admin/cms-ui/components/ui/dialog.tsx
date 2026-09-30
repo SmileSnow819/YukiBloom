@@ -21,10 +21,7 @@ const DialogOverlay = forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
-    className={cn(
-      'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/80 data-[state=closed]:animate-out data-[state=open]:animate-in',
-      className,
-    )}
+    className={cn('admin-dialog-overlay fixed inset-0 z-50 bg-black/80', className)}
     {...props}
   />
 ));
@@ -41,11 +38,7 @@ const DialogContent = forwardRef<React.ComponentRef<typeof DialogPrimitive.Conte
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-background p-6 shadow-lg',
-          'data-[state=closed]:animate-out data-[state=open]:animate-in',
-          'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
-          'duration-200',
+          'admin-dialog-content fixed top-1/2 left-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-background p-6 shadow-lg',
           className,
         )}
         {...props}

@@ -4,6 +4,7 @@
  * Dialog for creating new blog posts with title, categories, tags, and draft status.
  */
 
+import { ImageUploadField } from '@admin-ui/components/ImageUploadField';
 import { Button } from '@admin-ui/components/ui/button';
 import {
   Dialog,
@@ -14,13 +15,14 @@ import {
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
 import { type CustomCategory, useCustomCategories } from '@admin-ui/hooks/useCustomCategories';
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { createPost, uploadPostCover } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import { type CreatePostFormData, createPostSchema } from '@admin-ui/lib/schemas';
 import { cn } from '@admin-ui/lib/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Icon } from '@iconify/react';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { ImageCropDialog } from './ImageCropDialog';
@@ -78,9 +80,8 @@ function CustomCategoryChip({
 export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuccess }: CreatePostDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [cropFile, setCropFile] = useState<File | null>(null);
+  const { value: cropFile, open: cropOpen, setDialogValue: setCropFile } = useDialogValue<File>();
   const [coverUrl, setCoverUrl] = useState('');
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [newCategoryInput, setNewCategoryInput] = useState('');
 
@@ -112,7 +113,7 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
     setNewCategoryInput('');
     resetCustomCategories();
     onOpenChange(false);
-  }, [reset, resetCustomCategories, onOpenChange]);
+  }, [reset, resetCustomCategories, onOpenChange, setCropFile]);
 
   const toggleCategory = useCallback((category: string) => {
     setSelectedCategories((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
@@ -143,7 +144,6 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
       return;
     }
     setCropFile(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const uploadCroppedCover = async (file: File) => {
@@ -222,32 +222,16 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
           </div>
 
           {/* 封面 */}
-          <div className="space-y-2">
-            <label className="font-medium text-sm" htmlFor="post-cover">
-              封面 <span className="text-destructive">*</span>
-            </label>
-            {coverUrl ? (
-              <img src={coverUrl} alt="文章封面预览" className="max-h-56 w-full rounded-lg border object-cover" />
-            ) : (
-              <div className="grid min-h-36 place-items-center rounded-lg border border-dashed text-muted-foreground text-sm">
-                请上传文章封面
-              </div>
-            )}
-            <input
-              ref={fileInputRef}
-              id="post-cover"
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(event) => handleCoverChange(event.currentTarget.files?.[0])}
+          <div className="space-y-1">
+            <ImageUploadField
+              label="封面"
+              imageUrl={coverUrl}
+              alt="文章封面预览"
+              emptyText="请点击或拖拽上传文章封面"
+              required
+              uploading={isUploading}
+              onFileSelect={handleCoverChange}
             />
-            <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-              <Icon
-                icon={isUploading ? 'ri:loader-4-line' : 'ri:image-add-line'}
-                className={cn('mr-1.5 size-4', isUploading && 'animate-spin')}
-              />
-              {isUploading ? '上传中…' : coverUrl ? '更换封面' : '上传封面'}
-            </Button>
             {errors.coverMediaId && <p className="text-destructive text-xs">{errors.coverMediaId.message}</p>}
           </div>
 
@@ -368,7 +352,12 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
         </form>
       </DialogContent>
       {cropFile && (
-        <ImageCropDialog file={cropFile} onOpenChange={(isOpen) => !isOpen && setCropFile(null)} onCrop={uploadCroppedCover} />
+        <ImageCropDialog
+          file={cropFile}
+          open={cropOpen}
+          onOpenChange={(isOpen) => !isOpen && setCropFile(null)}
+          onCrop={uploadCroppedCover}
+        />
       )}
     </Dialog>
   );

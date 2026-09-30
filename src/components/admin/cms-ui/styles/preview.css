@@ -309,13 +309,27 @@ html.dark .preview-content .astro-code span {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
+    opacity 0.2s ease,
+    visibility 0.2s ease;
+  pointer-events: none;
 }
 
 .preview-lightbox.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
+}
+
+@starting-style {
+  .preview-lightbox.active {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview-lightbox {
+    transition: none;
+  }
 }
 
 .preview-lightbox-close {

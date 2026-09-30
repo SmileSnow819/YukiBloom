@@ -171,6 +171,27 @@
     linear-gradient(145deg, #fffafd 0%, #fff7fa 55%, #f9f6ff 100%);
 }
 
+@keyframes admin-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-page-enter {
+  animation: admin-page-enter 220ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-page-enter {
+    animation: none;
+  }
+}
+
 .admin-overview {
   display: flex;
   flex-direction: column;

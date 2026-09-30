@@ -32,15 +32,6 @@ importers:
       '@astrojs/vercel':
         specifier: ^9.0.4
         version: 9.0.4(astro@5.16.6(@netlify/blobs@10.5.0)(@types/node@24.13.3)(@vercel/functions@2.2.13)(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.53.3)(terser@5.37.0)(tsx@4.23.5)(typescript@5.9.3)(yaml@2.9.0))(encoding@0.1.13)(react@19.2.8)(rollup@4.53.3)(vue@3.5.40(typescript@5.9.3))
-      '@blocknote/core':
-        specifier: ^0.46.1
-        version: 0.46.1(@types/hast@3.0.5)
-      '@blocknote/react':
-        specifier: ^0.46.1
-        version: 0.46.1(@floating-ui/dom@1.8.0)(@types/hast@3.0.5)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@blocknote/shadcn':
-        specifier: ^0.46.1
-        version: 0.46.1(@floating-ui/dom@1.8.0)(@types/hast@3.0.5)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(postcss@8.5.6)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(tailwindcss@4.3.3)
       '@floating-ui/react':
         specifier: ^0.27.16
         version: 0.27.20(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -260,6 +251,9 @@ importers:
       unist-util-visit:
         specifier: ^5.0.0
         version: 5.1.0
+      vditor:
+        specifier: ^4.0.0
+        version: 4.0.0
       vfile:
         specifier: ^6.0.3
         version: 6.0.3
@@ -4913,6 +4907,9 @@ packages:
   dfa@1.2.0:
     resolution: {integrity: sha512-ED3jP8saaweFTjeGX8HQPjeC1YYyZs98jGNZx6IiBvxW7JG5v492kamAQB3m2wop07CvU/RQmzcKr6bgcC5D/Q==}
 
+  diff-match-patch@1.0.5:
+    resolution: {integrity: sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==}
+
   diff@5.2.0:
     resolution: {integrity: sha512-uIFDxqpRZGZ6ThOk84hEfqWoHx2devRFvpTZcTHur85vImfaxUbTW9Ryh4CpCuDnToOP1CEtXKIgytHBPVff5A==}
     engines: {node: '>=0.3.1'}
@@ -8053,6 +8050,9 @@ packages:
   validate-npm-package-name@5.0.1:
     resolution: {integrity: sha512-OljLrQ9SQdOUqTaQxqL5dEfZWrXExyyWsozYlAWFawPVNuD83igl7uJD2RTkNMbniIYgt8l81eCJGIdQF7avLQ==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
+
+  vditor@4.0.0:
+    resolution: {integrity: sha512-JUeSmmNNxXaq4j29F6OZ/vLgyM/Wt/SpSK4o/gyrc02uTsS+iTeC0ofajxbW29WSJ4LFMec4nrywVul51PrLvg==}
 
   vfile-location@5.0.3:
     resolution: {integrity: sha512-5yXvWDEgqeiYiBe1lbxYF7UMAIm/IcopxMHrMQDq3nvKcjPKIhZklUKL+AE7J7uApI4kwe2snsK+eI6UTj9EHg==}
@@ -13149,6 +13149,8 @@ snapshots:
 
   dfa@1.2.0: {}
 
+  diff-match-patch@1.0.5: {}
+
   diff@5.2.0: {}
 
   dlv@1.1.3: {}
@@ -16792,6 +16794,10 @@ snapshots:
       spdx-expression-parse: 3.0.1
 
   validate-npm-package-name@5.0.1: {}
+
+  vditor@4.0.0:
+    dependencies:
+      diff-match-patch: 1.0.5
 
   vfile-location@5.0.3:
     dependencies:

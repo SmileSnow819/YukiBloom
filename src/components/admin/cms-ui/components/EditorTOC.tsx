@@ -1,11 +1,10 @@
 /**
  * Editor Table of Contents
  *
- * Displays a navigable list of headings extracted from the BlockNote editor.
- * Clicking a heading scrolls the editor to that block.
+ * Displays Markdown headings and navigates to the matching Vditor content.
  */
 
-import type { EditorHeading } from '@admin-ui/hooks/useEditorHeadings';
+import type { EditorHeading } from '@admin-ui/components/VditorMarkdownEditor';
 import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
 

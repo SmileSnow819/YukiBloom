@@ -9,6 +9,7 @@
  * - Image lightbox
  */
 
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { renderMarkdown } from '@admin-ui/lib/markdown-render';
 import { enhancePreviewContent } from '@admin-ui/lib/preview-enhancer';
 import { Icon } from '@iconify/react';
@@ -23,9 +24,10 @@ interface MarkdownPreviewProps {
 /**
  * Image Lightbox Component
  */
-function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
+function ImageLightbox({ src, open, onClose }: { src: string; open: boolean; onClose: () => void }) {
   // Handle escape key
   useEffect(() => {
+    if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
@@ -39,15 +41,16 @@ function ImageLightbox({ src, onClose }: { src: string; onClose: () => void }) {
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = '';
     };
-  }, [onClose]);
+  }, [onClose, open]);
 
   return (
     <div
-      className="preview-lightbox active"
+      className={`preview-lightbox${open ? 'active' : ''}`}
       onClick={onClose}
       onKeyDown={(e) => e.key === 'Escape' && onClose()}
       role="dialog"
-      aria-modal="true"
+      aria-modal={open}
+      aria-hidden={!open}
       aria-label="图片预览"
     >
       <button type="button" className="preview-lightbox-close" onClick={onClose} aria-label="关闭">
@@ -68,7 +71,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [html, setHtml] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const { value: lightboxSrc, open: lightboxOpen, setDialogValue: setLightboxSrc } = useDialogValue<string>();
 
   // Render markdown to HTML
   useEffect(() => {
@@ -114,12 +117,12 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
     }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [html, isLoading]);
+  }, [html, isLoading, setLightboxSrc]);
 
   // Close lightbox handler
   const closeLightbox = useCallback(() => {
     setLightboxSrc(null);
-  }, []);
+  }, [setLightboxSrc]);
 
   if (isLoading) {
     return (
@@ -150,7 +153,7 @@ export function MarkdownPreview({ content }: MarkdownPreviewProps) {
       {/* Hydrate embed placeholders */}
 
       {/* Image Lightbox */}
-      {lightboxSrc && <ImageLightbox src={lightboxSrc} onClose={closeLightbox} />}
+      {lightboxSrc && <ImageLightbox src={lightboxSrc} open={lightboxOpen} onClose={closeLightbox} />}
     </>
   );
 }

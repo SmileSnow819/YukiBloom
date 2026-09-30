@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { Icon } from '@iconify/react';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -59,8 +60,15 @@ const emptyRoute = (): PublicRoute => ({
 
 export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actions: ReactNode | null) => void }) {
   const [footprints, setFootprints] = useState<FootprintsContent | null>(null);
-  const [editor, setEditor] = useState<FootprintEditor | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
+  const { value: editor, open: editorOpen, setDialogValue: setEditor } = useDialogValue<FootprintEditor>();
+  const {
+    value: pendingDelete,
+    open: deleteOpen,
+    setDialogValue: setPendingDelete,
+  } = useDialogValue<{
+    description: string;
+    onConfirm: () => void;
+  }>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -302,7 +310,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [footprints, onToolbarChange, saving]);
+  }, [footprints, onToolbarChange, saving, setEditor]);
 
   if (loading) return <ManagerMessage>正在读取足迹…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -439,7 +447,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         />
       </ListSection>
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && !saving && setEditor(null)}>
+      <Dialog open={editorOpen} onOpenChange={(open) => !open && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -465,7 +473,7 @@ export function FootprintsManager({ onToolbarChange }: { onToolbarChange: (actio
         </DialogContent>
       </Dialog>
       <DeleteConfirmDialog
-        open={pendingDelete !== null}
+        open={deleteOpen}
         title="确认删除足迹记录？"
         description={pendingDelete?.description ?? ''}
         onOpenChange={(open) => !open && setPendingDelete(null)}

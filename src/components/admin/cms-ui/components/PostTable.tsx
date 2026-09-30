@@ -16,11 +16,11 @@ import {
   AlertDialogTitle,
 } from '@admin-ui/components/ui/alert-dialog';
 import type { SortField, SortOrder } from '@admin-ui/hooks';
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { cn } from '@admin-ui/lib/utils';
 import type { PostListItem } from '@admin-ui/types';
 import { Icon } from '@iconify/react';
 import { format } from 'date-fns';
-import { useState } from 'react';
 
 interface SortableHeaderProps {
   label: string;
@@ -103,7 +103,11 @@ export function PostTable({
   onEditMetadata,
   onEditContent,
 }: PostTableProps) {
-  const [pendingStatusChange, setPendingStatusChange] = useState<PostListItem | null>(null);
+  const {
+    value: pendingStatusChange,
+    open: statusDialogOpen,
+    setDialogValue: setPendingStatusChange,
+  } = useDialogValue<PostListItem>();
 
   if (posts.length === 0) {
     return (
@@ -253,7 +257,7 @@ export function PostTable({
           </table>
         </div>
       </div>
-      <AlertDialog open={pendingStatusChange !== null} onOpenChange={(open) => !open && setPendingStatusChange(null)}>
+      <AlertDialog open={statusDialogOpen} onOpenChange={(open) => !open && setPendingStatusChange(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{pendingStatusChange?.draft ? '确认发布文章？' : '确认转为草稿？'}</AlertDialogTitle>

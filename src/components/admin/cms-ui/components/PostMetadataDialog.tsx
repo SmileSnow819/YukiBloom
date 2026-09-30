@@ -1,3 +1,4 @@
+import { ImageUploadField } from '@admin-ui/components/ImageUploadField';
 import { Button } from '@admin-ui/components/ui/button';
 import {
   Dialog,
@@ -7,29 +8,29 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
+import { useDialogValue } from '@admin-ui/hooks';
 import { readPostMetadata, savePostMetadata, uploadPostCover } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import type { PostMetadataValues } from '@admin-ui/lib/post-metadata';
-import { cn } from '@admin-ui/lib/utils';
 import { Icon } from '@iconify/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { ImageCropDialog } from './ImageCropDialog';
 
 interface PostMetadataDialogProps {
   postId: string;
+  open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }
 
-export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetadataDialogProps) {
+export function PostMetadataDialog({ postId, open, onOpenChange, onSaved }: PostMetadataDialogProps) {
   const [values, setValues] = useState<PostMetadataValues | null>(null);
   const [coverUrl, setCoverUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [cropFile, setCropFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { value: cropFile, open: cropOpen, setDialogValue: setCropFile } = useDialogValue<File>();
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +63,6 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
       return;
     }
     setCropFile(file);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
   async function uploadCroppedCover(file: File) {
@@ -108,7 +108,7 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
   }
 
   return (
-    <Dialog open onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>编辑文章信息</DialogTitle>
@@ -174,31 +174,17 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
               />
             </label>
 
-            <div className="space-y-2">
-              <span className="font-medium text-sm">封面</span>
-              {coverUrl ? (
-                <img src={coverUrl} alt="文章封面预览" className="max-h-56 w-full rounded-lg border object-cover" />
-              ) : (
-                <div className="grid min-h-36 place-items-center rounded-lg border border-dashed text-muted-foreground text-sm">
-                  {values.coverMediaId ? `当前封面媒体 ID：${values.coverMediaId}` : '尚未设置封面'}
-                </div>
-              )}
-              <div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={(event) => handleCoverChange(event.currentTarget.files?.[0])}
-                />
-                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={isUploading}>
-                  <Icon
-                    icon={isUploading ? 'ri:loader-4-line' : 'ri:image-add-line'}
-                    className={cn('mr-1.5 size-4', isUploading && 'animate-spin')}
-                  />
-                  {isUploading ? '上传中…' : values.coverMediaId ? '更换封面' : '上传封面'}
-                </Button>
-              </div>
+            <div className="space-y-1">
+              <ImageUploadField
+                label="封面"
+                imageUrl={coverUrl}
+                alt="文章封面预览"
+                emptyText={
+                  values.coverMediaId ? `当前封面媒体 ID：${values.coverMediaId}，点击或拖拽可更换` : '点击或拖拽上传文章封面'
+                }
+                uploading={isUploading}
+                onFileSelect={handleCoverChange}
+              />
             </div>
           </div>
         ) : (
@@ -217,6 +203,7 @@ export function PostMetadataDialog({ postId, onOpenChange, onSaved }: PostMetada
       {cropFile && (
         <ImageCropDialog
           file={cropFile}
+          open={cropOpen}
           onOpenChange={(open) => !open && setCropFile(null)}
           onCrop={(file) => {
             setCropFile(null);

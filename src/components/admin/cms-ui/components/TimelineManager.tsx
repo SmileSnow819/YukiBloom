@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
+import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { Icon } from '@iconify/react';
 import * as Popover from '@radix-ui/react-popover';
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
@@ -40,8 +41,15 @@ const emptyInternship = (): PublicInternship => ({
 
 export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions: ReactNode | null) => void }) {
   const [timeline, setTimeline] = useState<TimelineContent | null>(null);
-  const [editor, setEditor] = useState<TimelineEditorState | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<{ description: string; onConfirm: () => void } | null>(null);
+  const { value: editor, open: editorOpen, setDialogValue: setEditor } = useDialogValue<TimelineEditorState>();
+  const {
+    value: pendingDelete,
+    open: deleteOpen,
+    setDialogValue: setPendingDelete,
+  } = useDialogValue<{
+    description: string;
+    onConfirm: () => void;
+  }>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -136,7 +144,7 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
       </div>,
     );
     return () => onToolbarChange(null);
-  }, [onToolbarChange, saving, timeline]);
+  }, [onToolbarChange, saving, timeline, setEditor]);
 
   if (loading) return <ManagerMessage>正在读取实习经历…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
@@ -192,7 +200,7 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
       />
 
       <DeleteConfirmDialog
-        open={pendingDelete !== null}
+        open={deleteOpen}
         title="确认删除实习经历？"
         description={pendingDelete?.description ?? ''}
         onOpenChange={(open) => !open && setPendingDelete(null)}
@@ -202,7 +210,7 @@ export function TimelineManager({ onToolbarChange }: { onToolbarChange: (actions
         }}
       />
 
-      <Dialog open={editor !== null} onOpenChange={(open) => !open && !saving && setEditor(null)}>
+      <Dialog open={editorOpen} onOpenChange={(open) => !open && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editor?.index === null ? '新增实习经历' : '编辑实习经历'}</DialogTitle>
