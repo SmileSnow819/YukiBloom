@@ -64,7 +64,7 @@ const page = {
       )}
       <Divider>{t(locale, 'post.postList')}</Divider>
       <PostList posts={posts} page={page} showPaginator={true} baseUrl={postsBaseUrl} isHomePage={true} />
-      {siteContent.featuredCategories.some((category) => category.enabled) && (
+      {siteContent.categories.some((category) => category.showOnHome) && (
         <>
           <Divider className="mt-6">{t(locale, 'post.featuredCategories')}</Divider>
           <CategoryCards siteContent={siteContent} />

@@ -30,7 +30,10 @@ import '@admin-ui/styles/globals.css';
 function AppContent() {
   const [authenticated, setAuthenticated] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [credentials, setCredentials] = useState({ username: '', password: '' });
+  const [credentials, setCredentials] = useState({
+    username: '',
+    password: '',
+  });
   const [loginError, setLoginError] = useState('');
   useEffect(() => {
     adminRequest('/session')
@@ -42,7 +45,10 @@ function AppContent() {
     event.preventDefault();
     setLoginError('');
     try {
-      const result = await adminRequest<{ csrfToken: string }>('/login', { method: 'POST', body: credentials });
+      const result = await adminRequest<{ csrfToken: string }>('/login', {
+        method: 'POST',
+        body: credentials,
+      });
       setCsrfToken(result.csrfToken);
       setAuthenticated(true);
       toast.success('登录成功');
@@ -131,7 +137,7 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
     posts: '文章管理',
     timeline: '实习经历',
     footprints: '足迹管理',
-    categories: '分类配置',
+    categories: '分类管理',
   } as const;
 
   // Show editor if editing
@@ -333,6 +339,7 @@ function CMSDashboard({ onLogout }: { onLogout: () => void }) {
           key={metadataPostId}
           postId={metadataPostId}
           open={metadataOpen}
+          existingCategories={data?.categories || []}
           onOpenChange={(open) => !open && setMetadataPostId(null)}
           onSaved={fetchData}
         />

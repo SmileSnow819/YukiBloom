@@ -42,7 +42,7 @@ export async function createPublicSitemap(site: URL): Promise<string> {
       add(localizedPath(`/post/${encodeSlug(post.slug)}`, locale), post.updatedAt ?? post.date.toISOString());
     }
 
-    for (const category of getPublicCategoryLinks(categories)) {
+    for (const category of getPublicCategoryLinks(categories, '', siteContent.categories)) {
       add(`${prefix}/categories/${category}`);
     }
     for (const tag of new Set(posts.flatMap((post) => post.tags))) {

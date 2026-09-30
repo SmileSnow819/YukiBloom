@@ -9,10 +9,11 @@ import SubCategory from './SubCategory.astro';
 
 interface Props {
   categories: Category[];
+  categorySlugs?: Record<string, string>;
   countMap: Record<string, number>;
   totalCount: number;
 }
-const { categories, countMap, totalCount } = Astro.props;
+const { categories, categorySlugs = {}, countMap, totalCount } = Astro.props;
 const locale = getLocaleFromUrl(Astro.url.pathname);
 ---
 
@@ -29,13 +30,13 @@ const locale = getLocaleFromUrl(Astro.url.pathname);
           <CategoryTitle
             title={translateCategoryName(category.name, locale)}
             count={countMap[category.name]}
-            href={localizedPath(buildCategoryPath(category.name), locale)}
+            href={localizedPath(buildCategoryPath(category.name, categorySlugs), locale)}
             className={category?.children?.length ? 'has-children' : ''}
           />
           {category?.children?.length ? (
             <div class="category-first-level-container flex flex-col">
               {category.children.map((child) => (
-                <SubCategory category={child} parentName={category.name} countMap={countMap} />
+                <SubCategory category={child} parentName={category.name} categorySlugs={categorySlugs} countMap={countMap} />
               ))}
             </div>
           ) : null}

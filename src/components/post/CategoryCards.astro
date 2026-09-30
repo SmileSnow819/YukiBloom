@@ -11,7 +11,7 @@ import { Icon } from 'astro-icon/components';
 import { getLocaleFromUrl, localizedPath, t } from '@/i18n';
 import type { Category } from '@/lib/content/types';
 import type { PublicSiteContent } from '@/lib/public-api';
-import { findPublicCategoryByLink, getPublicFeaturedCategoryField, getPublicTaxonomy } from '@/lib/public-api';
+import { findPublicCategoryByLink, getPublicCategoryField, getPublicTaxonomy } from '@/lib/public-api';
 import type { PostRef } from '@/types/blog';
 import FlippedCard from './FlippedCard.astro';
 
@@ -31,7 +31,7 @@ interface Props {
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
 const { siteContent } = Astro.props;
-const featuredCategories = siteContent.featuredCategories;
+const homeCategories = siteContent.categories.filter((category) => category.showOnHome);
 const { categories, countMap, posts: allPosts } = await getPublicTaxonomy(locale);
 
 function findParent(category: Category | null, roots: Category[]): Category | null {
@@ -45,25 +45,23 @@ function findParent(category: Category | null, roots: Category[]): Category | nu
 }
 
 const categoryPosts: CategoryWithPosts[] = await Promise.all(
-  featuredCategories
-    .filter((category) => category.enabled)
-    .map(async (category) => {
-      const categoryInfo = findPublicCategoryByLink(categories, category?.link ?? '');
-      const posts = categoryInfo
-        ? allPosts
-            .filter((post) => post.categoryNames.includes(categoryInfo.name))
-            .map((post) => ({ slug: post.slug, link: post.slug, title: post.title }))
-        : [];
-      return {
-        link: category.link,
-        label: getPublicFeaturedCategoryField(siteContent, locale, category.link, 'label') ?? category.label,
-        image: category.image,
-        category: categoryInfo,
-        parentCategory: findParent(categoryInfo, categories),
-        posts,
-        count: countMap[categoryInfo?.name ?? ''] ?? 0,
-      };
-    }) || [],
+  homeCategories.map(async (category) => {
+    const categoryInfo = findPublicCategoryByLink(categories, category.slug, siteContent.categories);
+    const posts = categoryInfo
+      ? allPosts
+          .filter((post) => post.categoryNames.includes(categoryInfo.name))
+          .map((post) => ({ slug: post.slug, link: post.slug, title: post.title }))
+      : [];
+    return {
+      link: category.slug,
+      label: getPublicCategoryField(siteContent, locale, category.slug, 'label') ?? category.name,
+      image: category.image,
+      category: categoryInfo,
+      parentCategory: findParent(categoryInfo, categories),
+      posts,
+      count: countMap[categoryInfo?.name ?? ''] ?? 0,
+    };
+  }) || [],
 );
 ---
 
@@ -114,7 +112,7 @@ const categoryPosts: CategoryWithPosts[] = await Promise.all(
               {categoryInfo?.children?.length
                 ? categoryInfo.children.map((child) => (
                     <a
-                      href={`${categoryLink}/${categoryMap[child?.name]}`}
+                      href={`${categoryLink}/${siteContent.categories.find((item) => item.name === child?.name)?.slug ?? categoryMap[child?.name]}`}
                       class="text-primary hover:text-blue truncate text-left transition-colors duration-300"
                     >
                       {translateCategoryName(child.name, locale)}

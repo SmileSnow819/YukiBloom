@@ -12,14 +12,14 @@ export function getPublicSeriesField(
   return translation?.[field];
 }
 
-export function getPublicFeaturedCategoryField(
+export function getPublicCategoryField(
   content: PublicSiteContent,
   locale: string,
-  link: string,
+  slug: string,
   field: 'label' | 'description',
 ): string | undefined {
   const translation = content.translations.find(
-    (item) => item.locale === locale && item.entityType === 'featuredCategories' && item.entityKey === link,
+    (item) => item.locale === locale && item.entityType === 'categories' && item.entityKey === slug,
   );
   return translation?.[field];
 }

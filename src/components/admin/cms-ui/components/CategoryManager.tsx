@@ -1,4 +1,3 @@
-import { DeleteConfirmDialog } from '@admin-ui/components/DeleteConfirmDialog';
 import { ImageCropDialog } from '@admin-ui/components/ImageCropDialog';
 import { ImagePreviewDialog } from '@admin-ui/components/ImagePreviewDialog';
 import { ImageUploadField } from '@admin-ui/components/ImageUploadField';
@@ -19,23 +18,22 @@ import { Icon } from '@iconify/react';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { uploadAdminMedia } from '@/lib/admin/api';
-import { getManagedCategoryNames, upsertCategoryMapping } from '@/lib/admin/category-settings';
+import { getManagedCategoryNames } from '@/lib/admin/category-settings';
 import { type AdminSiteContent, getAdminSiteContent, saveAdminSiteContent } from '@/lib/admin/site-content';
-import type { PublicFeaturedCategory } from '@/lib/public-api/types';
+import type { PublicCategory } from '@/lib/public-api/types';
 
 type CategoryEditor = {
-  index: number | null;
+  originalName: string | null;
+  originalSlug: string | null;
+  name: string;
+  slug: string;
+  showOnHome: boolean;
+  image: string;
+  description: string;
   order: number;
-  item: PublicFeaturedCategory;
 };
 
-const emptyFeaturedCategory = (): PublicFeaturedCategory => ({
-  label: '',
-  description: '',
-  image: '',
-  link: '',
-  enabled: true,
-});
+type ManagedCategory = PublicCategory;
 
 export function CategoryManager({
   categories,
@@ -51,14 +49,6 @@ export function CategoryManager({
     setDialogValue: setEditor,
     updateDialogValue: updateEditor,
   } = useDialogValue<CategoryEditor>();
-  const {
-    value: pendingDelete,
-    open: deleteOpen,
-    setDialogValue: setPendingDelete,
-  } = useDialogValue<{
-    description: string;
-    onConfirm: () => void;
-  }>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -66,8 +56,29 @@ export function CategoryManager({
   const [isImageUploading, setIsImageUploading] = useState(false);
   const savedContentRef = useRef<AdminSiteContent | null>(null);
   const categoryNames = useMemo(
-    () => (content ? getManagedCategoryNames(categories, content.categoryMappings) : categories),
+    () =>
+      content
+        ? getManagedCategoryNames([...content.categories.map((item) => item.name), ...categories], content.categories)
+        : categories,
     [categories, content],
+  );
+  const managedCategories = useMemo<ManagedCategory[]>(
+    () =>
+      content
+        ? categoryNames.map((name) => {
+            return (
+              content.categories.find((item) => item.name === name) ?? {
+                name,
+                slug: generateCategorySlug(name),
+                image: '',
+                description: '',
+                showOnHome: false,
+                sortOrder: content.categories.length + categoryNames.indexOf(name),
+              }
+            );
+          })
+        : [],
+    [categoryNames, content],
   );
 
   const reload = useCallback(async () => {
@@ -90,29 +101,49 @@ export function CategoryManager({
 
   async function persistContent(nextContent: AdminSiteContent, successMessage: string, failureMessage: string) {
     if (saving) return false;
-    const nextCategoryNames = getManagedCategoryNames(categories, nextContent.categoryMappings);
+    const nextCategoryNames = getManagedCategoryNames(
+      [...nextContent.categories.map((item) => item.name), ...categories],
+      nextContent.categories,
+    );
     const incompleteCategory = nextCategoryNames.find((name) => {
-      const mapping = nextContent.categoryMappings.find((entry) => entry.name === name);
-      return !(mapping?.slug || generateCategorySlug(name)).trim();
+      const category = nextContent.categories.find((entry) => entry.name === name);
+      const slug = (category?.slug || generateCategorySlug(name)).trim();
+      return !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug);
     });
     if (incompleteCategory) {
       toast.error(`分类“${incompleteCategory}”无法生成链接标识，请手动填写。`);
       return false;
     }
-    const incompleteFeatured = nextContent.featuredCategories.find(
-      (category) => !category.label.trim() || !category.link.trim(),
+    const normalizedCategories = nextCategoryNames.map((name) => {
+      const category = nextContent.categories.find((entry) => entry.name === name);
+      return (
+        category ?? {
+          name,
+          slug: generateCategorySlug(name),
+          image: '',
+          description: '',
+          showOnHome: false,
+          sortOrder: nextContent.categories.length + nextCategoryNames.indexOf(name),
+        }
+      );
+    });
+    normalizedCategories.forEach((category, index) => {
+      category.sortOrder = index;
+    });
+    const duplicateSlug = normalizedCategories.find(
+      (mapping, index) =>
+        normalizedCategories.findIndex((candidate) => candidate.slug.toLowerCase() === mapping.slug.toLowerCase()) !== index,
     );
-    if (incompleteFeatured) {
-      toast.error('每个精选分类都需要填写名称和分类链接。');
+    if (duplicateSlug) {
+      toast.error(`链接标识“${duplicateSlug.slug}”已被其他分类使用。`);
       return false;
     }
-    const categoryMappings = nextCategoryNames.map((name) => {
-      const mapping = nextContent.categoryMappings.find((entry) => entry.name === name);
-      return { name, slug: mapping?.slug || generateCategorySlug(name) };
-    });
     setSaving(true);
     try {
-      const { data: savedContent, message } = await saveAdminSiteContent({ ...nextContent, categoryMappings });
+      const { data: savedContent, message } = await saveAdminSiteContent({
+        ...nextContent,
+        categories: normalizedCategories,
+      });
       savedContentRef.current = savedContent;
       setContent(savedContent);
       toast.success(message || successMessage);
@@ -128,38 +159,97 @@ export function CategoryManager({
 
   async function applyEditor() {
     if (!content || !editor) return;
-    if (!editor.item.label.trim() || !editor.item.link.trim()) {
-      toast.error('请填写精选分类名称和分类链接。');
+    const name = editor.name.trim();
+    const slug = editor.slug.trim().toLowerCase();
+    if (!name || !slug) {
+      toast.error('请填写分类名称和链接标识。');
       return;
     }
-    const maxOrder = content.featuredCategories.length + (editor.index === null ? 1 : 0);
-    if (!Number.isInteger(editor.order) || editor.order < 1 || editor.order > maxOrder) {
-      toast.error(`显示位置必须是 1 到 ${maxOrder} 之间的整数。`);
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      toast.error('链接标识只能包含小写英文字母、数字和连字符。');
       return;
     }
-    const featuredCategories = [...content.featuredCategories];
-    const item = { ...editor.item, label: editor.item.label.trim(), link: editor.item.link.trim() };
-    if (editor.index === null) featuredCategories.splice(editor.order - 1, 0, item);
-    else {
-      featuredCategories.splice(editor.index, 1);
-      featuredCategories.splice(editor.order - 1, 0, item);
+    const originalName = editor.originalName;
+    if (!originalName && categoryNames.includes(name)) {
+      toast.error(`分类“${name}”已存在。`);
+      return;
     }
+    const category = content.categories.find((item) => item.name === (originalName ?? name));
+    const originalSlug = editor.originalSlug ?? category?.slug ?? slug;
+    const slugTaken = content.categories.some(
+      (item) => item.name !== (originalName ?? name) && item.slug.toLowerCase() === slug,
+    );
+    if (slugTaken) {
+      toast.error(`链接标识“${slug}”已被其他分类使用。`);
+      return;
+    }
+
+    if (editor.showOnHome && !editor.image.trim()) {
+      toast.error('首页展示的分类需要上传封面图片。');
+      return;
+    }
+    if (editor.showOnHome) {
+      const currentHomeOrder = content.categories.filter(
+        (item) => item.showOnHome && item.name !== (originalName ?? name),
+      ).length;
+      const maxOrder = currentHomeOrder + 1;
+      if (!Number.isInteger(editor.order) || editor.order < 1 || editor.order > maxOrder) {
+        toast.error(`首页显示顺序必须是 1 到 ${maxOrder} 之间的整数。`);
+        return;
+      }
+    }
+
+    const updatedCategory: PublicCategory = {
+      name,
+      slug,
+      image: editor.image.trim(),
+      description: editor.description.trim(),
+      showOnHome: editor.showOnHome,
+      sortOrder: 0,
+    };
+    const remainingHomeCategories = content.categories.filter(
+      (item) => item.showOnHome && item.name !== (originalName ?? name),
+    );
+    const remainingOtherCategories = content.categories.filter(
+      (item) => !item.showOnHome && item.name !== (originalName ?? name),
+    );
+    if (editor.showOnHome) {
+      remainingHomeCategories.splice(editor.order - 1, 0, updatedCategory);
+    } else {
+      remainingOtherCategories.push(updatedCategory);
+    }
+    const nextCategories = [...remainingHomeCategories, ...remainingOtherCategories].map((item, index) => ({
+      ...item,
+      sortOrder: index,
+    }));
+    const translations =
+      originalSlug === slug
+        ? content.translations
+        : content.translations.map((item) =>
+            item.entityType === 'categories' && item.entityKey === originalSlug ? { ...item, entityKey: slug } : item,
+          );
     const success = await persistContent(
-      { ...content, featuredCategories },
-      editor.index === null ? '分类已添加' : '分类已更新',
-      editor.index === null ? '新增分类失败，请重试' : '保存分类修改失败，请重试',
+      { ...content, categories: nextCategories, translations },
+      originalName ? '分类已更新' : '分类已新增',
+      originalName ? '保存分类修改失败，请重试' : '新增分类失败，请重试',
     );
     if (!success) return;
     setEditor(null);
   }
 
-  async function removeFeatured(index: number) {
-    if (!content) return;
-    await persistContent(
-      { ...content, featuredCategories: content.featuredCategories.filter((_, itemIndex) => itemIndex !== index) },
-      '分类已删除',
-      '删除分类失败，请重试',
-    );
+  function editCategory(category: ManagedCategory) {
+    const featureIndex =
+      content?.categories.filter((item) => item.showOnHome).findIndex((item) => item.slug === category.slug) ?? -1;
+    setEditor({
+      originalName: category.name,
+      originalSlug: category.slug,
+      name: category.name,
+      slug: category.slug,
+      showOnHome: category.showOnHome,
+      image: category.image,
+      description: category.description,
+      order: featureIndex >= 0 ? featureIndex + 1 : (content?.categories.filter((item) => item.showOnHome).length ?? 0) + 1,
+    });
   }
 
   function handleImageSelection(file: File | undefined) {
@@ -180,8 +270,8 @@ export function CategoryManager({
     setIsImageUploading(true);
     try {
       const media = await uploadAdminMedia(file);
-      updateEditor((current) => (current ? { ...current, item: { ...current.item, image: media.url } } : current));
-      toast.success('封面已上传，确认分类后立即保存配置');
+      updateEditor((current) => (current ? { ...current, image: media.url } : current));
+      toast.success('封面已上传，确认分类后立即生效');
     } catch (cause) {
       toast.error(cause instanceof Error ? cause.message : '分类封面上传失败');
     } finally {
@@ -208,14 +298,19 @@ export function CategoryManager({
           disabled={saving}
           onClick={() =>
             setEditor({
-              index: null,
-              order: content.featuredCategories.length + 1,
-              item: emptyFeaturedCategory(),
+              originalName: null,
+              originalSlug: null,
+              name: '',
+              slug: '',
+              showOnHome: false,
+              image: '',
+              description: '',
+              order: content.categories.filter((item) => item.showOnHome).length + 1,
             })
           }
         >
           <Icon icon="ri:add-line" className="mr-1 size-4" />
-          新增精选分类
+          新增分类
         </Button>
       </div>,
     );
@@ -225,177 +320,123 @@ export function CategoryManager({
   if (loading) return <ManagerMessage>正在读取分类配置…</ManagerMessage>;
   if (error) return <ManagerError message={error} onRetry={reload} />;
   if (!content) return null;
+  const editorFeaturedIndex = editor
+    ? content.categories.filter((item) => item.showOnHome).findIndex((item) => item.slug === editor.originalSlug)
+    : -1;
 
   return (
-    <section className="space-y-8" aria-label="分类配置管理">
-      <section className="space-y-3">
-        <div>
-          <h4 className="font-semibold">
-            首页精选分类 <span className="font-normal text-muted-foreground">({content.featuredCategories.length})</span>
-          </h4>
-        </div>
-        <ManagerTable
-          items={content.featuredCategories}
-          getKey={(item, index) => `${item.label}-${index}`}
-          emptyMessage="暂无精选分类"
-          columns={[
-            {
-              label: '显示位置',
-              render: (_, index) => <span className="text-muted-foreground">{index + 1}</span>,
-            },
-            {
-              label: '封面',
-              render: (item) =>
-                item.image ? (
-                  <ImagePreviewDialog src={item.image} alt={`${item.label}封面`} thumbnailClassName="aspect-video w-24" />
-                ) : (
-                  <div className="grid aspect-video w-24 place-items-center rounded-md border border-border border-dashed bg-muted/40 text-muted-foreground">
-                    <Icon icon="ri:image-line" className="size-5" />
-                  </div>
-                ),
-            },
-            {
-              label: '名称 / 链接',
-              render: (item) => (
-                <>
-                  <span className="font-medium">{item.label}</span>
-                  <span className="mt-1 block text-muted-foreground">{item.link}</span>
-                </>
+    <section className="space-y-3" aria-label="分类管理">
+      <ManagerTable
+        items={managedCategories}
+        getKey={(item) => item.name}
+        emptyMessage="暂无分类，请先新增分类"
+        columns={[
+          {
+            label: '分类名称 / 链接标识',
+            render: (item) => (
+              <>
+                <span className="font-medium">{item.name}</span>
+                <span className="mt-1 block font-mono text-muted-foreground text-xs">{item.slug}</span>
+              </>
+            ),
+          },
+          {
+            label: '首页展示',
+            render: (item) => (
+              <span
+                className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-medium text-xs ${
+                  item.showOnHome
+                    ? 'border-emerald-600/20 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400'
+                    : 'border-border bg-muted text-muted-foreground'
+                }`}
+              >
+                {item.showOnHome ? '展示中' : '未展示'}
+              </span>
+            ),
+          },
+          {
+            label: '封面',
+            render: (item) =>
+              item.image ? (
+                <ImagePreviewDialog src={item.image} alt={`${item.name}封面`} thumbnailClassName="aspect-video w-24" />
+              ) : (
+                <span className="text-muted-foreground">未设置</span>
               ),
+          },
+          {
+            label: '首页顺序',
+            render: (item) => {
+              const order = content.categories
+                .filter((category) => category.showOnHome)
+                .findIndex((category) => category.slug === item.slug);
+              return <span className="text-muted-foreground">{item.showOnHome && order >= 0 ? order + 1 : '—'}</span>;
             },
-            {
-              label: '状态',
-              render: (item) => (
-                <span
-                  className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-medium text-xs ${
-                    item.enabled
-                      ? 'border-emerald-600/20 bg-emerald-600/10 text-emerald-700 dark:text-emerald-400'
-                      : 'border-border bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {item.enabled ? '首页展示' : '已隐藏'}
-                </span>
-              ),
-            },
-          ]}
-          onEdit={(item, index) => setEditor({ index, order: index + 1, item: { ...item } })}
-          onDelete={(item, index) =>
-            setPendingDelete({
-              description: `确定删除精选分类“${item.label}”吗？`,
-              onConfirm: () => void removeFeatured(index),
-            })
-          }
-        />
-      </section>
-
-      <section className="space-y-3">
-        <div>
-          <h4 className="font-semibold">
-            文章分类 <span className="font-normal text-muted-foreground">({categoryNames.length})</span>
-          </h4>
-        </div>
-        <ManagerTable
-          items={categoryNames.map((name) => ({
-            name,
-            slug: content.categoryMappings.find((mapping) => mapping.name === name)?.slug || generateCategorySlug(name),
-          }))}
-          getKey={(item) => item.name}
-          emptyMessage="还没有文章分类"
-          columns={[
-            {
-              label: '名称',
-              render: (item) => <span className="font-medium">{item.name}</span>,
-            },
-            {
-              label: '链接标识',
-              render: (item) => (
-                <input
-                  value={item.slug}
-                  onChange={(event) => {
-                    setContent({
-                      ...content,
-                      categoryMappings: upsertCategoryMapping(content.categoryMappings, item.name, event.target.value.trim()),
-                    });
-                  }}
-                  onBlur={() => {
-                    if (content) void persistContent(content, '分类链接已保存', '保存分类链接失败，请重试');
-                  }}
-                  disabled={saving}
-                  aria-label={`${item.name} 的链接标识`}
-                  className="w-full max-w-sm rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm"
-                />
-              ),
-            },
-          ]}
-        />
-      </section>
+          },
+        ]}
+        onEdit={editCategory}
+      />
 
       <Dialog open={editorOpen} onOpenChange={(open) => !open && !isImageUploading && !saving && setEditor(null)}>
         <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{`${editor?.index === null ? '新增' : '编辑'}精选分类`}</DialogTitle>
-            <DialogDescription>
-              配置首页分类卡片。分类链接填写已有文章分类的链接标识，例如 front-end；不要填写完整的 /categories/front-end
-              路径。确认后会立即保存并生效。
-            </DialogDescription>
+            <DialogTitle>{editor?.originalName ? '编辑分类' : '新增分类'}</DialogTitle>
+            <DialogDescription>分类会同时用于文章归档和首页分类卡片。确认后立即保存并生效。</DialogDescription>
           </DialogHeader>
           {editor && (
             <div className="grid gap-4 py-2 sm:grid-cols-2">
-              <NumberField
-                label="显示位置（越小越靠前）"
-                value={editor.order}
-                min={1}
-                max={content.featuredCategories.length + (editor.index === null ? 1 : 0)}
-                onChange={(order) => setEditor({ ...editor, order })}
-              />
               <Field
-                label="显示名称"
-                value={editor.item.label}
-                onChange={(label) => setEditor({ ...editor, item: { ...editor.item, label } })}
-              />
-              <Field
-                label="分类链接"
-                value={editor.item.link}
-                onChange={(link) => setEditor({ ...editor, item: { ...editor.item, link } })}
-                placeholder="front-end"
-              />
-              <div className="space-y-2 sm:col-span-2">
-                <Field
-                  label="图片 URL"
-                  value={editor.item.image}
-                  onChange={(image) => setEditor({ ...editor, item: { ...editor.item, image } })}
-                />
-                <ImageUploadField
-                  label="预览图片"
-                  imageUrl={editor.item.image}
-                  alt={`${editor.item.label || '精选分类'}封面预览`}
-                  uploading={isImageUploading}
-                  onFileSelect={handleImageSelection}
-                />
-              </div>
-              <label className="flex items-center gap-2 self-end pb-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={editor.item.enabled}
-                  onChange={(event) =>
-                    setEditor({
-                      ...editor,
-                      item: { ...editor.item, enabled: event.target.checked },
-                    })
-                  }
-                />
-                在首页展示
-              </label>
-              <TextArea
-                label="简介"
-                value={editor.item.description}
-                onChange={(description) =>
+                label="分类名称"
+                value={editor.name}
+                disabled={Boolean(editor.originalName)}
+                onChange={(name) =>
                   setEditor({
                     ...editor,
-                    item: { ...editor.item, description },
+                    name,
+                    slug: generateCategorySlug(name),
                   })
                 }
               />
+              <Field
+                label="链接标识"
+                value={editor.slug}
+                onChange={(slug) => setEditor({ ...editor, slug })}
+                placeholder="front-end"
+              />
+              <label className="flex items-center gap-2 sm:col-span-2">
+                <input
+                  type="checkbox"
+                  checked={editor.showOnHome}
+                  onChange={(event) => setEditor({ ...editor, showOnHome: event.target.checked })}
+                />
+                在首页展示
+              </label>
+              {editor.showOnHome && (
+                <>
+                  <NumberField
+                    label="首页顺序（越小越靠前）"
+                    value={editor.order}
+                    min={1}
+                    max={content.categories.filter((item) => item.showOnHome).length + (editorFeaturedIndex >= 0 ? 0 : 1)}
+                    onChange={(order) => setEditor({ ...editor, order })}
+                  />
+                  <div className="space-y-2 sm:col-span-2">
+                    <Field label="封面 URL" value={editor.image} onChange={(image) => setEditor({ ...editor, image })} />
+                    <ImageUploadField
+                      label="首页封面"
+                      imageUrl={editor.image}
+                      alt={`${editor.name || '分类'}封面预览`}
+                      required
+                      uploading={isImageUploading}
+                      onFileSelect={handleImageSelection}
+                    />
+                  </div>
+                  <TextArea
+                    label="描述"
+                    value={editor.description}
+                    onChange={(description) => setEditor({ ...editor, description })}
+                  />
+                </>
+              )}
             </div>
           )}
           <DialogFooter>
@@ -403,7 +444,7 @@ export function CategoryManager({
               取消
             </Button>
             <Button onClick={() => void applyEditor()} disabled={isImageUploading || saving}>
-              {saving ? '保存中…' : editor?.index === null ? '添加并保存' : '保存修改'}
+              {saving ? '保存中…' : editor?.originalName ? '保存修改' : '新增分类'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -419,16 +460,6 @@ export function CategoryManager({
           />
         )}
       </Dialog>
-      <DeleteConfirmDialog
-        open={deleteOpen}
-        title="确认删除精选分类？"
-        description={pendingDelete?.description ?? ''}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
-        onConfirm={() => {
-          pendingDelete?.onConfirm();
-          setPendingDelete(null);
-        }}
-      />
     </section>
   );
 }

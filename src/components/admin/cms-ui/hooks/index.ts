@@ -2,7 +2,7 @@
  * CMS Hooks
  */
 
-export { type CustomCategory, useCustomCategories } from './useCustomCategories';
+export { useAvailableCategories } from './useAvailableCategories';
 export {
   type SortField,
   type SortOrder,

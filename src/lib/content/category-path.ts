@@ -11,13 +11,16 @@ import { encodeSlug } from '../route';
  * @param categoryNames Array of category names or single category name
  * @returns Category path like "/categories/note/front-end"
  */
-export function buildCategoryPath(categoryNames: string | string[]): string {
+export function buildCategoryPath(
+  categoryNames: string | string[],
+  categorySlugs: Record<string, string> = categoryMap,
+): string {
   if (!categoryNames) return '';
 
   const names = Array.isArray(categoryNames) ? categoryNames : [categoryNames];
   if (names.length === 0) return '';
 
-  const slugs = names.map((name) => encodeSlug(categoryMap[name]));
+  const slugs = names.map((name) => encodeSlug(categorySlugs[name] ?? categoryMap[name]));
   return `/categories/${slugs.join('/')}`;
 }
 

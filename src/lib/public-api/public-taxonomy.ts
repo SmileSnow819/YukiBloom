@@ -2,7 +2,7 @@ import { categoryMap } from '@constants/category';
 import { encodeSlug } from '@lib/route';
 import type { Category } from '@/lib/content/types';
 import { getLocalizedPublicPosts, getPostCategoryNames, getPublicPostDate } from './post-view';
-import type { PublicPostSummary } from './types';
+import type { PublicCategory, PublicPostSummary } from './types';
 
 export interface PublicTimelinePost {
   slug: string;
@@ -65,24 +65,32 @@ export async function getPublicTaxonomy(locale: string): Promise<{
   };
 }
 
-export function getPublicCategoryLinks(categories: Category[], parentLink = ''): string[] {
+export function getPublicCategoryLinks(
+  categories: Category[],
+  parentLink = '',
+  categoryRecords: readonly PublicCategory[] = [],
+): string[] {
   const links: string[] = [];
   for (const category of categories) {
-    const segment = encodeSlug(categoryMap[category.name]);
+    const segment = encodeSlug(categoryRecords.find((item) => item.name === category.name)?.slug ?? categoryMap[category.name]);
     const link = parentLink ? `${parentLink}/${segment}` : segment;
     links.push(link);
-    if (category.children?.length) links.push(...getPublicCategoryLinks(category.children, link));
+    if (category.children?.length) links.push(...getPublicCategoryLinks(category.children, link, categoryRecords));
   }
   return links;
 }
 
-export function findPublicCategoryByLink(categories: Category[], link: string): Category | null {
+export function findPublicCategoryByLink(
+  categories: Category[],
+  link: string,
+  categoryRecords: readonly PublicCategory[] = [],
+): Category | null {
   const segments = link.split('/').filter(Boolean).map(decodeURIComponent);
   const reverseMap = new Map(Object.entries(categoryMap).map(([name, slug]) => [slug, name]));
   let level = categories;
   let found: Category | undefined;
   for (const segment of segments) {
-    const name = reverseMap.get(segment) ?? segment;
+    const name = categoryRecords.find((item) => item.slug === segment)?.name ?? reverseMap.get(segment) ?? segment;
     found = level.find((category) => category.name === name);
     if (!found) return null;
     level = found.children ?? [];

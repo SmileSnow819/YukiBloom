@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
-import { type CustomCategory, useCustomCategories } from '@admin-ui/hooks/useCustomCategories';
+import { useAvailableCategories } from '@admin-ui/hooks/useAvailableCategories';
 import { useDialogValue } from '@admin-ui/hooks/useDialogValue';
 import { createPost, uploadPostCover } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
@@ -34,59 +34,13 @@ interface CreatePostDialogProps {
   onSuccess: (postId: string) => void;
 }
 
-/**
- * Custom category chip with editable slug
- */
-function CustomCategoryChip({
-  category,
-  onRemove,
-  onSlugChange,
-}: {
-  category: CustomCategory;
-  onRemove: () => void;
-  onSlugChange: (slug: string) => void;
-}) {
-  const [isEditing, setIsEditing] = useState(false);
-
-  return (
-    <div className="flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm">
-      <span className="font-medium text-primary">{category.name}</span>
-      {isEditing ? (
-        <input
-          type="text"
-          value={category.slug}
-          onChange={(e) => onSlugChange(e.target.value)}
-          onBlur={() => setIsEditing(false)}
-          onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
-          className="ml-1 w-24 rounded border border-border bg-background px-1 text-xs focus:outline-none focus:ring-1 focus:ring-ring"
-        />
-      ) : (
-        <button
-          type="button"
-          onClick={() => setIsEditing(true)}
-          className="ml-1 cursor-pointer text-muted-foreground text-xs hover:text-foreground"
-          title="编辑链接标识"
-        >
-          ({category.slug})
-        </button>
-      )}
-      <button type="button" onClick={onRemove} className="ml-1 cursor-pointer text-muted-foreground hover:text-destructive">
-        <Icon icon="ri:close-line" className="size-3.5" />
-      </button>
-    </div>
-  );
-}
-
 export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuccess }: CreatePostDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const { value: cropFile, open: cropOpen, setDialogValue: setCropFile } = useDialogValue<File>();
   const [coverUrl, setCoverUrl] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [newCategoryInput, setNewCategoryInput] = useState('');
-
-  const { customCategories, addCustomCategory, removeCustomCategory, updateCategorySlug, resetCustomCategories } =
-    useCustomCategories();
+  const availableCategories = useAvailableCategories(open, existingCategories);
 
   const {
     register,
@@ -110,32 +64,12 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
     setCoverUrl('');
     setCropFile(null);
     setSelectedCategories([]);
-    setNewCategoryInput('');
-    resetCustomCategories();
     onOpenChange(false);
-  }, [reset, resetCustomCategories, onOpenChange, setCropFile]);
+  }, [reset, onOpenChange, setCropFile]);
 
   const toggleCategory = useCallback((category: string) => {
     setSelectedCategories((prev) => (prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category]));
   }, []);
-
-  const handleAddCustomCategory = useCallback(() => {
-    const trimmed = newCategoryInput.trim();
-    if (!trimmed) return;
-
-    // Add to selected and custom categories
-    addCustomCategory(trimmed);
-    setSelectedCategories((prev) => (prev.includes(trimmed) ? prev : [...prev, trimmed]));
-    setNewCategoryInput('');
-  }, [newCategoryInput, addCustomCategory]);
-
-  const handleRemoveCustomCategory = useCallback(
-    (name: string) => {
-      removeCustomCategory(name);
-      setSelectedCategories((prev) => prev.filter((c) => c !== name));
-    },
-    [removeCustomCategory],
-  );
 
   const handleCoverChange = (file: File | undefined) => {
     if (!file) return;
@@ -176,7 +110,6 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
             .filter(Boolean)
         : undefined;
 
-      // Get custom category mappings
       const result = await createPost({
         title: data.title,
         coverMediaId: data.coverMediaId,
@@ -240,43 +173,13 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
             <span className="font-medium text-sm">分类</span>
 
             {/* Selected categories display */}
-            {selectedCategories.length > 0 && (
-              <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/30 p-2">
-                {selectedCategories.map((cat) => {
-                  const customCat = customCategories.find((c) => c.name === cat);
-                  if (customCat) {
-                    return (
-                      <CustomCategoryChip
-                        key={cat}
-                        category={customCat}
-                        onRemove={() => handleRemoveCustomCategory(cat)}
-                        onSlugChange={(slug) => updateCategorySlug(cat, slug)}
-                      />
-                    );
-                  }
-                  return (
-                    <span key={cat} className="flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-sm">
-                      {cat}
-                      <button
-                        type="button"
-                        onClick={() => toggleCategory(cat)}
-                        className="cursor-pointer text-muted-foreground hover:text-destructive"
-                      >
-                        <Icon icon="ri:close-line" className="size-3.5" />
-                      </button>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Existing categories */}
             <div className="flex flex-wrap gap-2">
-              {existingCategories.slice(0, 12).map((cat) => (
+              {availableCategories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => toggleCategory(cat)}
+                  aria-pressed={selectedCategories.includes(cat)}
                   className={cn(
                     'cursor-pointer rounded-full px-3 py-1 text-sm transition-colors',
                     selectedCategories.includes(cat) ? 'bg-primary text-primary-foreground' : 'bg-muted hover:bg-muted/80',
@@ -285,27 +188,11 @@ export function CreatePostDialog({ open, onOpenChange, existingCategories, onSuc
                   {cat}
                 </button>
               ))}
+              {availableCategories.length === 0 && (
+                <span className="text-muted-foreground text-sm">暂无分类，请先到分类管理中新增。</span>
+              )}
             </div>
-
-            {/* Custom category input */}
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCategoryInput}
-                onChange={(e) => setNewCategoryInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddCustomCategory();
-                  }
-                }}
-                placeholder="添加自定义分类…"
-                className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-              <Button type="button" variant="outline" size="sm" onClick={handleAddCustomCategory}>
-                <Icon icon="ri:add-line" className="size-4" />
-              </Button>
-            </div>
+            <p className="text-muted-foreground text-xs">分类请先在“分类管理”中新增，再回到这里选择。</p>
           </div>
 
           {/* 标签 */}

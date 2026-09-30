@@ -9,27 +9,33 @@ import {
   DialogTitle,
 } from '@admin-ui/components/ui/dialog';
 import { useDialogValue } from '@admin-ui/hooks';
+import { useAvailableCategories } from '@admin-ui/hooks/useAvailableCategories';
 import { readPostMetadata, savePostMetadata, uploadPostCover } from '@admin-ui/lib/api';
 import { validateImageUpload } from '@admin-ui/lib/image-upload';
 import type { PostMetadataValues } from '@admin-ui/lib/post-metadata';
 import { Icon } from '@iconify/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ImageCropDialog } from './ImageCropDialog';
 
 interface PostMetadataDialogProps {
   postId: string;
   open: boolean;
+  existingCategories: string[];
   onOpenChange: (open: boolean) => void;
   onSaved: () => void;
 }
 
-export function PostMetadataDialog({ postId, open, onOpenChange, onSaved }: PostMetadataDialogProps) {
+export function PostMetadataDialog({ postId, open, existingCategories, onOpenChange, onSaved }: PostMetadataDialogProps) {
   const [values, setValues] = useState<PostMetadataValues | null>(null);
   const [coverUrl, setCoverUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [postCategories, setPostCategories] = useState<string[]>([]);
+  const categoryNamesInUse = useMemo(() => [...existingCategories, ...postCategories], [existingCategories, postCategories]);
+  const availableCategories = useAvailableCategories(open, categoryNamesInUse);
   const { value: cropFile, open: cropOpen, setDialogValue: setCropFile } = useDialogValue<File>();
 
   useEffect(() => {
@@ -39,6 +45,16 @@ export function PostMetadataDialog({ postId, open, onOpenChange, onSaved }: Post
       .then(({ values: defaults, cover }) => {
         if (cancelled) return;
         setValues(defaults);
+        const categories = [
+          ...new Set(
+            defaults.categories
+              .split(/[>,]/)
+              .map((category) => category.trim())
+              .filter(Boolean),
+          ),
+        ];
+        setSelectedCategories(categories);
+        setPostCategories(categories);
         setCoverUrl(cover?.url || '');
       })
       .catch((cause: unknown) => {
@@ -96,7 +112,7 @@ export function PostMetadataDialog({ postId, open, onOpenChange, onSaved }: Post
 
     setIsSaving(true);
     try {
-      await savePostMetadata(postId, values);
+      await savePostMetadata(postId, { ...values, categories: selectedCategories.join(', ') });
       toast.success('文章信息已保存');
       onSaved();
       onOpenChange(false);
@@ -143,15 +159,35 @@ export function PostMetadataDialog({ postId, open, onOpenChange, onSaved }: Post
                   className="w-full rounded-lg border border-input bg-background px-3 py-2"
                 />
               </label>
-              <label className="block space-y-1.5 text-sm">
+              <div className="block space-y-1.5 text-sm">
                 <span className="font-medium">分类</span>
-                <input
-                  value={values.categories}
-                  onChange={(event) => updateValue('categories', event.target.value)}
-                  placeholder="层级分类用 > 分隔；多个分类用逗号分隔"
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2"
-                />
-              </label>
+                {availableCategories.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {availableCategories.map((category) => (
+                      <button
+                        key={category}
+                        type="button"
+                        aria-pressed={selectedCategories.includes(category)}
+                        onClick={() =>
+                          setSelectedCategories((current) =>
+                            current.includes(category) ? current.filter((item) => item !== category) : [...current, category],
+                          )
+                        }
+                        className={`cursor-pointer rounded-full px-3 py-1 text-sm transition-colors ${
+                          selectedCategories.includes(category)
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted hover:bg-muted/80'
+                        }`}
+                      >
+                        {category}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">暂无分类，请先到分类管理中新增。</p>
+                )}
+                <p className="text-muted-foreground text-xs">只能从分类管理中已存在的分类里选择。</p>
+              </div>
             </div>
 
             <label className="block space-y-1.5 text-sm">

@@ -6,19 +6,20 @@ import { seoConfig } from '@constants/site-config';
 import Layout from '@layouts/Layout.astro';
 import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
 import { getLocaleFromUrl, t } from '@/i18n';
-import { getPublicCategoryLinks, getPublicTaxonomy } from '@/lib/public-api';
+import { getPublicCategoryLinks, getPublicSiteContent, getPublicTaxonomy } from '@/lib/public-api';
 
 export const prerender = false;
 
 const locale = getLocaleFromUrl(Astro.url.pathname);
-const { categories, countMap } = await getPublicTaxonomy(locale);
-const links = getPublicCategoryLinks(categories);
+const [{ categories, countMap }, siteContent] = await Promise.all([getPublicTaxonomy(locale), getPublicSiteContent()]);
+const categorySlugs = Object.fromEntries(siteContent.categories.map(({ name, slug }) => [name, slug]));
+const links = getPublicCategoryLinks(categories, '', siteContent.categories);
 ---
 
 <Layout title={`${t(locale, 'category.allCategories')} | ${seoConfig.title}`}>
   <TwoColumnLayout>
     <Cover slot="cover" title={t(locale, 'category.allCategories')} />
     <HomeSider slot="sider" />
-    <CategoryList categories={categories} countMap={countMap} totalCount={links.length ?? 0} />
+    <CategoryList categories={categories} categorySlugs={categorySlugs} countMap={countMap} totalCount={links.length} />
   </TwoColumnLayout>
 </Layout>

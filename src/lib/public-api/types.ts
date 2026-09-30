@@ -136,17 +136,13 @@ export interface PublicBackgroundTrack {
   enabled: boolean;
 }
 
-export interface PublicCategoryMapping {
+export interface PublicCategory {
   name: string;
   slug: string;
-}
-
-export interface PublicFeaturedCategory {
-  label: string;
-  description: string;
   image: string;
-  link: string;
-  enabled: boolean;
+  description: string;
+  showOnHome: boolean;
+  sortOrder: number;
 }
 
 export interface PublicFeaturedSeries {
@@ -239,8 +235,7 @@ export interface PublicTranslation {
 export interface PublicSiteContent {
   announcements: PublicAnnouncement[];
   backgroundMusic: PublicBackgroundTrack[];
-  categoryMappings: PublicCategoryMapping[];
-  featuredCategories: PublicFeaturedCategory[];
+  categories: PublicCategory[];
   featuredSeries: PublicFeaturedSeries[];
   friendLinks: PublicFriendLink[];
   friendSettings: PublicFriendSettings;

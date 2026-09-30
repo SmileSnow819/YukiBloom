@@ -418,13 +418,25 @@
       },
       "type": "object"
     },
-    "sitecontent.CategoryMapping": {
+    "sitecontent.Category": {
       "properties": {
+        "description": {
+          "type": "string"
+        },
+        "image": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
+        "showOnHome": {
+          "type": "boolean"
+        },
         "slug": {
           "type": "string"
+        },
+        "sortOrder": {
+          "type": "integer"
         }
       },
       "type": "object"
@@ -443,15 +455,9 @@
           },
           "type": "array"
         },
-        "categoryMappings": {
+        "categories": {
           "items": {
-            "$ref": "#/definitions/sitecontent.CategoryMapping"
-          },
-          "type": "array"
-        },
-        "featuredCategories": {
-          "items": {
-            "$ref": "#/definitions/sitecontent.FeaturedCategory"
+            "$ref": "#/definitions/sitecontent.Category"
           },
           "type": "array"
         },
@@ -499,26 +505,6 @@
         },
         "version": {
           "type": "integer"
-        }
-      },
-      "type": "object"
-    },
-    "sitecontent.FeaturedCategory": {
-      "properties": {
-        "description": {
-          "type": "string"
-        },
-        "enabled": {
-          "type": "boolean"
-        },
-        "image": {
-          "type": "string"
-        },
-        "label": {
-          "type": "string"
-        },
-        "link": {
-          "type": "string"
         }
       },
       "type": "object"

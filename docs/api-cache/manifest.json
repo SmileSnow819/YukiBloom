@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "generatedAt": "2026-09-30T04:05:58.894Z",
+  "generatedAt": "2026-09-30T07:04:55.262Z",
   "documents": [
     {
       "name": "全部",
       "slug": "全部",
       "file": "openapi/全部.json",
-      "sha256": "fd2b2142e80ce4ab0daef0c55d8ed7feb57b100bb15bc95414d0dfa6b5fe80d2",
+      "sha256": "de50781a3a8247789e0e3b8f1249c9507117fa5342db618f14a343f69e3f0be7",
       "pathCount": 25,
       "operationCount": 33
     }
