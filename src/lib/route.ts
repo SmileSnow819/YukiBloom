@@ -1,5 +1,5 @@
 import { Routes } from '@constants/router';
-import type { BlogPost, PostRef } from 'types/blog';
+import type { BlogPost, PostRef } from '@/types/blog';
 
 export type RouteParams<T extends Routes> = T extends Routes.Post ? BlogPost | PostRef | undefined : undefined;
 
