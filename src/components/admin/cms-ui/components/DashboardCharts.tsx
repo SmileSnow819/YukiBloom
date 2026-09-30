@@ -64,7 +64,14 @@ function CategoryChart({ stats }: { stats: DashboardChartInput }) {
   const option = useMemo<EChartsOption>(
     () => ({
       aria: { enabled: true },
-      grid: { left: 8, right: 28, top: 4, bottom: 4, containLabel: true },
+      grid: {
+        left: 8,
+        right: 28,
+        top: 4,
+        bottom: 4,
+        outerBoundsMode: 'same',
+        outerBoundsContain: 'axisLabel',
+      },
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
