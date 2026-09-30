@@ -65,10 +65,8 @@ pnpm lint             # Run Biome linter and formatter
 pnpm lint:fix         # Auto-fix linting issues
 pnpm knip             # Find unused files/dependencies
 
-# Content data generation
+# Static image data generation
 pnpm generate:lqips       # Generate LQIP image placeholders
-pnpm generate:summaries   # Generate AI summaries
-pnpm generate:all         # Generate all content assets
 ```
 
 **Note on Configuration Changes:** After modifying `config/site.yaml`, restart the dev server or rebuild. The YAML configuration is cached during build for performance.
@@ -78,18 +76,18 @@ pnpm generate:all         # Generate all content assets
 ### Tech Stack
 - **Framework**: Astro 5.x with React integration
 - **Styling**: Tailwind CSS 4.x with plugins
-- **Content**: Astro Content Collections (`src/content/blog/`)
+- **Content**: Backend public API (`src/lib/public-api/`); local blog Markdown has been removed
 - **i18n**: Custom translation system (`src/i18n/`) with Astro i18n routing
 - **Animations**: Motion (Framer Motion successor)
 - **State**: Nanostores
-- **Search**: Pagefind (static)
+- **Search**: Backend public API
 - **Utilities**: es-toolkit, date-fns, sanitize-html
 
 ### Project Structure
 ```plain
 src/
 ├── components/   # React & Astro components
-├── content/blog/ # Markdown/MDX posts (translations under <locale>/ subdirs)
+├── content/      # Legacy Astro collection schema kept for type compatibility
 ├── i18n/         # Internationalization (translations, config, utils)
 ├── layouts/      # Page layouts
 ├── pages/        # File-based routing ([lang]/ mirrors for non-default locales)
@@ -131,7 +129,7 @@ pages/ → components/ → hooks/ → lib/ → constants/
 
 ### Key Concepts
 
-**Content System**: Blog posts in `src/content/blog/` using Astro Content Collections. Hierarchical categories supporting `'工具'` or `['笔记', '前端', 'React']`.
+**Content System**: Public pages, posts, categories, series, footprints, search, RSS, and sitemap read from the backend API. The old local blog Markdown files and summary generator have been removed. `BACKEND_API_URL` supplies the backend origin.
 
 **Featured Series**: Special category-based content series with dedicated pages and homepage highlights. Configured via `featuredSeries` in `config/site.yaml`. Each series requires a unique `slug` (must not conflict with reserved routes) and `categoryName`. Supports multiple series, individual enable/disable, and homepage highlight control. Dynamic routes generated at `[seriesSlug].astro`.
 
@@ -143,10 +141,10 @@ pages/ → components/ → hooks/ → lib/ → constants/
 
 **i18n System**: Two-layer translation architecture with locale-aware routing.
 - **UI strings** (`src/i18n/translations/`): TypeScript dictionaries with `t(locale, key, params?)` function. Keys defined in `zh.ts` (source-of-truth), other locales are partial overrides. ~170 keys.
-- **Content strings** (`config/i18n-content.yaml`): YAML-based translations for category names, series fields, featured category labels. Accessed via `getContentCategoryName()` / `getContentSeriesField()` / `getContentFeaturedCategoryField()` (internal to `src/lib/content/categories.ts`).
+- **Content strings** (`config/i18n-content.yaml`): YAML-based translations for category names, series fields, featured category labels. Accessed through `src/i18n/content.ts`.
 - **Routing**: Default locale has no URL prefix; other locales use `/<locale>/` prefix. Static pages in `src/pages/[lang]/` are thin wrappers using `getLocaleStaticPaths()`. Dynamic pages (post, tags, categories, series) have per-locale `getStaticPaths`. Root pages derive locale from URL via `getLocaleFromUrl()`.
 - **React hook**: `useTranslation()` reads from `$locale` nanostore (synced via `astro:page-load` event). Returns `{ t, locale }`.
-- **Content locale**: Posts in `src/content/blog/<locale>/` are detected by slug prefix (`getSlugLocaleInfo()`); `filterPostsByLocale()` provides fallback — non-default locales show translations + untranslated default-locale posts.
+- **Content locale**: Backend posts include a locale. Public API helpers provide fallback to default-locale posts where a translation is unavailable.
 - **Locale config**: `enabled` flag in `config/site.yaml` allows disabling locales without removing content. `isI18nEnabled` controls conditional Astro i18n routing.
 - **`localizedPath(path, locale?)`** defaults to `defaultLocale` — no need for `locale ?? defaultLocale` at call sites.
 - **Do NOT enable Astro `fallback`** in `astro.config.mjs` — it breaks `[seriesSlug].astro` dynamic routes.
