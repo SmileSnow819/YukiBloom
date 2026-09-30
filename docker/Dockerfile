@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 # =============================================================================
 # astro-koharu Dockerfile
 # Multi-stage build for the Astro Node server
@@ -18,7 +19,8 @@ RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install dependencies (include dev deps for build)
-RUN pnpm install --frozen-lockfile --prod=false
+RUN --mount=type=cache,id=yukibloom-pnpm,target=/var/cache/pnpm \
+    pnpm install --store-dir /var/cache/pnpm --frozen-lockfile --prod=false
 
 # Copy source files
 COPY . .
@@ -27,7 +29,8 @@ COPY . .
 # second install so the production image does not invoke the dev-only Husky hook;
 # production native packages were already built during the first install.
 RUN pnpm run build
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
+RUN --mount=type=cache,id=yukibloom-pnpm,target=/var/cache/pnpm \
+    pnpm install --store-dir /var/cache/pnpm --frozen-lockfile --prod --ignore-scripts
 
 # =============================================================================
 # Stage 2: Production (Astro Node standalone server)
