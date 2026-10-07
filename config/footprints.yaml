@@ -81,6 +81,13 @@ locations:
     type: travel
     icon: ri:map-pin-2-line
 
+  - id: suzhou
+    name: 苏州
+    lat: 31.2989
+    lng: 120.5853
+    type: travel
+    icon: ri:map-pin-2-line
+
 stays:
   - startDate: "2026.03.12"
     endDate: "2026.03.16"
@@ -249,3 +256,21 @@ routes:
     description: "入职自己的梦中情厂啦～bilibili"
     images:
       - /img/footprints/shang-hai-bilibili.jpg
+
+  - from: shanghai
+    to: suzhou
+    date: "2026.10.03 11:00"
+    transport: highspeed
+    label: 高铁
+    description: "去苏州，第一次去漫展参加苏州百合Only"
+    images:
+      - /img/footprints/su-zhou.webp
+
+  - from: suzhou
+    to: shanghai
+    date: "2026.10.04 16:30"
+    transport: car
+    label: 汽车
+    description: "回上海参加沪橘w，收到好多物料谢谢老师们～"
+    images:
+      - /img/footprints/hu-ju.webp
