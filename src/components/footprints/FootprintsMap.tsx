@@ -4,9 +4,9 @@ import type { ECharts, EChartsOption } from 'echarts';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCityRegionStyles } from './city-regions';
-import { getCityTooltip } from './city-tooltip';
 import { getCityVisits } from './city-visits';
 import { getOverviewBounds } from './overview';
+import { getOverviewLineStyle, layoutOverviewRoutes } from './overview-routes';
 
 export interface FootprintLocation {
   id: string;
@@ -209,6 +209,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     [data.routes, locationMap],
   );
 
+  const overviewRoutes = useMemo(() => layoutOverviewRoutes(routeSegments), [routeSegments]);
+
   const activeRoute = routeSegments[Math.min(activeRouteIndex, routeSegments.length - 1)];
   const isOverview = !isSingleRoute && (reduceMotion || completedRouteCount >= routeSegments.length);
   const cityVisits = selectedCityId ? getCityVisits(routeSegments, selectedCityId) : [];
@@ -267,7 +269,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       setActiveRouteIndex(index);
       setCompletedRouteCount(index);
       setActiveLocationId(reduceMotion ? segment.to : segment.from);
-      heroRef.current?.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: 'start' });
+      heroRef.current?.scrollIntoView({
+        behavior: reduceMotion ? 'instant' : 'smooth',
+        block: 'start',
+      });
     },
     [clearRouteTimer, reduceMotion, routeSegments],
   );
@@ -354,7 +359,9 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           echarts.registerMap('footprint-cities', chinaGeoJson);
         }
         if (disposed || !chartNodeRef.current) return;
-        chartRef.current = echarts.init(chartNodeRef.current, undefined, { renderer: 'canvas' });
+        chartRef.current = echarts.init(chartNodeRef.current, undefined, {
+          renderer: 'canvas',
+        });
         cleanupResize = () => {
           chartRef.current?.resize();
           setMapWidth(chartRef.current?.getWidth() || 0);
@@ -477,11 +484,18 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
                 position: labelPositionMap[activeLocation.id] || 'top',
                 distance: labelDistanceMap[activeLocation.id] || 10,
               },
-              itemStyle: { color: locationColorMap.get(activeLocation.id) || '#ff6b9a' },
+              itemStyle: {
+                color: locationColorMap.get(activeLocation.id) || '#ff6b9a',
+              },
             },
           ]
         : [];
-    const lineData = visibleRouteSegments.map(createRouteLine);
+    const lineData = isOverview
+      ? overviewRoutes.map((segment) => ({
+          ...createRouteLine(segment),
+          lineStyle: getOverviewLineStyle(segment),
+        }))
+      : visibleRouteSegments.map(createRouteLine);
 
     const showCityBorders = isOverview || view.zoom >= 3;
     const provinceRegionNames = provinceRegionNamesRef.current;
@@ -489,8 +503,9 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       roam: false,
       boundingCoords: fitOverview ? overviewBounds : undefined,
       center: fitOverview ? undefined : view.center,
-      zoom: fitOverview ? 1 : view.zoom,
+      zoom: fitOverview ? 1.1 : view.zoom,
       aspectScale: 0.86,
+      preserveAspect: 'contain' as const,
       layoutCenter: fitOverview ? undefined : (['52%', '54%'] as [string, string]),
       layoutSize: fitOverview ? undefined : '104%',
       left: fitOverview ? (wideOverview ? '44%' : '8%') : undefined,
@@ -502,21 +517,17 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     const option: EChartsOption = {
       animationDurationUpdate: reduceMotion || !isOverview ? 0 : 980,
       animationEasingUpdate: 'cubicInOut',
-      tooltip: {
-        trigger: 'item',
-        confine: true,
-        renderMode: 'html',
-        formatter: (params) => {
-          const item = Array.isArray(params) ? params[0] : params;
-          return getCityTooltip(data.locations, item?.name || '');
-        },
-      },
+      tooltip: { show: false },
       geo: [
         {
           ...geoViewport,
           map: 'china-footprints',
           silent: true,
-          itemStyle: { areaColor: '#fff1f6', borderColor: '#f48aad', borderWidth: 1.1 },
+          itemStyle: {
+            areaColor: '#fff1f6',
+            borderColor: '#f48aad',
+            borderWidth: 1.1,
+          },
           emphasis: { disabled: true },
         },
         {
@@ -531,9 +542,16 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             borderColor: 'rgba(190, 87, 128, 0.42)',
             borderWidth: showCityBorders ? 0.6 : 0,
           },
-          emphasis: { label: { show: false }, itemStyle: { areaColor: 'transparent' } },
+          emphasis: {
+            label: { show: false },
+            itemStyle: { areaColor: 'transparent' },
+          },
           regions: [
-            ...provinceRegionNames.map((name) => ({ name, itemStyle: { opacity: 0 }, emphasis: { disabled: true } })),
+            ...provinceRegionNames.map((name) => ({
+              name,
+              itemStyle: { opacity: 0 },
+              emphasis: { disabled: true },
+            })),
             ...getCityRegionStyles(
               data.locations.filter((location) => visitedIds.has(location.id)).map((location) => location.name),
             ),
@@ -542,12 +560,13 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       ],
       series: [
         {
+          id: 'route-track',
           name: '路线轨道',
           type: 'lines',
           coordinateSystem: 'geo',
           zlevel: 2,
           silent: true,
-          data: lineData,
+          data: isOverview ? [] : lineData,
           lineStyle: {
             color: isOverview ? 'rgba(244,118,158,0.26)' : 'rgba(244,118,158,0.32)',
             width: isOverview ? 5 : 7,
@@ -555,6 +574,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           },
         },
         {
+          id: 'route-lines',
           name: '足迹路线',
           type: 'lines',
           coordinateSystem: 'geo',
@@ -574,6 +594,25 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             width: isOverview ? 2.4 : 3.2,
             opacity: 0.9,
             type: 'solid',
+          },
+        },
+        {
+          id: 'route-hover-arrows',
+          name: '关联路线箭头',
+          type: 'lines',
+          coordinateSystem: 'geo',
+          zlevel: 3,
+          silent: true,
+          data: [],
+          lineStyle: { opacity: 0, curveness: 0.12 },
+          effect: {
+            show: !reduceMotion,
+            period: 1.6,
+            delay: 0,
+            trailLength: 0,
+            symbol: 'arrow',
+            symbolSize: 9,
+            color: '#e85b8c',
           },
         },
         {
@@ -653,7 +692,59 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     routeSegments,
     reduceMotion,
     visibleRouteSegments,
+    overviewRoutes,
   ]);
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!mapReady || !chart || !isOverview) return;
+    const mergedRoutes = overviewRoutes;
+    let hoveredCityId: string | undefined;
+    const updateHover = (cityId?: string) => {
+      if (hoveredCityId === cityId) return;
+      hoveredCityId = cityId;
+      chart.setOption({
+        series: [
+          {
+            id: 'route-lines',
+            data: mergedRoutes.map((route) => {
+              const connected = Boolean(cityId && (route.from === cityId || route.to === cityId));
+              return {
+                ...createRouteLine(route),
+                lineStyle: getOverviewLineStyle(route, cityId),
+                symbol: reduceMotion && connected ? ['none', 'arrow'] : ['none', 'none'],
+                symbolSize: [0, 12],
+              };
+            }),
+          },
+          {
+            id: 'route-hover-arrows',
+            data: cityId
+              ? mergedRoutes
+                  .filter((route) => route.from === cityId || route.to === cityId)
+                  .map((route) => ({
+                    ...createRouteLine(route),
+                    lineStyle: { curveness: route.overviewCurveness },
+                  }))
+              : [],
+          },
+        ],
+      });
+    };
+    const onMouseOver = (params: { name?: string }) => {
+      const city = data.locations.find((location) => location.name === params.name || `${location.name}市` === params.name);
+      updateHover(city?.id);
+    };
+    const clearHover = () => updateHover();
+    chart.on('mouseover', onMouseOver);
+    chart.on('mouseout', clearHover);
+    chart.on('globalout', clearHover);
+    return () => {
+      chart.off('mouseover', onMouseOver);
+      chart.off('mouseout', clearHover);
+      chart.off('globalout', clearHover);
+    };
+  }, [data.locations, isOverview, mapReady, reduceMotion, overviewRoutes]);
 
   return (
     <div className="footprints">
@@ -696,7 +787,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
                 initial={{ opacity: 0, y: 16, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
+                transition={{
+                  duration: reduceMotion ? 0 : 0.28,
+                  ease: 'easeOut',
+                }}
               >
                 {selectedCityId && cityVisits.length > 0 && (
                   <>
@@ -761,7 +855,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           {!mapReady && <div className="footprints-map-loading">{mapError || '地图加载中...'}</div>}
         </div>
         <fieldset className="footprints-progress">
-          <legend className="footprints-progress-label">行程时间线 · 点击任意站点播放</legend>
+          <legend className="footprints-progress-label">TIMELINE</legend>
           <div className="footprints-progress-track" ref={timelineRef}>
             {routeSegments.map((segment, index) => (
               <button
