@@ -1,7 +1,7 @@
 # Footprints Configuration
 # 足迹配置文件
 # 图片放在 public/img/footprints，命名建议：footprints-地点-日期.webp
-# 在 routes 的 images 中引用：/img/footprints/luo-yang.jpg
+# 在 routes 的 images 中引用：/img/footprints/luo-yang.webp
 
 locations:
   - id: sanmenxia
@@ -88,6 +88,13 @@ locations:
     type: travel
     icon: ri:map-pin-2-line
 
+  - id: hefei
+    name: 合肥
+    lat: 31.8206
+    lng: 117.2272
+    type: travel
+    icon: ri:map-pin-2-line
+
 stays:
   - startDate: "2026.03.12"
     endDate: "2026.03.16"
@@ -119,7 +126,7 @@ routes:
     label: 汽车
     description: "去洛阳的医院看病，之后小初高大学也一直在洛阳上学～"
     images:
-      - /img/footprints/luo-yang.jpg
+      - /img/footprints/luo-yang.webp
 
   - from: luoyang
     to: xian
@@ -128,11 +135,11 @@ routes:
     label: 汽车
     description: "去参加日语等级考试，顺便去西安转一转"
     images:
-      - /img/footprints/xi-an.jpg
+      - /img/footprints/xi-an.webp
 
   - from: xian
     to: luoyang
-    date: "2026.12.04"
+    date: "2023.12.04"
     transport: car
     label: 汽车
     description: "考试结束，回去啦～"
@@ -144,7 +151,43 @@ routes:
     label: 火车
     description: "找到了第一份实习，第一次一个人外出～"
     images:
-      - /img/footprints/bei-jing.jpg
+      - /img/footprints/bei-jing.webp
+
+  - from: beijing
+    to: luoyang
+    date: "2025.01.17"
+    transport: train
+    label: 火车
+    description: "就馋这一口！回学校准备期末考试"
+    images:
+      - /img/footprints/luo-yang-2.webp
+
+  - from: luoyang
+    to: beijing
+    date: "2025.01.25"
+    transport: train
+    label: 火车
+    description: "回北京继续实习，终于不用请代课了，我的钱包~QwQ"
+    images:
+      - /img/footprints/bei-jing-2.webp
+
+  - from: beijing
+    to: luoyang
+    date: "2025.02.13"
+    transport: train
+    label: 火车
+    description: "回家过年！"
+    images:
+      - /img/footprints/luo-yang-3.webp
+
+  - from: luoyang
+    to: beijing
+    date: "2025.02.25"
+    transport: train
+    label: 火车
+    description: "过完年回北京实习...感觉好累，不过还是要继续努力！"
+    images:
+      - /img/footprints/bei-jing-3.webp
 
   - from: beijing
     to: tianjin
@@ -153,7 +196,7 @@ routes:
     label: 高铁
     description: "骑驴找马有点累了，离职去天津休息一会吧"
     images:
-      - /img/footprints/tian-jin.jpg
+      - /img/footprints/tian-jin.webp
 
   - from: tianjin
     to: beijing
@@ -162,7 +205,7 @@ routes:
     label: 高铁
     description: "想着挂了就回学校沉淀了，没想到快手顺利过关，回北京继续实习～"
     images:
-      - /img/footprints/bei-jing-kuai-shou.jpg
+      - /img/footprints/bei-jing-4.webp
 
   - from: beijing
     to: wuhan
@@ -171,7 +214,7 @@ routes:
     label: 火车
     description: "五一出去发～找朋友去武汉玩，顺便去看一看江城的夜景。"
     images:
-      - /img/footprints/wu-han.jpg
+      - /img/footprints/wu-han.webp
 
   - from: wuhan
     to: changsha
@@ -180,7 +223,7 @@ routes:
     label: 高铁
     description: "品尝湘菜～逛逛网红城市长沙"
     images:
-      - /img/footprints/chang-sha.jpg
+      - /img/footprints/chang-sha.webp
 
   - from: changsha
     to: beijing
@@ -188,6 +231,24 @@ routes:
     transport: highspeed
     label: 高铁
     description: "从长沙返回北京，把短途旅行收束回工作日。"
+
+  - from: beijing
+    to: wuhan
+    date: "2026.05.23"
+    transport: train
+    label: 火车
+    description: "上班好累...没有人陪..."
+    images:
+      - /img/footprints/wu-han-2.webp
+
+  - from: changsha
+    to: beijing
+    date: "2026.05.25"
+    transport: highspeed
+    label: 高铁
+    description: "又回去了，不想上班，但是钱钱..."
+    images:
+      - /img/footprints/bei-jing-5.webp
 
   - from: beijing
     to: luoyang
@@ -203,7 +264,7 @@ routes:
     label: 高铁
     description: "魔都不愧是魔都～，比北京好多了，心情也跟着变得轻松起来。"
     images:
-      - /img/footprints/shang-hai.jpg
+      - /img/footprints/shang-hai.webp
 
   - from: shanghai
     to: hangzhou
@@ -212,7 +273,7 @@ routes:
     label: 高铁
     description: "看看互联网之城～，打卡美食荒漠kfc，顺便逛逛西湖"
     images:
-      - /img/footprints/hang-zhou.jpg
+      - /img/footprints/hang-zhou.webp
 
   - from: hangzhou
     to: nanjing
@@ -221,7 +282,7 @@ routes:
     label: 高铁
     description: "中国第一大商场居然在南京，还有这么豪华的厕所"
     images:
-      - /img/footprints/nan-jing.jpg
+      - /img/footprints/nan-jing.webp
 
   - from: nanjing
     to: luoyang
@@ -237,7 +298,7 @@ routes:
     label: 高铁
     description: "这真的不是火箭嘛？怎么会是麦穗！？"
     images:
-      - /img/footprints/shi-jia-zhuang.jpg
+      - /img/footprints/shi-jia-zhuang.webp
 
   - from: shijiazhuang
     to: beijing
@@ -246,7 +307,7 @@ routes:
     label: 高铁
     description: "获得了百度的offer，继续开始新的实习了～，终究逃离不掉西二旗。"
     images:
-      - /img/footprints/bei-jing-bai-du.jpg
+      - /img/footprints/bei-jing-6.webp
 
   - from: beijing
     to: shanghai
@@ -255,7 +316,7 @@ routes:
     label: 高铁
     description: "入职自己的梦中情厂啦～bilibili"
     images:
-      - /img/footprints/shang-hai-bilibili.jpg
+      - /img/footprints/shang-hai-2.webp
 
   - from: shanghai
     to: suzhou
@@ -273,4 +334,31 @@ routes:
     label: 汽车
     description: "回上海参加沪橘w，收到好多物料谢谢老师们～"
     images:
-      - /img/footprints/hu-ju.webp
+      - /img/footprints/shang-hai-3.webp
+
+  - from: shanghai
+    to: hefei
+    date: "2026.10.21"
+    transport: highspeed
+    label: 高铁
+    description: "去合肥找朋友玩～一到两个月就不想上班"
+    images:
+      - /img/footprints/he-fei.webp
+
+  - from: hefei
+    to: wuhan
+    date: "2026.10.23"
+    transport: highspeed
+    label: 高铁
+    description: "山有木兮木有枝，心悦君兮君不知。"
+    images:
+      - /img/footprints/wu-han-3.webp
+
+  - from: wuhan
+    to: shanghai
+    date: "2026.10.26"
+    transport: plane
+    label: 飞机
+    description: "第一次做飞机...体验好差"
+    images:
+      - /img/footprints/shang-hai-4.webp
