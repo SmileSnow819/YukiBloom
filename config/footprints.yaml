@@ -241,7 +241,7 @@ routes:
     images:
       - /img/footprints/wu-han-2.webp
 
-  - from: changsha
+  - from: wuhan
     to: beijing
     date: "2026.05.25"
     transport: highspeed
