@@ -3,11 +3,15 @@ import { Icon } from '@iconify/react';
 import type { ECharts, EChartsOption } from 'echarts';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getCityRegionStyles } from './city-regions';
+import { getCityTooltip } from './city-tooltip';
 import { getCityVisits } from './city-visits';
+import { getOverviewBounds } from './overview';
 
 export interface FootprintLocation {
   id: string;
   name: string;
+  impression?: string;
   lat: number;
   lng: number;
   type?: string;
@@ -73,6 +77,7 @@ const transportRunnerIconMap: Record<string, string> = {
   train: 'ri:train-line',
   highspeed: 'ri:train-wifi-line',
   flight: 'ri:plane-line',
+  plane: 'ri:plane-line',
   car: 'ri:car-line',
   walk: 'ri:walk-line',
   ship: 'ri:ship-line',
@@ -88,6 +93,7 @@ const labelPositionMap: Record<string, 'top' | 'right' | 'bottom' | 'left'> = {
   shanghai: 'right',
   hangzhou: 'bottom',
   nanjing: 'top',
+  suzhou: 'top',
 };
 
 const labelDistanceMap: Record<string, number> = {
@@ -97,6 +103,7 @@ const labelDistanceMap: Record<string, number> = {
   beijing: 12,
   tianjin: 16,
   shijiazhuang: 16,
+  suzhou: 22,
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -158,6 +165,7 @@ function createRouteLine(segment: RouteSegment) {
 
 export default function FootprintsMap({ data }: FootprintsMapProps) {
   const heroRef = useRef<HTMLElement | null>(null);
+  const provinceRegionNamesRef = useRef<string[]>([]);
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const chartNodeRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
@@ -165,6 +173,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const reduceMotion = useReducedMotion();
   const [selectedCityId, setSelectedCityId] = useState<string>();
   const [isSingleRoute, setIsSingleRoute] = useState(false);
+  const [mapWidth, setMapWidth] = useState(0);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState('');
   const [activeRouteIndex, setActiveRouteIndex] = useState(reduceMotion ? data.routes.length - 1 : 0);
@@ -274,9 +283,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   useEffect(() => {
     const chart = chartRef.current;
     if (!mapReady || !chart) return;
-    const handleClick = (params: { seriesName?: string; name?: string }) => {
-      if (params.seriesName !== '城市' && params.seriesName !== '当前') return;
-      const city = data.locations.find((location) => location.name === params.name);
+    const handleClick = (params: { name?: string }) => {
+      const city = data.locations.find((location) => location.name === params.name || `${location.name}市` === params.name);
       if (city) selectCity(city.id);
     };
     chart.on('click', handleClick);
@@ -327,9 +335,31 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
         const chinaGeoJson = await response.json();
         if (disposed || !chartNodeRef.current) return;
 
+        provinceRegionNamesRef.current = chinaGeoJson.features.map(
+          (feature: { properties: { name: string } }) => feature.properties.name,
+        );
         echarts.registerMap('china-footprints', chinaGeoJson);
+        try {
+          const cityResponse = await fetch('/data/footprint-cities.geojson');
+          if (!cityResponse.ok) throw new Error(`City GeoJSON request failed: ${cityResponse.status}`);
+          const cities = await cityResponse.json();
+          if (disposed || !chartNodeRef.current) return;
+          // Include invisible country geometry to keep both geo coordinate systems aligned.
+          echarts.registerMap('footprint-cities', {
+            ...chinaGeoJson,
+            features: [...chinaGeoJson.features, ...cities.features],
+          });
+        } catch (error) {
+          console.warn('[FootprintsMap] City boundaries unavailable; using province boundaries', error);
+          echarts.registerMap('footprint-cities', chinaGeoJson);
+        }
+        if (disposed || !chartNodeRef.current) return;
         chartRef.current = echarts.init(chartNodeRef.current, undefined, { renderer: 'canvas' });
-        cleanupResize = () => chartRef.current?.resize();
+        cleanupResize = () => {
+          chartRef.current?.resize();
+          setMapWidth(chartRef.current?.getWidth() || 0);
+        };
+        setMapWidth(chartRef.current.getWidth());
         window.addEventListener('resize', cleanupResize);
         setMapReady(true);
         setMapError('');
@@ -411,7 +441,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
     const visibleLocationIds = new Set<string>();
     if (isOverview) {
-      for (const location of data.locations) visibleLocationIds.add(location.id);
+      for (const segment of routeSegments) {
+        visibleLocationIds.add(segment.from);
+        visibleLocationIds.add(segment.to);
+      }
     } else if (activeRoute) {
       visibleLocationIds.add(activeRoute.from);
       visibleLocationIds.add(activeRoute.to);
@@ -419,6 +452,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     }
 
     const view = getGeoView(activeRoute, isOverview);
+    const visitedIds = new Set(routeSegments.flatMap((route) => [route.from, route.to]));
+    const overviewBounds = getOverviewBounds(data.locations.filter((location) => visitedIds.has(location.id)));
+    const fitOverview = isOverview && Boolean(overviewBounds);
+    const wideOverview = fitOverview && mapWidth >= 900;
     const points = data.locations
       .filter((location) => visibleLocationIds.has(location.id) && location.id !== activeLocationId)
       .map((location) => ({
@@ -446,33 +483,63 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
         : [];
     const lineData = visibleRouteSegments.map(createRouteLine);
 
+    const showCityBorders = isOverview || view.zoom >= 3;
+    const provinceRegionNames = provinceRegionNamesRef.current;
+    const geoViewport = {
+      roam: false,
+      boundingCoords: fitOverview ? overviewBounds : undefined,
+      center: fitOverview ? undefined : view.center,
+      zoom: fitOverview ? 1 : view.zoom,
+      aspectScale: 0.86,
+      layoutCenter: fitOverview ? undefined : (['52%', '54%'] as [string, string]),
+      layoutSize: fitOverview ? undefined : '104%',
+      left: fitOverview ? (wideOverview ? '44%' : '8%') : undefined,
+      right: fitOverview ? '5%' : undefined,
+      top: fitOverview ? (wideOverview ? '5%' : '26%') : undefined,
+      bottom: fitOverview ? '8%' : undefined,
+    };
+
     const option: EChartsOption = {
       animationDurationUpdate: reduceMotion || !isOverview ? 0 : 980,
       animationEasingUpdate: 'cubicInOut',
       tooltip: {
         trigger: 'item',
         confine: true,
-      },
-      geo: {
-        map: 'china-footprints',
-        roam: false,
-        center: view.center,
-        zoom: view.zoom,
-        aspectScale: 0.86,
-        layoutCenter: ['52%', '54%'],
-        layoutSize: '104%',
-        silent: true,
-        itemStyle: {
-          areaColor: '#fff1f6',
-          borderColor: '#f48aad',
-          borderWidth: 1.1,
-          shadowBlur: 14,
-          shadowColor: 'rgba(218,112,138,0.16)',
-        },
-        emphasis: {
-          disabled: true,
+        renderMode: 'html',
+        formatter: (params) => {
+          const item = Array.isArray(params) ? params[0] : params;
+          return getCityTooltip(data.locations, item?.name || '');
         },
       },
+      geo: [
+        {
+          ...geoViewport,
+          map: 'china-footprints',
+          silent: true,
+          itemStyle: { areaColor: '#fff1f6', borderColor: '#f48aad', borderWidth: 1.1 },
+          emphasis: { disabled: true },
+        },
+        {
+          ...geoViewport,
+          map: 'footprint-cities',
+          z: 1,
+          silent: false,
+          selectedMode: false,
+          label: { show: false },
+          itemStyle: {
+            areaColor: 'transparent',
+            borderColor: 'rgba(190, 87, 128, 0.42)',
+            borderWidth: showCityBorders ? 0.6 : 0,
+          },
+          emphasis: { label: { show: false }, itemStyle: { areaColor: 'transparent' } },
+          regions: [
+            ...provinceRegionNames.map((name) => ({ name, itemStyle: { opacity: 0 }, emphasis: { disabled: true } })),
+            ...getCityRegionStyles(
+              data.locations.filter((location) => visitedIds.has(location.id)).map((location) => location.name),
+            ),
+          ],
+        },
+      ],
       series: [
         {
           name: '路线轨道',
@@ -498,15 +565,15 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             show: !isOverview && !reduceMotion && isPlaying,
             period: ROUTE_EFFECT_PERIOD,
             trailLength: 0.18,
-            symbol: activeRoute?.transport === 'flight' ? 'triangle' : 'arrow',
-            symbolSize: activeRoute?.transport === 'flight' ? 12 : 10,
-            color: activeRoute?.transport === 'flight' ? '#55acd5' : '#ff5f93',
+            symbol: 'arrow',
+            symbolSize: 10,
+            color: '#ff5f93',
           },
           lineStyle: {
-            color: activeRoute?.transport === 'flight' ? '#55acd5' : '#ff5f93',
+            color: '#ff5f93',
             width: isOverview ? 2.4 : 3.2,
             opacity: 0.9,
-            type: activeRoute?.transport === 'flight' ? 'dashed' : 'solid',
+            type: 'solid',
           },
         },
         {
@@ -582,6 +649,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     isPlaying,
     locationColorMap,
     mapReady,
+    mapWidth,
+    routeSegments,
     reduceMotion,
     visibleRouteSegments,
   ]);

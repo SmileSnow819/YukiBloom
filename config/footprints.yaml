@@ -3,9 +3,11 @@
 # 图片放在 public/img/footprints，命名建议：footprints-地点-日期.webp
 # 在 routes 的 images 中引用：/img/footprints/luo-yang.webp
 
+# impression：对城市的印象，悬停时展示；留空则只显示城市名，可用 YAML | 写多行。
 locations:
   - id: sanmenxia
     name: 三门峡
+    impression: "故事出发的地方，不管走多远，故乡总在这里。"
     lat: 34.7728
     lng: 111.2003
     type: hometown
@@ -13,6 +15,7 @@ locations:
 
   - id: luoyang
     name: 洛阳
+    impression: "从小到大上学的地方，也是累了就想回去充电的地方～"
     lat: 34.6197
     lng: 112.4540
     type: hometown
@@ -20,6 +23,7 @@ locations:
 
   - id: xian
     name: 西安
+    impression: "为日语等级考试来过，考试之外，也留了一点时间给这座城。"
     lat: 34.3416
     lng: 108.9398
     type: travel
@@ -27,6 +31,7 @@ locations:
 
   - id: beijing
     name: 北京
+    impression: "打工人之城，去的时候全是为了工作,不带班味的去北京到底是什么感觉"
     lat: 39.9042
     lng: 116.4074
     type: internship
@@ -34,6 +39,7 @@ locations:
 
   - id: tianjin
     name: 天津
+    impression: "物价比北京便宜的多！呆着也很舒服，能在这里工作感觉挺不错的"
     lat: 39.3434
     lng: 117.3616
     type: travel
@@ -41,6 +47,7 @@ locations:
 
   - id: shijiazhuang
     name: 石家庄
+    impression: "这地铁logo真的不是小米的吗（"
     lat: 38.0428
     lng: 114.5149
     type: pass
@@ -48,6 +55,7 @@ locations:
 
   - id: wuhan
     name: 武汉
+    impression: "大学很多，但留不住人，工资低得可怜"
     lat: 30.5928
     lng: 114.3055
     type: travel
@@ -55,6 +63,7 @@ locations:
 
   - id: changsha
     name: 长沙
+    impression: "这里人半夜做梦都不睡觉（，网红城市"
     lat: 28.2282
     lng: 112.9388
     type: travel
@@ -62,6 +71,7 @@ locations:
 
   - id: shanghai
     name: 上海
+    impression: "活动好多，但对打工人也不太友好，比北京好很多"
     lat: 31.2304
     lng: 121.4737
     type: travel
@@ -69,6 +79,7 @@ locations:
 
   - id: hangzhou
     name: 杭州
+    impression: "西湖美景，互联网之城，比较想定居的城市"
     lat: 30.2741
     lng: 120.1551
     type: travel
@@ -76,6 +87,7 @@ locations:
 
   - id: nanjing
     name: 南京
+    impression: "最豪华的商场居然在南京，厕所都那么豪华"
     lat: 32.0603
     lng: 118.7969
     type: travel
@@ -83,6 +95,7 @@ locations:
 
   - id: suzhou
     name: 苏州
+    impression: "离上海近，房租也便宜很多，景点也很多"
     lat: 31.2989
     lng: 120.5853
     type: travel
@@ -90,6 +103,7 @@ locations:
 
   - id: hefei
     name: 合肥
+    impression: "只能想起孙权（，好想也没什么玩的，但是又有地铁又靠近长三角，物价也便宜，挺不错的诶"
     lat: 31.8206
     lng: 117.2272
     type: travel
@@ -359,6 +373,6 @@ routes:
     date: "2026.10.26"
     transport: plane
     label: 飞机
-    description: "第一次做飞机...体验好差"
+    description: "第一次坐飞机...体验好差"
     images:
       - /img/footprints/shang-hai-4.webp
