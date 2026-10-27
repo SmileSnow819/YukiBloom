@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getCityRegionStyles } from './city-regions';
 import { getCityVisits } from './city-visits';
 import { getOverviewBounds } from './overview';
-import { getOverviewLineStyle, layoutOverviewRoutes } from './overview-routes';
+import { getOverviewLineStyle, interpolateRouteAppearance, layoutOverviewRoutes } from './overview-routes';
 
 export interface FootprintLocation {
   id: string;
@@ -598,16 +598,21 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
         },
         {
           id: 'route-hover-arrows',
-          name: '关联路线箭头',
+          name: '总览路线箭头',
           type: 'lines',
           coordinateSystem: 'geo',
           zlevel: 3,
           silent: true,
-          data: [],
+          data: isOverview
+            ? overviewRoutes.map((route) => ({
+                ...createRouteLine(route),
+                lineStyle: { curveness: route.overviewCurveness },
+              }))
+            : [],
           lineStyle: { opacity: 0, curveness: 0.12 },
           effect: {
             show: !reduceMotion,
-            period: 1.6,
+            period: 3.2,
             delay: 0,
             trailLength: 0,
             symbol: 'arrow',
@@ -700,36 +705,60 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     if (!mapReady || !chart || !isOverview) return;
     const mergedRoutes = overviewRoutes;
     let hoveredCityId: string | undefined;
+    let animationFrame: number | undefined;
+    let appearance = mergedRoutes.map((route) => ({ ...getOverviewLineStyle(route), arrowOpacity: 1 }));
     const updateHover = (cityId?: string) => {
       if (hoveredCityId === cityId) return;
       hoveredCityId = cityId;
-      chart.setOption({
-        series: [
-          {
-            id: 'route-lines',
-            data: mergedRoutes.map((route) => {
-              const connected = Boolean(cityId && (route.from === cityId || route.to === cityId));
-              return {
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
+      const from = appearance.map((style) => ({ ...style }));
+      const target = mergedRoutes.map((route) => ({
+        ...getOverviewLineStyle(route, cityId),
+        arrowOpacity: !cityId || route.from === cityId || route.to === cityId ? 1 : 0,
+      }));
+      const startedAt = performance.now();
+      const renderFrame = (now: number) => {
+        const progress = reduceMotion ? 1 : Math.min(1, (now - startedAt) / 320);
+        appearance = target.map((style, index) => ({
+          ...style,
+          ...interpolateRouteAppearance(from[index], style, progress),
+        }));
+        chart.setOption({
+          series: [
+            {
+              id: 'route-lines',
+              animation: false,
+              data: mergedRoutes.map((route, index) => ({
                 ...createRouteLine(route),
-                lineStyle: getOverviewLineStyle(route, cityId),
-                symbol: reduceMotion && connected ? ['none', 'arrow'] : ['none', 'none'],
+                lineStyle: {
+                  ...getOverviewLineStyle(route),
+                  width: appearance[index].width,
+                  opacity: appearance[index].opacity,
+                },
+                symbol:
+                  reduceMotion && cityId && (route.from === cityId || route.to === cityId)
+                    ? ['none', 'arrow']
+                    : ['none', 'none'],
                 symbolSize: [0, 12],
-              };
-            }),
-          },
-          {
-            id: 'route-hover-arrows',
-            data: cityId
-              ? mergedRoutes
-                  .filter((route) => route.from === cityId || route.to === cityId)
-                  .map((route) => ({
-                    ...createRouteLine(route),
-                    lineStyle: { curveness: route.overviewCurveness },
-                  }))
-              : [],
-          },
-        ],
-      });
+              })),
+            },
+            {
+              id: 'route-hover-arrows',
+              animation: false,
+              effect: { period: cityId ? 1.6 : 3.2 },
+              // Keep every arrow alive: fading its color avoids deleting and restarting the animation.
+              data: mergedRoutes.map((route, index) => ({
+                ...createRouteLine(route),
+                lineStyle: { curveness: route.overviewCurveness },
+                effect: { color: `rgba(232, 91, 140, ${appearance[index].arrowOpacity})` },
+              })),
+            },
+          ],
+        });
+        animationFrame = progress < 1 ? requestAnimationFrame(renderFrame) : undefined;
+      };
+      if (reduceMotion) renderFrame(startedAt);
+      else animationFrame = requestAnimationFrame(renderFrame);
     };
     const onMouseOver = (params: { name?: string }) => {
       const city = data.locations.find((location) => location.name === params.name || `${location.name}市` === params.name);
@@ -740,6 +769,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     chart.on('mouseout', clearHover);
     chart.on('globalout', clearHover);
     return () => {
+      if (animationFrame !== undefined) cancelAnimationFrame(animationFrame);
       chart.off('mouseover', onMouseOver);
       chart.off('mouseout', clearHover);
       chart.off('globalout', clearHover);

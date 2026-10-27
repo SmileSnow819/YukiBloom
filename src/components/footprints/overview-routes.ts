@@ -83,3 +83,17 @@ export function layoutOverviewRoutes<T extends LayoutRoute>(routes: readonly T[]
   }
   return merged.map((route) => ({ ...route, overviewCurveness: curves.get(key(route)) || 0 }));
 }
+
+type RouteAppearance = { width: number; opacity: number; arrowOpacity: number };
+
+/** Interpolate from the currently displayed style so interrupted hovers never jump. */
+export function interpolateRouteAppearance(from: RouteAppearance, to: RouteAppearance, progress: number): RouteAppearance {
+  const t = Math.max(0, Math.min(1, progress));
+  const eased = t * t * (3 - 2 * t);
+  if (t === 1) return { ...to };
+  return {
+    width: from.width + (to.width - from.width) * eased,
+    opacity: from.opacity + (to.opacity - from.opacity) * eased,
+    arrowOpacity: from.arrowOpacity + (to.arrowOpacity - from.arrowOpacity) * eased,
+  };
+}
