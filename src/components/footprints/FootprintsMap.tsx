@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import type { ECharts, EChartsOption } from 'echarts';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { getCityVisits } from './city-visits';
 
 export interface FootprintLocation {
   id: string;
@@ -157,10 +158,13 @@ function createRouteLine(segment: RouteSegment) {
 
 export default function FootprintsMap({ data }: FootprintsMapProps) {
   const heroRef = useRef<HTMLElement | null>(null);
+  const timelineRef = useRef<HTMLDivElement | null>(null);
   const chartNodeRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<ECharts | null>(null);
   const routeTimerRef = useRef<number | null>(null);
   const reduceMotion = useReducedMotion();
+  const [selectedCityId, setSelectedCityId] = useState<string>();
+  const [isSingleRoute, setIsSingleRoute] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState('');
   const [activeRouteIndex, setActiveRouteIndex] = useState(reduceMotion ? data.routes.length - 1 : 0);
@@ -197,7 +201,9 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   );
 
   const activeRoute = routeSegments[Math.min(activeRouteIndex, routeSegments.length - 1)];
-  const isOverview = reduceMotion || completedRouteCount >= routeSegments.length;
+  const isOverview = !isSingleRoute && (reduceMotion || completedRouteCount >= routeSegments.length);
+  const cityVisits = selectedCityId ? getCityVisits(routeSegments, selectedCityId) : [];
+  const visitIndex = cityVisits.indexOf(activeRouteIndex);
   const activeLocation = activeLocationId ? locationMap.get(activeLocationId) : undefined;
   const finalLocation = routeSegments.at(-1)?.toLocation;
   const activeRunnerIcon = activeRoute?.transport
@@ -206,8 +212,15 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
   const currentDateText = useMemo(() => getCurrentDateText(), []);
   const isFullscreenView = isFullscreen || isImmersive;
   const visibleRouteSegments = isOverview ? routeSegments : activeRoute ? [activeRoute] : [];
-  const progressPercent =
-    routeSegments.length <= 1 || isOverview ? 100 : (activeRouteIndex / Math.max(routeSegments.length - 1, 1)) * 100;
+  useEffect(() => {
+    const track = timelineRef.current;
+    const stop = track?.children[activeRouteIndex] as HTMLElement | undefined;
+    if (!track || !stop || isOverview) return;
+    track.scrollTo({
+      left: Math.max(0, stop.offsetLeft - track.offsetLeft - track.clientWidth / 2 + stop.offsetWidth / 2),
+      behavior: reduceMotion ? 'instant' : 'smooth',
+    });
+  }, [activeRouteIndex, isOverview, reduceMotion]);
 
   const clearRouteTimer = useCallback(() => {
     if (routeTimerRef.current === null) return;
@@ -217,6 +230,8 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
 
   const startPlayback = useCallback(() => {
     clearRouteTimer();
+    setIsSingleRoute(false);
+    setSelectedCityId(undefined);
 
     if (reduceMotion || routeSegments.length === 0) {
       setIsPlaying(false);
@@ -232,19 +247,48 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     setActiveLocationId(routeSegments[0]?.from);
   }, [clearRouteTimer, reduceMotion, routeSegments]);
 
-  const jumpToRoute = (index: number) => {
-    const segment = routeSegments[index];
-    if (!segment) return;
+  const jumpToRoute = useCallback(
+    (index: number, cityId?: string) => {
+      const segment = routeSegments[index];
+      if (!segment) return;
+      clearRouteTimer();
+      setSelectedCityId(cityId);
+      setIsSingleRoute(true);
+      setIsPlaying(!reduceMotion);
+      setActiveRouteIndex(index);
+      setCompletedRouteCount(index);
+      setActiveLocationId(reduceMotion ? segment.to : segment.from);
+      heroRef.current?.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: 'start' });
+    },
+    [clearRouteTimer, reduceMotion, routeSegments],
+  );
 
-    clearRouteTimer();
-    setIsPlaying(false);
-    setActiveRouteIndex(index);
-    setCompletedRouteCount(index);
-    setActiveLocationId(segment.from);
-  };
+  const selectCity = useCallback(
+    (cityId: string) => {
+      const visits = getCityVisits(routeSegments, cityId);
+      if (visits.length) jumpToRoute(visits[0], cityId);
+    },
+    [jumpToRoute, routeSegments],
+  );
+
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!mapReady || !chart) return;
+    const handleClick = (params: { seriesName?: string; name?: string }) => {
+      if (params.seriesName !== '城市' && params.seriesName !== '当前') return;
+      const city = data.locations.find((location) => location.name === params.name);
+      if (city) selectCity(city.id);
+    };
+    chart.on('click', handleClick);
+    return () => {
+      chart.off('click', handleClick);
+    };
+  }, [data.locations, mapReady, selectCity]);
 
   const skipPlayback = () => {
     clearRouteTimer();
+    setIsSingleRoute(false);
+    setSelectedCityId(undefined);
     setIsPlaying(false);
     setActiveRouteIndex(Math.max(routeSegments.length - 1, 0));
     setCompletedRouteCount(routeSegments.length);
@@ -343,7 +387,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
       setCompletedRouteCount(activeRouteIndex + 1);
       setActiveLocationId(segment.to);
 
-      if (activeRouteIndex >= routeSegments.length - 1) {
+      if (isSingleRoute || activeRouteIndex >= routeSegments.length - 1) {
         setIsPlaying(false);
       } else {
         setActiveRouteIndex((index) => index + 1);
@@ -351,7 +395,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     }, ROUTE_DURATION);
 
     return clearRouteTimer;
-  }, [activeRouteIndex, clearRouteTimer, isPlaying, reduceMotion, routeSegments]);
+  }, [activeRouteIndex, clearRouteTimer, isPlaying, isSingleRoute, reduceMotion, routeSegments]);
 
   useEffect(() => {
     if (activeRouteIndex < 0 || reduceMotion || isOverview) return;
@@ -451,7 +495,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           silent: true,
           data: lineData,
           effect: {
-            show: !isOverview && !reduceMotion,
+            show: !isOverview && !reduceMotion && isPlaying,
             period: ROUTE_EFFECT_PERIOD,
             trailLength: 0.18,
             symbol: activeRoute?.transport === 'flight' ? 'triangle' : 'arrow',
@@ -535,6 +579,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
     activeRoute,
     data.locations,
     isOverview,
+    isPlaying,
     locationColorMap,
     mapReady,
     reduceMotion,
@@ -563,7 +608,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             {!isOverview && (
               <button type="button" className="footprints-action-button" onClick={skipPlayback}>
                 <Icon icon="ri:skip-forward-line" />
-                跳过
+                {isSingleRoute ? '全部足迹' : '跳过'}
               </button>
             )}
             <button type="button" className="footprints-action-button" onClick={toggleFullscreen}>
@@ -578,16 +623,43 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
             {activeRoute && (
               <motion.article
                 key={`${activeRoute.from}-${activeRoute.to}-${activeRoute.index}`}
-                className="footprints-map-detail"
+                className={`footprints-map-detail ${selectedCityId ? 'has-visit-carousel' : ''}`}
                 initial={{ opacity: 0, y: 16, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.98 }}
                 transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
               >
+                {selectedCityId && cityVisits.length > 0 && (
+                  <>
+                    <button
+                      type="button"
+                      className="footprints-carousel-arrow is-previous"
+                      disabled={visitIndex <= 0}
+                      aria-label="上一次到访"
+                      onClick={() => jumpToRoute(cityVisits[visitIndex - 1], selectedCityId)}
+                    >
+                      <span aria-hidden="true">‹</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="footprints-carousel-arrow is-next"
+                      disabled={visitIndex >= cityVisits.length - 1}
+                      aria-label="下一次到访"
+                      onClick={() => jumpToRoute(cityVisits[visitIndex + 1], selectedCityId)}
+                    >
+                      <span aria-hidden="true">›</span>
+                    </button>
+                  </>
+                )}
                 <div className="footprints-map-detail-icon">
                   <Icon icon={activeRunnerIcon} />
                 </div>
                 <div className="footprints-map-detail-body">
+                  {selectedCityId && cityVisits.length > 0 && (
+                    <div className="footprints-visit-caption" aria-live="polite">
+                      {locationMap.get(selectedCityId)?.name} · 第 {visitIndex + 1} / {cityVisits.length} 次到访
+                    </div>
+                  )}
                   <strong>
                     {activeRoute.fromLocation.name} <span>{'->'}</span> {activeRoute.toLocation.name}
                   </strong>
@@ -620,19 +692,22 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
           {!mapReady && <div className="footprints-map-loading">{mapError || '地图加载中...'}</div>}
         </div>
         <fieldset className="footprints-progress">
-          <legend className="footprints-progress-label">足迹播放进度</legend>
-          <div className="footprints-progress-track">
-            <div className="footprints-progress-fill" style={{ width: `${progressPercent}%` }} />
+          <legend className="footprints-progress-label">行程时间线 · 点击任意站点播放</legend>
+          <div className="footprints-progress-track" ref={timelineRef}>
             {routeSegments.map((segment, index) => (
               <button
                 key={`${segment.from}-${segment.to}-${index}-progress`}
                 type="button"
-                className={`footprints-progress-dot ${index <= activeRouteIndex || isOverview ? 'is-active' : ''}`}
-                style={{ left: `${routeSegments.length <= 1 ? 100 : (index / (routeSegments.length - 1)) * 100}%` }}
+                className={`footprints-progress-dot ${index === activeRouteIndex && !isOverview ? 'is-active' : ''}`}
+                aria-current={index === activeRouteIndex && !isOverview ? 'step' : undefined}
                 onClick={() => jumpToRoute(index)}
                 aria-label={`跳到 ${segment.fromLocation.name} 到 ${segment.toLocation.name}`}
                 title={`${segment.fromLocation.name} -> ${segment.toLocation.name}`}
-              />
+              >
+                <span className="footprints-stop-number">{index + 1}</span>
+                <strong>{segment.toLocation.name}</strong>
+                <small>{segment.date || '未标记日期'}</small>
+              </button>
             ))}
           </div>
         </fieldset>
@@ -642,7 +717,7 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
         <div className="footprints-panel">
           <div className="footprints-section-heading">
             <Icon icon="ri:route-line" />
-            <h3>路线记录</h3>
+            <h3>行程时间线</h3>
           </div>
           <div className="footprints-route-list">
             {routeSegments.map((segment) => (
@@ -655,9 +730,10 @@ export default function FootprintsMap({ data }: FootprintsMapProps) {
                   icon={transportRunnerIconMap[segment.transport || ''] || 'ri:map-pin-line'}
                 />
                 <div>
-                  <strong>
-                    {segment.fromLocation.name} <span>{'->'}</span> {segment.toLocation.name}
-                  </strong>
+                  <button type="button" className="footprints-route-play" onClick={() => jumpToRoute(segment.index)}>
+                    {segment.fromLocation.name} <span>{'→'}</span> {segment.toLocation.name}
+                    <Icon icon="ri:play-circle-line" /> 查看路线
+                  </button>
                   <span>
                     {segment.date || '未标记日期'} / {segment.label || getTypeLabel(segment.transport)}
                   </span>

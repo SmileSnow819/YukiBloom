@@ -697,3 +697,209 @@
     grid-template-columns: 1fr;
   }
 }
+
+.footprints-action-button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.footprints-progress {
+  flex-shrink: 0;
+  padding: 0.6rem 1.2rem 1rem;
+  background: #fff8fb;
+  border-top: 1px solid #edb8cc;
+}
+
+.footprints-progress-label {
+  position: static;
+  width: auto;
+  height: auto;
+  clip: auto;
+  overflow: visible;
+  white-space: normal;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.4rem;
+  background: #fff8fb;
+  color: #943b60;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.footprints-progress-track {
+  display: flex;
+  gap: 0.55rem;
+  height: auto;
+  overflow-x: auto;
+  padding: 0.35rem 0.2rem 0.6rem;
+  scrollbar-color: #d7789b #fce7ef;
+}
+
+.footprints-progress-track::before,
+.footprints-progress-fill {
+  display: none;
+}
+
+.footprints-progress-dot {
+  position: relative;
+  top: auto;
+  display: grid;
+  flex: 0 0 6.4rem;
+  gap: 0.15rem;
+  width: auto;
+  height: auto;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #edb8cc;
+  border-radius: 0.65rem;
+  background: white;
+  color: #71344d;
+  text-align: left;
+  transform: none;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.footprints-progress-dot:hover,
+.footprints-progress-dot.is-active {
+  background: #fce0eb;
+  border-color: #be3568;
+  box-shadow: inset 0 0 0 1px #be3568;
+  transform: none;
+}
+
+.footprints-stop-number {
+  color: #ad3c66;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.footprints-progress-dot small {
+  font-size: 0.72rem;
+}
+
+.footprints-route-list {
+  border-left: 2px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  margin-left: 0.5rem;
+  padding-left: 1.2rem;
+}
+
+.footprints-route-card {
+  position: relative;
+  border-color: color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.footprints-route-card::before {
+  position: absolute;
+  left: -1.65rem;
+  top: 1.4rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--primary);
+  content: "";
+}
+
+.footprints-route-play {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border: 0;
+  padding: 0.2rem 0;
+  background: transparent;
+  color: var(--primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.footprints button:focus-visible {
+  outline: 3px solid #55acd5;
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .footprints-progress-dot {
+    flex-basis: 5.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .footprints-map-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .footprints-map-actions .footprints-action-button {
+    width: auto;
+    flex: 1;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+.footprints-progress-dot strong {
+  font-size: 0.8rem;
+}
+.footprints-progress-dot small {
+  font-size: 0.65rem;
+}
+.footprints-progress {
+  padding-bottom: 0.6rem;
+}
+
+.footprints-progress-dot {
+  grid-template-columns: auto 1fr;
+  align-content: center;
+  column-gap: 0.35rem;
+  row-gap: 0.2rem;
+  min-height: 3rem;
+  line-height: 1.2;
+}
+
+.footprints-progress-dot small {
+  grid-column: 1 / -1;
+  white-space: nowrap;
+}
+
+.footprints-map-detail.has-visit-carousel {
+  padding-inline: 2.8rem;
+}
+
+.footprints-visit-caption {
+  margin-bottom: 0.45rem;
+  color: #943b60;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.footprints-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #fff0f6;
+  color: #943b60;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.footprints-carousel-arrow.is-previous {
+  left: 0.35rem;
+}
+.footprints-carousel-arrow.is-next {
+  right: 0.35rem;
+}
+.footprints-carousel-arrow:hover {
+  background: #fce0eb;
+}
+.footprints-carousel-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
